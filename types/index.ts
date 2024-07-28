@@ -1,26 +1,20 @@
 export { v4 as generateId } from 'uuid'
 import chalk from 'chalk'
+import { NodotsBoard, buildBoard } from './@nodots/backgammon/Board'
+import { NodotsCube, buildCube } from './@nodots/backgammon/Cube'
+import { NodotsChecker } from './@nodots/backgammon/Checker'
+import { NodotsPlay } from './@nodots/backgammon/Play'
 import {
-  NodotsPlayerDice,
-  NodotsPlayerDiceActive,
   NodotsPlayersDiceBlack,
   NodotsPlayersDiceInactive,
   NodotsPlayersDiceWhite,
   NodotsRoll,
-  initializing as initializingPlayersDice,
-  roll,
-  setPlayersDiceActive,
-} from './NodotsGame/Dice'
-import { NodotsPlay } from './NodotsGame/Play'
+} from './@nodots/backgammon/Dice'
 import {
-  INodotsPlayers,
   NodotsPlayersInitializing,
+  INodotsPlayers,
   PlayerWinning,
-} from './NodotsGame/Player'
-import { NodotsBoard, buildBoard } from './NodotsGame/Board'
-import { NodotsChecker } from './NodotsGame/Checker'
-import { buildCube, NodotsCube } from './NodotsGame/Cube'
-import { uuid } from 'drizzle-orm/pg-core'
+} from './@nodots/backgammon/Player'
 
 export const CHECKERS_PER_PLAYER = 15
 export type PointPosition =
@@ -186,12 +180,10 @@ export const initializing = (
       black: {
         ...externalPlayers.black,
         kind: 'player-initializing',
-        pipCount: 167,
       },
       white: {
         ...externalPlayers.white,
         kind: 'player-initializing',
-        pipCount: 167,
       },
     }
   }

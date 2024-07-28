@@ -1,4 +1,5 @@
-import { NodotsColor, NodotsMoveDirection, generateId } from '../..'
+import { NodotsColor, NodotsMoveDirection } from '../../..'
+
 export type NodotsLocale = 'en' | 'es'
 
 export interface INodotsPlayerPreferences {
