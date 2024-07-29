@@ -1,42 +1,24 @@
 import express from 'express'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { pgTable, serial, text, varchar } from 'drizzle-orm/pg-core'
 import { Client } from 'pg'
 import { players as playersTable } from './drizzle-schema/schema'
+import { PlayerKnocking, PlayerReady } from '../types/@nodots/backgammon/Player'
 import {
-  PlayerInitializing,
-  PlayerKnocking,
-} from '../types/@nodots/backgammon/Player'
-import chalk from 'chalk'
+  assignPlayerColors,
+  assignPlayerDirections,
+  findNodotsPlayerFromPlayerKnocking,
+} from '../types/@nodots/backgammon/Player/helpers'
+import { NodotsColor, NodotsMoveDirection } from '../types'
 const app = express()
 const port = process.env.PORT || 3000
 
-const client = new Client({
+export const client = new Client({
   host: '127.0.0.1',
   port: 5432,
   user: 'nodots',
   password: 'nodots',
   database: 'nodots_backgammon_dev',
 })
-
-const findNodotsPlayer = async (player: PlayerKnocking) => {
-  console.log('[findNodotsPlayer] player:', player)
-  const foundPlayers = await client.query(
-    `SELECT * FROM players WHERE email = $1`,
-    [player.email]
-  )
-  let foundPlayer: PlayerInitializing | PlayerKnocking
-  if (foundPlayers.rows.length === 1) {
-    foundPlayer = foundPlayers.rows[0]
-  } else {
-    foundPlayer = {
-      kind: 'player-knocking',
-      source: player.source,
-      email: player.email,
-    }
-  }
-  return foundPlayer
-}
 
 const main = async () => {
   await client.connect()
@@ -78,14 +60,48 @@ const main = async () => {
     }
   })
 
-  const transmogrifyPlayer = async (player: PlayerKnocking) => {
-    const nodotsPlayer = await db.insert(playersTable).values({
+  const transmogrifyPlayer = (
+    player: PlayerKnocking,
+    color: NodotsColor,
+    direction: NodotsMoveDirection
+  ): PlayerReady => {
+    return {
       ...player,
-      externalId: `${player.source}:${player.email}`,
       kind: 'player-ready',
-    })
-    console.log('[transmogrifyPlayer] nodotsPlayer:', nodotsPlayer)
-    return nodotsPlayer
+      color,
+      direction,
+    }
+  }
+
+  const initializePlayers = (
+    player1: PlayerReady | PlayerKnocking,
+    player2: PlayerReady | PlayerKnocking
+  ): [PlayerReady, PlayerReady] => {
+    console.log('[initializePlayers] player1:', player1)
+    console.log('[initializePlayers] player2:', player2)
+
+    const colors = assignPlayerColors(player1, player2)
+    const directions = assignPlayerDirections(player1, player2)
+
+    let playerReady1: PlayerReady
+    let playerReady2: PlayerReady
+
+    playerReady1 =
+      player1.kind === 'player-knocking'
+        ? transmogrifyPlayer(player1, colors[0], directions[0])
+        : {
+            ...player1,
+            kind: 'player-ready',
+          }
+    playerReady2 =
+      player2.kind === 'player-knocking'
+        ? transmogrifyPlayer(player2, colors[1], directions[1])
+        : {
+            ...player2,
+            kind: 'player-ready',
+          }
+
+    return [playerReady1, playerReady2]
   }
 
   // Route for starting a game
@@ -94,23 +110,14 @@ const main = async () => {
     const { players } = req.body
     const player1Knocking = players[0]
     const player2Knocking = players[1]
-    let player1 = await findNodotsPlayer(player1Knocking)
-    let player2 = await findNodotsPlayer(player2Knocking)
+    let player1 = await findNodotsPlayerFromPlayerKnocking(player1Knocking)
+    let player2 = await findNodotsPlayerFromPlayerKnocking(player2Knocking)
     const nodotsPlayers = [player1, player2]
     console.log('[main] nodotsPlayers:', nodotsPlayers)
 
-    if (player1.kind === 'player-knocking') {
-      const playerCandidate = await transmogrifyPlayer(player1)
-      console.log(playerCandidate)
-    }
+    const playersReady = initializePlayers(player1, player2)
 
-    if (player2.kind === 'player-knocking') {
-      transmogrifyPlayer(player2)
-    }
-
-    res
-      .status(200)
-      .json({ msg: 'Game initializing with external players:', nodotsPlayers })
+    res.status(200).json(playersReady)
   })
 
   // Start the server

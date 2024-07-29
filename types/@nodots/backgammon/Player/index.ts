@@ -23,27 +23,41 @@ export interface INodotsPlayers {
   white: INodotsPlayer
 }
 
+export interface INodotsPlayersPlaying {
+  black: PlayerPlayingWaiting | PlayerPlayingRolling | PlayerPlayingMoving
+  white: PlayerPlayingWaiting | PlayerPlayingRolling | PlayerPlayingMoving
+}
+
 export interface PlayerKnocking extends INodotsPlayer {
   kind: 'player-knocking'
   source: string
+  externalId: string
   preferences?: INodotsPlayerPreferences
 }
 
 export interface PlayerReady extends INodotsPlayer {
   kind: 'player-ready'
   source: string
+  color: NodotsColor
+  direction: NodotsMoveDirection
   preferences?: INodotsPlayerPreferences
 }
 
-export interface PlayerWaiting extends INodotsPlayer {
+export interface PlayerPlayingWaiting extends INodotsPlayer {
   kind: 'player-waiting'
+  color: NodotsColor
+  direction: NodotsMoveDirection
 }
 
-export interface PlayerRolling extends INodotsPlayer {
+export interface PlayerPlayingRolling extends INodotsPlayer {
   kind: 'player-rolling'
+  color: NodotsColor
+  direction: NodotsMoveDirection
 }
-export interface PlayerMoving extends INodotsPlayer {
+export interface PlayerPlayingMoving extends INodotsPlayer {
   kind: 'player-moving'
+  color: NodotsColor
+  direction: NodotsMoveDirection
 }
 
 // export interface PlayerWinning extends INodotsPlayer {
@@ -60,29 +74,27 @@ export interface PlayerMoving extends INodotsPlayer {
 
 export type NodotsPlayer =
   | PlayerKnocking
-  | PlayerInitializing
-  | PlayerRollingForStart
-  | PlayerRolling
-  | PlayerMoving
-  | PlayerWaiting
-  // | PlayerResigning
-  | PlayerWinning
-// | PlayerLosing
+  | PlayerReady
+  | PlayerPlayingWaiting
+  | PlayerPlayingRollingForStart
+  | PlayerPlayingRolling
+  | PlayerPlayingMoving
+  | PlayerPlayingWaiting
 
-export interface NodotsPlayersInitializing {
-  kind: 'players-initializing'
-  black: PlayerInitializing
-  white: PlayerInitializing
+export interface NodotsPlayersReady {
+  kind: 'players-ready'
+  black: PlayerReady
+  white: PlayerReady
 }
 
 export interface NodotsPlayersBlackRolling {
-  black: PlayerRolling
-  white: PlayerWaiting
+  black: PlayerPlayingRolling
+  white: PlayerPlayingWaiting
 }
 
 export interface NodotsPlayersBlackMoving {
-  black: PlayerMoving
-  white: PlayerWaiting
+  black: PlayerPlayingMoving
+  white: PlayerPlayingWaiting
 }
 
 export type NodotsPlayersBlackActive =
@@ -90,13 +102,13 @@ export type NodotsPlayersBlackActive =
   | NodotsPlayersBlackMoving
 
 export interface NodotsPlayersWhiteRolling {
-  black: PlayerWaiting
-  white: PlayerRolling
+  black: PlayerPlayingWaiting
+  white: PlayerPlayingRolling
 }
 
 export interface NodotsPlayersWhiteMoving {
-  black: PlayerWaiting
-  white: PlayerMoving
+  black: PlayerPlayingWaiting
+  white: PlayerPlayingMoving
 }
 
 export type NodotsPlayersWhiteActive =
@@ -104,7 +116,7 @@ export type NodotsPlayersWhiteActive =
   | NodotsPlayersWhiteMoving
 
 export type NodotsPlayers =
-  | NodotsPlayersInitializing
+  | NodotsPlayersReady
   | NodotsPlayersBlackActive
   | NodotsPlayersWhiteActive
 
@@ -113,37 +125,25 @@ export interface NodotsPipCounts {
   white: number
 }
 
-export interface PlayerWaiting extends INodotsPlayer {
+export interface PlayerKnocking extends INodotsPlayer {
+  kind: 'player-knocking'
+  source: string
+  email: string
+}
+
+export interface PlayerPlayingWaiting extends INodotsPlayer {
   kind: 'player-waiting'
 }
 
-export interface PlayerKnocking extends INodotsPlayer {
-  kind: 'player-knocking'
-  source: string
-  email: string
-}
-
-export interface PlayerKnocking extends INodotsPlayer {
-  kind: 'player-knocking'
-  email: string
-  source: string
-}
-
-export interface PlayerInitializing extends INodotsPlayer {
-  kind: 'player-initializing'
-  email: string
-  preferences?: INodotsPlayerPreferences
-}
-
-export interface PlayerRollingForStart extends INodotsPlayer {
+export interface PlayerPlayingRollingForStart extends INodotsPlayer {
   kind: 'player-rolling-for-start'
 }
 
-export interface PlayerRolling extends INodotsPlayer {
+export interface PlayerPlayingRolling extends INodotsPlayer {
   kind: 'player-rolling'
 }
 
-export interface PlayerMoving extends INodotsPlayer {
+export interface PlayerPlayingMoving extends INodotsPlayer {
   kind: 'player-moving'
 }
 
@@ -156,39 +156,30 @@ export interface PlayerResiginging extends INodotsPlayer {
 }
 
 export type NodotsPlayerState =
-  | PlayerInitializing
-  | PlayerRollingForStart
-  | PlayerRolling
-  | PlayerMoving
+  | PlayerReady
+  | PlayerPlayingRollingForStart
+  | PlayerPlayingRolling
+  | PlayerPlayingMoving
   | PlayerResiginging
   | PlayerWinning
 
-export const initializingPlayer = (
-  player: INodotsPlayer
-): PlayerInitializing => {
-  const { preferences, email } = player
-  // const { username, color, direction, automation } = preferences
-
+export const ready = (
+  player: PlayerKnocking,
+  color: NodotsColor,
+  direction: NodotsMoveDirection
+): PlayerReady => {
   return {
-    kind: 'player-initializing',
-    email,
-  }
-}
-
-export const initializingPlayers = (
-  players: INodotsPlayers
-): NodotsPlayersInitializing => {
-  return {
-    kind: 'players-initializing',
-    black: initializingPlayer(players.black),
-    white: initializingPlayer(players.white),
+    ...player,
+    kind: 'player-ready',
+    color,
+    direction,
   }
 }
 
 export const setPlayersActive = (
   color: NodotsColor,
   players:
-    | NodotsPlayersInitializing
+    | NodotsPlayersReady
     | NodotsPlayersBlackActive
     | NodotsPlayersWhiteActive
 ): NodotsPlayersBlackActive | NodotsPlayersWhiteActive => {

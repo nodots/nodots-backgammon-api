@@ -11,19 +11,13 @@ export interface NodotsBoardImports {
   counterclockwise: NodotsBoardImport
 }
 
-import { BOARD_IMPORT_DEFAULT } from '../../../board-setups'
+import { BOARD_IMPORT_DEFAULT } from '../../../../board-setups'
 import { INodotsPlayers, NodotsPlayers } from '../Player'
-import {
-  getClockwisePlayer,
-  getCounterclockwisePlayer,
-} from '../Player/helpers'
+// import {
+//   getClockwisePlayer,
+//   getCounterclockwisePlayer,
+// } from '../Player/helpers'
 import chalk from 'chalk'
-import {
-  CheckercontainerPosition,
-  generateId,
-  NodotsColor,
-  PointPosition,
-} from '../..'
 
 export type Latitude = 'north' | 'south'
 export type Longitude = 'east' | 'west'

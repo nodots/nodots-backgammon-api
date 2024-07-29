@@ -1,4 +1,4 @@
-import { NodotsBoardImport } from '../stores/Game/types/Board'
+import { NodotsBoardImport } from '../types/@nodots/backgammon/Board'
 
 export const BOARD_IMPORT_DEFAULT: NodotsBoardImport = [
   { position: 24, checkercount: 2 },
