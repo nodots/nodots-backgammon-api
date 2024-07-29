@@ -3,19 +3,18 @@ import { NodotsColor, NodotsMoveDirection } from '../../..'
 export type NodotsLocale = 'en' | 'es'
 
 export interface INodotsPlayerPreferences {
-  username: string
-  color: NodotsColor
-  direction: NodotsMoveDirection
-  automation: {
+  username?: string
+  color?: NodotsColor
+  direction?: NodotsMoveDirection
+  locale?: NodotsLocale
+  automation?: {
     roll: boolean
     move: boolean
   }
 }
 
 export type INodotsPlayer = {
-  externalId: string
   email: string
-  locale: NodotsLocale
   preferences?: INodotsPlayerPreferences
 }
 
@@ -24,9 +23,10 @@ export interface INodotsPlayers {
   white: INodotsPlayer
 }
 
-export interface PlayerIncoming extends INodotsPlayer {
-  kind: 'player-incoming'
-  preferences: INodotsPlayerPreferences
+export interface PlayerKnocking extends INodotsPlayer {
+  kind: 'player-knocking'
+  source: string
+  preferences?: INodotsPlayerPreferences
 }
 
 export interface PlayerWaiting extends INodotsPlayer {
@@ -53,7 +53,7 @@ export interface PlayerMoving extends INodotsPlayer {
 // }
 
 export type NodotsPlayer =
-  | PlayerIncoming
+  | PlayerKnocking
   | PlayerInitializing
   | PlayerRollingForStart
   | PlayerRolling
@@ -111,18 +111,22 @@ export interface PlayerWaiting extends INodotsPlayer {
   kind: 'player-waiting'
 }
 
+export interface PlayerKnocking extends INodotsPlayer {
+  kind: 'player-knocking'
+  source: string
+  email: string
+}
+
+export interface PlayerKnocking extends INodotsPlayer {
+  kind: 'player-knocking'
+  email: string
+  source: string
+}
+
 export interface PlayerInitializing extends INodotsPlayer {
   kind: 'player-initializing'
   email: string
-  preferences?: {
-    username: string
-    color: NodotsColor
-    direction: NodotsMoveDirection
-    automation: {
-      roll: boolean
-      move: boolean
-    }
-  }
+  preferences?: INodotsPlayerPreferences
 }
 
 export interface PlayerRollingForStart extends INodotsPlayer {
@@ -156,14 +160,12 @@ export type NodotsPlayerState =
 export const initializingPlayer = (
   player: INodotsPlayer
 ): PlayerInitializing => {
-  const { preferences, externalId, email, locale } = player
+  const { preferences, email } = player
   // const { username, color, direction, automation } = preferences
 
   return {
     kind: 'player-initializing',
-    externalId,
     email,
-    locale,
   }
 }
 

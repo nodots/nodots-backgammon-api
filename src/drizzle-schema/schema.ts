@@ -8,7 +8,7 @@ import {
 } from 'drizzle-orm/pg-core'
 
 export const PlayerTypeEnum = pgEnum('kind', [
-  'player-incoming',
+  'player-knocking',
   'player-initializing',
   'player-rolling-for-start',
   'player-rolling',
@@ -22,8 +22,7 @@ export const players = pgTable('players', {
   kind: PlayerTypeEnum('kind'),
   externalId: text('external_id'),
   email: text('email'),
-  locale: text('locale'),
   preferences: jsonb('preferences'),
-  createdAt: timestamp('created_at'),
-  updatedAt: timestamp('updated_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

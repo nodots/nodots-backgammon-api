@@ -4,9 +4,10 @@ import { pgTable, serial, text, varchar } from 'drizzle-orm/pg-core'
 import { Client } from 'pg'
 import { players as playersTable } from './drizzle-schema/schema'
 import {
-  PlayerIncoming,
   PlayerInitializing,
+  PlayerKnocking,
 } from '../types/@nodots/backgammon/Player'
+import chalk from 'chalk'
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -17,6 +18,25 @@ const client = new Client({
   password: 'nodots',
   database: 'nodots_backgammon_dev',
 })
+
+const findNodotsPlayer = async (player: PlayerKnocking) => {
+  console.log('[findNodotsPlayer] player:', player)
+  const foundPlayers = await client.query(
+    `SELECT * FROM players WHERE email = $1`,
+    [player.email]
+  )
+  let foundPlayer: PlayerInitializing | PlayerKnocking
+  if (foundPlayers.rows.length === 1) {
+    foundPlayer = foundPlayers.rows[0]
+  } else {
+    foundPlayer = {
+      kind: 'player-knocking',
+      source: player.source,
+      email: player.email,
+    }
+  }
+  return foundPlayer
+}
 
 const main = async () => {
   await client.connect()
@@ -34,19 +54,19 @@ const main = async () => {
     const players = await db.select().from(playersTable)
     res.status(200).json(players)
   })
+
   // Route for creating a player
   app.post('/players', async (req, res) => {
     // Logic for creating a player goes here
-    const incomingPlayer: PlayerIncoming = {
+    const incomingPlayer: PlayerKnocking = {
       ...req.body,
-      kind: 'player-incoming',
+      kind: 'player-knocking',
     }
     // decode PlayerIncoming to PlayerInitializing
     const player: typeof playersTable.$inferInsert = {
       kind: 'player-initializing',
       externalId: `${req.body.source}:${incomingPlayer.email}`,
       email: incomingPlayer.email,
-      locale: incomingPlayer.locale,
       preferences: incomingPlayer.preferences,
     }
     try {
@@ -59,9 +79,41 @@ const main = async () => {
   })
 
   // Route for starting a game
-  app.post('/game', (req, res) => {
+  app.post('/games', async (req, res) => {
     // Logic for starting a game goes here
-    res.send('Game started')
+    const { players } = req.body
+    const player1Knocking = players[0]
+    const player2Knocking = players[1]
+    let player1 = await findNodotsPlayer(player1Knocking)
+    let player2 = await findNodotsPlayer(player2Knocking)
+    const nodotsPlayers = [player1, player2]
+    console.log('[main] nodotsPlayers:', nodotsPlayers)
+
+    if (player1.kind === 'player-knocking') {
+      console.log(`[main] Inserting player1: ${player1.email}`)
+      const player: typeof playersTable.$inferInsert = {
+        kind: 'player-initializing',
+        externalId: `${player1.source}:${player1.email}`,
+        email: player1.email,
+        preferences: player1.preferences,
+      }
+      await db.insert(playersTable).values(player)
+    }
+
+    if (player2.kind === 'player-knocking') {
+      console.log(`[main] Inserting player2: ${player2.email}`)
+      const player: typeof playersTable.$inferInsert = {
+        kind: 'player-initializing',
+        externalId: `${player2.source}:${player2.email}`,
+        email: player2.email,
+        preferences: player2.preferences,
+      }
+      await db.insert(playersTable).values(player)
+    }
+
+    res
+      .status(200)
+      .json({ msg: 'Game initializing with external players:', nodotsPlayers })
   })
 
   // Start the server
