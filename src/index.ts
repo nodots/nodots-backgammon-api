@@ -78,6 +78,16 @@ const main = async () => {
     }
   })
 
+  const transmogrifyPlayer = async (player: PlayerKnocking) => {
+    const nodotsPlayer = await db.insert(playersTable).values({
+      ...player,
+      externalId: `${player.source}:${player.email}`,
+      kind: 'player-ready',
+    })
+    console.log('[transmogrifyPlayer] nodotsPlayer:', nodotsPlayer)
+    return nodotsPlayer
+  }
+
   // Route for starting a game
   app.post('/games', async (req, res) => {
     // Logic for starting a game goes here
@@ -90,25 +100,12 @@ const main = async () => {
     console.log('[main] nodotsPlayers:', nodotsPlayers)
 
     if (player1.kind === 'player-knocking') {
-      console.log(`[main] Inserting player1: ${player1.email}`)
-      const player: typeof playersTable.$inferInsert = {
-        kind: 'player-initializing',
-        externalId: `${player1.source}:${player1.email}`,
-        email: player1.email,
-        preferences: player1.preferences,
-      }
-      await db.insert(playersTable).values(player)
+      const playerCandidate = await transmogrifyPlayer(player1)
+      console.log(playerCandidate)
     }
 
     if (player2.kind === 'player-knocking') {
-      console.log(`[main] Inserting player2: ${player2.email}`)
-      const player: typeof playersTable.$inferInsert = {
-        kind: 'player-initializing',
-        externalId: `${player2.source}:${player2.email}`,
-        email: player2.email,
-        preferences: player2.preferences,
-      }
-      await db.insert(playersTable).values(player)
+      transmogrifyPlayer(player2)
     }
 
     res

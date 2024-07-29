@@ -29,6 +29,12 @@ export interface PlayerKnocking extends INodotsPlayer {
   preferences?: INodotsPlayerPreferences
 }
 
+export interface PlayerReady extends INodotsPlayer {
+  kind: 'player-ready'
+  source: string
+  preferences?: INodotsPlayerPreferences
+}
+
 export interface PlayerWaiting extends INodotsPlayer {
   kind: 'player-waiting'
 }

@@ -9,6 +9,7 @@ import {
 
 export const PlayerTypeEnum = pgEnum('kind', [
   'player-knocking',
+  'player-ready',
   'player-initializing',
   'player-rolling-for-start',
   'player-rolling',
