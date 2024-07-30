@@ -1,4 +1,3 @@
-export { v4 as generateId } from 'uuid'
 import chalk from 'chalk'
 import { NodotsBoard, buildBoard } from '../Board'
 import { NodotsCube, buildCube } from '../Cube'

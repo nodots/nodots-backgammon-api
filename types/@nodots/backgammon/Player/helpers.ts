@@ -3,7 +3,7 @@ import {
   PlayerReady,
   INodotsPlayer,
   INodotsPlayers,
-  INodotsPlayersPlaying,
+  NodotsPlayersPlaying,
   PlayerPlayingWaiting,
   PlayerPlayingRolling,
   PlayerPlayingMoving,
@@ -17,7 +17,7 @@ import { NodotsColor, NodotsMoveDirection } from '../Game'
 export const initializePlayers = (
   player1: PlayerReady | PlayerKnocking,
   player2: PlayerReady | PlayerKnocking
-): [PlayerReady, PlayerReady] => {
+): NodotsPlayersReady => {
   console.log('[initializePlayers] player1:', player1)
   console.log('[initializePlayers] player2:', player2)
 
@@ -33,6 +33,8 @@ export const initializePlayers = (
       : {
           ...player1,
           kind: 'player-ready',
+          color: colors[0],
+          direction: directions[0],
         }
   playerReady2 =
     player2.kind === 'player-knocking'
@@ -40,9 +42,15 @@ export const initializePlayers = (
       : {
           ...player2,
           kind: 'player-ready',
+          color: colors[1],
+          direction: directions[1],
         }
 
-  return [playerReady1, playerReady2]
+  return {
+    kind: 'players-ready',
+    black: playerReady1.color === 'black' ? playerReady1 : playerReady2,
+    white: playerReady1.color === 'white' ? playerReady1 : playerReady2,
+  }
 }
 
 export const getActivePlayer = (
@@ -55,22 +63,29 @@ export const getActivePlayer = (
 }
 
 export const getClockwisePlayer = (
-  players: INodotsPlayersPlaying
-): PlayerPlayingWaiting | PlayerPlayingRolling | PlayerPlayingMoving =>
-  players.black.direction === 'clockwise' ? players.black : players.white
+  players: NodotsPlayersReady | NodotsPlayersPlaying
+) => {
+  console.log('[Helpers: Player] getClockwisePlayer players:', players)
+  return players.black
+  // return players.black.direction === 'clockwise' ? players.black : players.white
+}
 
 export const getCounterclockwisePlayer = (
-  players: INodotsPlayersPlaying
-): PlayerPlayingWaiting | PlayerPlayingRolling | PlayerPlayingMoving =>
-  players.black.direction === 'counterclockwise' ? players.black : players.white
+  players: NodotsPlayersReady | NodotsPlayersPlaying
+) => {
+  console.log('[Helpers: Player] getClockwisePlayer players:', players)
+  return players.white
+  // return players.black.direction === 'clockwise' ? players.white : players.black}
+}
 
 export const getPlayerForMoveDirection = (
-  players: INodotsPlayersPlaying,
+  players: NodotsPlayersPlaying,
   direction: NodotsMoveDirection
-): PlayerPlayingWaiting | PlayerPlayingRolling | PlayerPlayingMoving =>
-  direction === 'clockwise'
-    ? getClockwisePlayer(players)
-    : getCounterclockwisePlayer(players)
+) =>
+  console.log(
+    `[Helpers: Player] getPlayerForMoveDirection ${direction} players:`,
+    players
+  )
 
 export const findNodotsPlayerFromPlayerKnocking = async (
   player: PlayerKnocking

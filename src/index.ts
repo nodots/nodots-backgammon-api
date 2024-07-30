@@ -2,13 +2,21 @@ import express from 'express'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Client } from 'pg'
 import { players as playersTable } from './drizzle-schema/schema'
-import { PlayerKnocking, PlayerReady } from '../types/@nodots/backgammon/Player'
+import {
+  NodotsPlayersReady,
+  PlayerKnocking,
+  PlayerReady,
+} from '../types/@nodots/backgammon/Player'
 import {
   assignPlayerColors,
   assignPlayerDirections,
   findNodotsPlayerFromPlayerKnocking,
   initializePlayers,
 } from '../types/@nodots/backgammon/Player/helpers'
+import { GameInitialized } from '../types/@nodots/backgammon/Game'
+import { buildBoard } from '../types/@nodots/backgammon/Board'
+import { buildCube } from '../types/@nodots/backgammon/Cube'
+import { buildDice } from '../types/@nodots/backgammon/Dice'
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -72,9 +80,23 @@ const main = async () => {
     const nodotsPlayers = [player1, player2]
     console.log('[main] nodotsPlayers:', nodotsPlayers)
 
-    const playersReady = initializePlayers(player1, player2)
+    const initializedPlayers: NodotsPlayersReady = initializePlayers(
+      player1,
+      player2
+    )
+    const dice = buildDice()
+    const board = buildBoard(players)
+    const cube = buildCube()
 
-    res.status(200).json(playersReady)
+    const game: GameInitialized = {
+      kind: 'game-initialized',
+      dice,
+      board,
+      cube,
+      players: initializedPlayers,
+    }
+
+    res.status(200).json(game)
   })
 
   // Start the server

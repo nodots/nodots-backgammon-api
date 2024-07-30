@@ -23,7 +23,7 @@ export interface INodotsPlayers {
   white: INodotsPlayer
 }
 
-export interface INodotsPlayersPlaying {
+export interface NodotsPlayersPlaying {
   black: PlayerPlayingWaiting | PlayerPlayingRolling | PlayerPlayingMoving
   white: PlayerPlayingWaiting | PlayerPlayingRolling | PlayerPlayingMoving
 }

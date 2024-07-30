@@ -1,4 +1,3 @@
-import chalk from 'chalk'
 import { NodotsColor } from '../Game'
 export type DieValue = 1 | 2 | 3 | 4 | 5 | 6
 export type DieOrder = 0 | 1
@@ -135,10 +134,7 @@ export const setPlayersDiceActive = (
   color: NodotsColor
 ): NodotsPlayersDiceBlack | NodotsPlayersDiceWhite => {
   console.log('[Types: Dice ] setPlayersDiceActive color:', color)
-  console.log(
-    chalk.red('[Types: Dice ] setPlayersDiceActive diceState:'),
-    diceState
-  )
+  console.log(diceState)
   switch (color) {
     case 'black':
       return {
