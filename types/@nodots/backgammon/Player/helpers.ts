@@ -8,50 +8,51 @@ import {
   PlayerPlayingRolling,
   PlayerPlayingMoving,
   NodotsPlayersReady,
+  PlayerInitialized,
 } from '.'
 import { randomBoolean } from '..'
 
 import { client } from '../../../../src'
 import { NodotsColor, NodotsMoveDirection } from '../Game'
 
-export const initializePlayers = (
-  player1: PlayerReady | PlayerKnocking,
-  player2: PlayerReady | PlayerKnocking
-): NodotsPlayersReady => {
-  console.log('[initializePlayers] player1:', player1)
-  console.log('[initializePlayers] player2:', player2)
+// export const initializePlayers = (
+//   player1: PlayerReady | PlayerKnocking,
+//   player2: PlayerReady | PlayerKnocking
+// ): NodotsPlayersReady => {
+//   console.log('[initializePlayers] player1:', player1)
+//   console.log('[initializePlayers] player2:', player2)
 
-  const colors = assignPlayerColors(player1, player2)
-  const directions = assignPlayerDirections(player1, player2)
+//   const colors = assignPlayerColors(player1, player2)
+//   const directions = assignPlayerDirections(player1, player2)
 
-  let playerReady1: PlayerReady
-  let playerReady2: PlayerReady
+//   let playerReady1: PlayerReady
+//   let playerReady2: PlayerReady
 
-  playerReady1 =
-    player1.kind === 'player-knocking'
-      ? transmogrifyPlayer(player1, colors[0], directions[0])
-      : {
-          ...player1,
-          kind: 'player-ready',
-          color: colors[0],
-          direction: directions[0],
-        }
-  playerReady2 =
-    player2.kind === 'player-knocking'
-      ? transmogrifyPlayer(player2, colors[1], directions[1])
-      : {
-          ...player2,
-          kind: 'player-ready',
-          color: colors[1],
-          direction: directions[1],
-        }
+//   playerReady1 =
+//     player1.kind === 'player-knocking'
+//       ? transmogrifyPlayer(player1, colors[0], directions[0])
+//       : {
+//           ...player1,
+//           kind: 'player-ready',
+//           color: colors[0],
+//           direction: directions[0],
+//         }
+//   playerReady2 =
+//     player2.kind === 'player-knocking'
+//       ? transmogrifyPlayer(player2, colors[1], directions[1])
+//       : {
+//           ...player2,
+//           kind: 'player-ready',
+//           color: colors[1],
+//           direction: directions[1],
+//         }
 
-  return {
-    kind: 'players-ready',
-    black: playerReady1.color === 'black' ? playerReady1 : playerReady2,
-    white: playerReady1.color === 'white' ? playerReady1 : playerReady2,
-  }
-}
+//   return {
+//     kind: 'players-ready',
+//     black: playerReady1.color === 'black' ? playerReady1 : playerReady2,
+//     white: playerReady1.color === 'white' ? playerReady1 : playerReady2,
+//   }
+// }
 
 export const getActivePlayer = (
   activeColor: NodotsColor,
@@ -202,36 +203,35 @@ export const assignPlayerDirections = (
   throw Error('assignPlayerDirections: unexpected case')
 }
 
-const transmogrifyPlayer = (
-  player: PlayerKnocking,
-  color: NodotsColor,
-  direction: NodotsMoveDirection
-): PlayerReady => {
-  return {
-    ...player,
-    kind: 'player-ready',
-    color,
-    direction,
-  }
-}
+// const transmogrifyPlayer = (
+//   player: PlayerKnocking,
+//   color: NodotsColor,
+//   direction: NodotsMoveDirection
+// ): PlayerReady => {
+//   const playerInitialized: PlayerInitialized = {
+//     ...player,
+//     kind: 'player-initialized',
+//   }
+//   return playerReady
+// }
 
-export const transmogrifyPlayers = (
-  players: [PlayerKnocking | PlayerReady, PlayerKnocking | PlayerReady]
-): NodotsPlayersReady => {
-  const colors = assignPlayerColors(players[0], players[1]) // FIXME: Should send a players tuple
-  const directions = assignPlayerDirections(players[0], players[1]) // FIXME: Should send a players tuple
-  const player1 =
-    players[0].kind === 'player-knocking'
-      ? transmogrifyPlayer(players[0], colors[0], directions[0])
-      : players[0]
-  const player2 =
-    players[1].kind === 'player-knocking'
-      ? transmogrifyPlayer(players[1], colors[1], directions[1])
-      : players[1]
+// export const transmogrifyPlayers = (
+//   players: [PlayerKnocking | PlayerReady, PlayerKnocking | PlayerReady]
+// ): NodotsPlayersReady => {
+//   const colors = assignPlayerColors(players[0], players[1]) // FIXME: Should send a players tuple
+//   const directions = assignPlayerDirections(players[0], players[1]) // FIXME: Should send a players tuple
+//   const player1 =
+//     players[0].kind === 'player-knocking'
+//       ? transmogrifyPlayer(players[0], colors[0], directions[0])
+//       : players[0]
+//   const player2 =
+//     players[1].kind === 'player-knocking'
+//       ? transmogrifyPlayer(players[1], colors[1], directions[1])
+//       : players[1]
 
-  return {
-    kind: 'players-ready',
-    black: player1.color === 'black' ? player1 : player2,
-    white: player1.color === 'white' ? player1 : player2,
-  }
-}
+//   return {
+//     kind: 'players-ready',
+//     black: player1.color === 'black' ? player1 : player2,
+//     white: player1.color === 'white' ? player1 : player2,
+//   }
+// }

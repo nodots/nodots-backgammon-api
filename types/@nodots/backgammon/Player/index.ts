@@ -1,4 +1,7 @@
+import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { NodotsColor, NodotsMoveDirection } from '../Game'
+import { create, getAll, getSeekingGame, setSeekingGame } from './db'
+import { PgUUID } from 'drizzle-orm/pg-core'
 
 export type NodotsLocale = 'en' | 'es'
 
@@ -35,26 +38,47 @@ export interface PlayerKnocking extends INodotsPlayer {
   preferences?: INodotsPlayerPreferences
 }
 
+export interface PlayerInitialized extends INodotsPlayer {
+  id: string
+  kind: 'player-initialized'
+  source: string
+  externalId: string
+  preferences?: INodotsPlayerPreferences
+}
+
+export interface PlayerSeekingGame extends INodotsPlayer {
+  id: string
+  kind: 'player-seeking-game'
+  source: string
+  externalId: string
+  preferences?: INodotsPlayerPreferences
+}
+
 export interface PlayerReady extends INodotsPlayer {
+  id: string
   kind: 'player-ready'
   source: string
+  externalId: string
   color: NodotsColor
   direction: NodotsMoveDirection
   preferences?: INodotsPlayerPreferences
 }
 
 export interface PlayerPlayingWaiting extends INodotsPlayer {
+  id: string
   kind: 'player-waiting'
   color: NodotsColor
   direction: NodotsMoveDirection
 }
 
 export interface PlayerPlayingRolling extends INodotsPlayer {
+  id: string
   kind: 'player-rolling'
   color: NodotsColor
   direction: NodotsMoveDirection
 }
 export interface PlayerPlayingMoving extends INodotsPlayer {
+  id: string
   kind: 'player-moving'
   color: NodotsColor
   direction: NodotsMoveDirection
@@ -74,6 +98,8 @@ export interface PlayerPlayingMoving extends INodotsPlayer {
 
 export type NodotsPlayer =
   | PlayerKnocking
+  | PlayerInitialized
+  | PlayerSeekingGame
   | PlayerReady
   | PlayerPlayingWaiting
   | PlayerPlayingRollingForStart
@@ -156,24 +182,41 @@ export interface PlayerResiginging extends INodotsPlayer {
 }
 
 export type NodotsPlayerState =
+  | PlayerKnocking
+  | PlayerInitialized
+  | PlayerSeekingGame
   | PlayerReady
+  | PlayerPlayingWaiting
   | PlayerPlayingRollingForStart
   | PlayerPlayingRolling
   | PlayerPlayingMoving
   | PlayerResiginging
   | PlayerWinning
 
-export const ready = (
+export const initialized = async (
   player: PlayerKnocking,
-  color: NodotsColor,
-  direction: NodotsMoveDirection
-): PlayerReady => {
-  return {
-    ...player,
-    kind: 'player-ready',
-    color,
-    direction,
-  }
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  return await create(player, db)
+}
+
+export const list = async (db: NodePgDatabase<Record<string, never>>) => {
+  return await getAll(db)
+}
+
+export const seekingGame = async (
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  return await getSeekingGame(db)
+}
+export const setPlayerSeekingGame = async (
+  playerId: string,
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  const guid = playerId as unknown as PgUUID<any> // FIXME
+  const seeking = await setSeekingGame(guid, db)
+  console.log('[Types: Player] seeking:', seeking)
+  return seeking
 }
 
 export const setPlayersActive = (

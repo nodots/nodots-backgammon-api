@@ -1,23 +1,8 @@
 import express from 'express'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Client } from 'pg'
-import { players as playersTable } from './drizzle-schema/schema'
-import {
-  NodotsPlayersReady,
-  PlayerKnocking,
-  PlayerReady,
-} from '../types/@nodots/backgammon/Player'
-import {
-  assignPlayerColors,
-  assignPlayerDirections,
-  findNodotsPlayerFromPlayerKnocking,
-  initializePlayers,
-} from '../types/@nodots/backgammon/Player/helpers'
-import { GameInitialized } from '../types/@nodots/backgammon/Game'
-import { buildBoard } from '../types/@nodots/backgammon/Board'
-import { buildCube } from '../types/@nodots/backgammon/Cube'
-import { buildDice } from '../types/@nodots/backgammon/Dice'
-
+import { findNodotsPlayerFromPlayerKnocking } from '../types/@nodots/backgammon/Player/helpers'
+import { PlayerRouter } from './routes/players'
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -41,62 +26,33 @@ const main = async () => {
     res.send('Hello, world!')
   })
 
-  app.get('/players', async (req, res) => {
-    const players = await db.select().from(playersTable)
-    res.status(200).json(players)
-  })
-
-  // Route for creating a player
-  app.post('/players', async (req, res) => {
-    // Logic for creating a player goes here
-    const incomingPlayer: PlayerKnocking = {
-      ...req.body,
-      kind: 'player-knocking',
-    }
-    // decode PlayerIncoming to PlayerInitializing
-    const player: typeof playersTable.$inferInsert = {
-      kind: 'player-initializing',
-      externalId: `${req.body.source}:${incomingPlayer.email}`,
-      email: incomingPlayer.email,
-      preferences: incomingPlayer.preferences,
-    }
-    try {
-      await db.insert(playersTable).values(player)
-      res.status(200).json(player)
-    } catch (error) {
-      console.error('Error inserting player into the database:', error)
-      res.status(500).json({ error: 'Internal Server Error' })
-    }
-  })
+  const playerRouter = PlayerRouter(db)
+  app.use('/players', playerRouter)
 
   // Route for starting a game
   app.post('/games', async (req, res) => {
     // Logic for starting a game goes here
-    const { players } = req.body
-    const player1Knocking = players[0]
-    const player2Knocking = players[1]
+    const player1Knocking = req.body.players[0]
+    const player2Knocking = req.body.players[1]
     let player1 = await findNodotsPlayerFromPlayerKnocking(player1Knocking)
     let player2 = await findNodotsPlayerFromPlayerKnocking(player2Knocking)
     const nodotsPlayers = [player1, player2]
     console.log('[main] nodotsPlayers:', nodotsPlayers)
 
-    const initializedPlayers: NodotsPlayersReady = initializePlayers(
-      player1,
-      player2
-    )
-    const dice = buildDice()
-    const board = buildBoard(players)
-    const cube = buildCube()
+    // const players = initializePlayers(player1, player2)
+    // const dice = buildDice()
+    // const board = buildBoard(players)
+    // const cube = buildCube()
 
-    const game: GameInitialized = {
-      kind: 'game-initialized',
-      dice,
-      board,
-      cube,
-      players: initializedPlayers,
-    }
+    // const game: GameInitialized = {
+    //   kind: 'game-initialized',
+    //   dice,
+    //   board,
+    //   cube,
+    //   players,
+    // }
 
-    res.status(200).json(game)
+    res.status(200).json({ message: 'Game started!' })
   })
 
   // Start the server
