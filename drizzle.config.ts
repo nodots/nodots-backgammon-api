@@ -1,9 +1,14 @@
 import { defineConfig } from 'drizzle-kit'
+import dotenv from 'dotenv'
+dotenv.config()
+
 export default defineConfig({
-  schema: './src/drizzle-schema/schema.ts',
+  schema: process.env.DB_SCHEMA,
   dialect: 'postgresql',
   dbCredentials: {
-    url: 'postgres://nodots:nodots@localhost:5432/nodots_backgammon_dev',
+    url:
+      process.env.DB_URL ||
+      'postgres://<user>:<password>@localhost:5432/<database_name>',
   },
   verbose: true,
   strict: true,

@@ -1,4 +1,4 @@
-import { uuid as generateId } from 'uuidv4'
+import { generateId } from '..'
 import { INodotsBoard, getCheckers } from '../Board'
 import { NodotsColor, PlayerCheckers } from '../Game'
 

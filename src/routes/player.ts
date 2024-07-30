@@ -1,15 +1,15 @@
 import { PgUUID } from 'drizzle-orm/pg-core'
+import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import { Router } from 'express'
 import {
   initialized,
   list,
   PlayerKnocking,
-} from '../../types/@nodots/backgammon/Player'
+} from '../../nodots_modules/@nodots/backgammon/Player'
 import {
   getSeekingGame,
   setSeekingGame,
-} from '../../types/@nodots/backgammon/Player/db'
-import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { Router } from 'express'
+} from '../../nodots_modules/@nodots/backgammon/Player/db'
 
 export interface IPlayerRouter extends Router {}
 

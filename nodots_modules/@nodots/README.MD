@@ -25,6 +25,7 @@ React client that scales beautifully from smart phone to smart TV and implements
 - Logic for creating players from very basic json input. You can build your very own API or app with this.
 - Logic for ~~all~~ most aspects of game play using standard rules for single-game play.
 - Leverages [Drizzle](https://orm.drizzle.team/) to make it easy to work with your preferred data store.
+- Support for board imports compatible with GNUBG format.
 
 ## Installation
 

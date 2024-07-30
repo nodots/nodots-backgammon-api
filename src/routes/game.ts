@@ -1,6 +1,6 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { Router } from 'express'
-import { initialized } from '../../types/@nodots/backgammon/Game'
+import { initialized } from '../../nodots_modules/@nodots/backgammon/Game'
 
 export interface IGameRouter extends Router {}
 
@@ -21,25 +21,25 @@ export const GameRouter = (db: NodePgDatabase): IGameRouter => {
     }
   })
 
-  // router.post('/', async (req, res) => {
-  //   res.status(200).json({ request: req.body })
-  //   // Logic for starting a game goes here
+  router.post('/', async (req, res) => {
+    res.status(200).json({ request: req.body })
+    // Logic for starting a game goes here
 
-  //   // const players = initializePlayers(player1, player2)
-  //   // const dice = buildDice()
-  //   // const board = buildBoard(players)
-  //   // const cube = buildCube()
+    // const players = initializePlayers(player1, player2)
+    // const dice = buildDice()
+    // const board = buildBoard(players)
+    // const cube = buildCube()
 
-  //   // const game: GameInitialized = {
-  //   //   kind: 'game-initialized',
-  //   //   dice,
-  //   //   board,
-  //   //   cube,
-  //   //   players,
-  //   // }
+    // const game: GameInitialized = {
+    //   kind: 'game-initialized',
+    //   dice,
+    //   board,
+    //   cube,
+    //   players,
+    // }
 
-  //   res.status(200).json({ message: 'Game started!' })
-  // })
+    res.status(200).json({ message: 'Game started!' })
+  })
 
   return router
 }
