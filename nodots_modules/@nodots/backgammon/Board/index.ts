@@ -1,4 +1,4 @@
-import { uuid as generateId } from 'uuidv4'
+import { generateId } from '../../backgammon'
 import { INodotsChecker, buildCheckersForCheckercontainerId } from '../Checker'
 import { Bar, INodotsCheckercontainer, Off, Point } from '../Checkercontainer'
 
@@ -17,12 +17,9 @@ import {
   NodotsPlayersPlaying,
   NodotsPlayers,
   NodotsPlayersReady,
+  NodotsPlayersSeekingGame,
 } from '../Player'
 import { CheckercontainerPosition, NodotsColor, PointPosition } from '../Game'
-import {
-  getClockwisePlayer,
-  getCounterclockwisePlayer,
-} from '../Player/helpers'
 
 export type Latitude = 'north' | 'south'
 export type Longitude = 'east' | 'west'
@@ -195,13 +192,7 @@ export interface NodotsCheckercontainerImport {
 
 export type NodotsBoardImport = NodotsCheckercontainerImport[]
 
-const buildBar = (
-  players: NodotsPlayersReady | NodotsPlayersPlaying,
-  boards: NodotsBoardImports
-): { white: Bar; black: Bar } => {
-  const clockwisePlayer = getClockwisePlayer(players)
-  const counterclockwisePlayer = getCounterclockwisePlayer(players)
-
+const buildBar = (boards: NodotsBoardImports): { white: Bar; black: Bar } => {
   const clockwiseBoard = boards.clockwise
   const counterclockwiseBoard = boards.counterclockwise
 
@@ -264,13 +255,7 @@ const buildBar = (
   }
 }
 
-const buildOff = (
-  players: NodotsPlayersPlaying | NodotsPlayersReady,
-  boards: NodotsBoardImports
-): { white: Off; black: Off } => {
-  // const clockwisePlayer = getClockwisePlayer(players)
-  // const counterclockwisePlayer = getCounterclockwisePlayer(players)
-
+const buildOff = (boards: NodotsBoardImports): { white: Off; black: Off } => {
   const clockwiseBoard = boards.clockwise
   const counterclockwiseBoard = boards.counterclockwise
 
@@ -336,10 +321,7 @@ const buildOff = (
   }
 }
 
-export const buildBoard = (
-  players: NodotsPlayersPlaying | NodotsPlayersReady,
-  boardImports?: NodotsBoardImports
-): INodotsBoard => {
+export const buildBoard = (boardImports?: NodotsBoardImports): INodotsBoard => {
   let clockwiseBoardImport: NodotsBoardImport = BOARD_IMPORT_DEFAULT
   let counterclockwiseBoardImport = BOARD_IMPORT_DEFAULT
 
@@ -410,8 +392,8 @@ export const buildBoard = (
   if (tempPoints.length === 24) {
     return {
       points: tempPoints,
-      bar: buildBar(players, imports),
-      off: buildOff(players, imports),
+      bar: buildBar(imports),
+      off: buildOff(imports),
     }
   } else {
     throw Error(`invalid tempPoints length ${tempPoints.length}`)

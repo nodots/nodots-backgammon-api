@@ -13,13 +13,14 @@ import {
 } from '../Dice'
 import {
   INodotsPlayers,
+  NodotsPlayers,
   NodotsPlayersReady,
-  PlayerKnocking,
-  PlayerReady,
+  NodotsPlayersSeekingGame,
   PlayerWinning,
 } from '../Player'
-import { transmogrifyPlayers } from '../Player/helpers'
 import { randomBoolean } from '..'
+import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import { getAll } from './db'
 
 export const CHECKERS_PER_PLAYER = 15
 export type PointPosition =
@@ -130,13 +131,11 @@ export type NodotsGameState =
   | GamePlayingRolling
   | GameCompleted
 
-export const initializing = (
-  externalPlayers: [PlayerKnocking | PlayerReady, PlayerKnocking | PlayerReady]
+export const initialized = (
+  players: NodotsPlayersReady,
+  db: NodePgDatabase<Record<string, never>>
 ): GameInitialized => {
-  console.log(chalk.green('5. [Types: Game]'), externalPlayers)
-
-  const players = transmogrifyPlayers(externalPlayers)
-  const board = buildBoard(players)
+  const board = buildBoard()
   const dice = buildDice()
   const cube = buildCube()
 
@@ -147,6 +146,10 @@ export const initializing = (
     board,
     cube,
   }
+}
+
+export const list = async (db: NodePgDatabase<Record<string, never>>) => {
+  return await getAll(db)
 }
 
 export const rollingForStart = (

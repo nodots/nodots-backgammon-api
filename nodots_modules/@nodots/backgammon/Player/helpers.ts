@@ -9,10 +9,11 @@ import {
   PlayerPlayingMoving,
   NodotsPlayersReady,
   PlayerInitialized,
+  NodotsPlayersSeekingGame,
 } from '.'
 import { randomBoolean } from '..'
 
-import { client } from '../../../../src'
+import { nodotsDbClient } from '../../../../src'
 import { NodotsColor, NodotsMoveDirection } from '../Game'
 
 // export const initializePlayers = (
@@ -64,7 +65,7 @@ export const getActivePlayer = (
 }
 
 export const getClockwisePlayer = (
-  players: NodotsPlayersReady | NodotsPlayersPlaying
+  players: NodotsPlayersReady | NodotsPlayersPlaying | NodotsPlayersSeekingGame
 ) => {
   console.log('[Helpers: Player] getClockwisePlayer players:', players)
   return players.black
@@ -72,7 +73,7 @@ export const getClockwisePlayer = (
 }
 
 export const getCounterclockwisePlayer = (
-  players: NodotsPlayersReady | NodotsPlayersPlaying
+  players: NodotsPlayersReady | NodotsPlayersPlaying | NodotsPlayersSeekingGame
 ) => {
   console.log('[Helpers: Player] getClockwisePlayer players:', players)
   return players.white
@@ -92,7 +93,7 @@ export const findNodotsPlayerFromPlayerKnocking = async (
   player: PlayerKnocking
 ) => {
   console.log('[findNodotsPlayerFromPlayerKnocking] player:', player)
-  const foundPlayers = await client.query(
+  const foundPlayers = await nodotsDbClient.query(
     `SELECT * FROM players WHERE email = $1`,
     [player.email]
   )

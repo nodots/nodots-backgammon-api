@@ -27,8 +27,15 @@ export interface INodotsPlayers {
 }
 
 export interface NodotsPlayersPlaying {
+  kind: 'players-playing'
   black: PlayerPlayingWaiting | PlayerPlayingRolling | PlayerPlayingMoving
   white: PlayerPlayingWaiting | PlayerPlayingRolling | PlayerPlayingMoving
+}
+
+export interface NodotsPlayersSeekingGame {
+  kind: 'players-seeking-game'
+  black: PlayerSeekingGame
+  white: PlayerSeekingGame
 }
 
 export interface PlayerKnocking extends INodotsPlayer {

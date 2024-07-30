@@ -2,11 +2,12 @@ import express from 'express'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Client } from 'pg'
 import { findNodotsPlayerFromPlayerKnocking } from '../types/@nodots/backgammon/Player/helpers'
-import { PlayerRouter } from './routes/players'
+import { PlayerRouter } from './routes/player'
+import { GameRouter } from './routes/game'
 const app = express()
 const port = process.env.PORT || 3000
 
-export const client = new Client({
+export const nodotsDbClient = new Client({
   host: '127.0.0.1',
   port: 5432,
   user: 'nodots',
@@ -15,8 +16,8 @@ export const client = new Client({
 })
 
 const main = async () => {
-  await client.connect()
-  const db = drizzle(client)
+  await nodotsDbClient.connect()
+  const db = drizzle(nodotsDbClient)
 
   // Middleware to parse JSON
   app.use(express.json())
@@ -27,33 +28,10 @@ const main = async () => {
   })
 
   const playerRouter = PlayerRouter(db)
-  app.use('/players', playerRouter)
+  const gameRouter = GameRouter(db)
 
-  // Route for starting a game
-  app.post('/games', async (req, res) => {
-    // Logic for starting a game goes here
-    const player1Knocking = req.body.players[0]
-    const player2Knocking = req.body.players[1]
-    let player1 = await findNodotsPlayerFromPlayerKnocking(player1Knocking)
-    let player2 = await findNodotsPlayerFromPlayerKnocking(player2Knocking)
-    const nodotsPlayers = [player1, player2]
-    console.log('[main] nodotsPlayers:', nodotsPlayers)
-
-    // const players = initializePlayers(player1, player2)
-    // const dice = buildDice()
-    // const board = buildBoard(players)
-    // const cube = buildCube()
-
-    // const game: GameInitialized = {
-    //   kind: 'game-initialized',
-    //   dice,
-    //   board,
-    //   cube,
-    //   players,
-    // }
-
-    res.status(200).json({ message: 'Game started!' })
-  })
+  app.use('/player', playerRouter)
+  app.use('/game', gameRouter)
 
   // Start the server
   app.listen(port, () => {
