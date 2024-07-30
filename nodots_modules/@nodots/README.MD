@@ -26,6 +26,8 @@ React client that scales beautifully from smart phone to smart TV and implements
 - Logic for ~~all~~ most aspects of game play using standard rules for single-game play.
 - Leverages [Drizzle](https://orm.drizzle.team/) to make it easy to work with your preferred data store.
 - Support for board imports compatible with GNUBG format.
+- 📝 TODO: i18n/i10n.
+- 📝 TODO: Match support.
 
 ## Installation
 
