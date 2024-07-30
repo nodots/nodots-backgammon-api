@@ -1,4 +1,4 @@
-import { NodotsColor, NodotsMoveDirection } from '../../..'
+import { NodotsColor, NodotsMoveDirection } from '../Game'
 
 export type NodotsLocale = 'en' | 'es'
 

@@ -7,10 +7,43 @@ import {
   PlayerPlayingWaiting,
   PlayerPlayingRolling,
   PlayerPlayingMoving,
+  NodotsPlayersReady,
 } from '.'
-import { randomBinary } from '..'
-import { NodotsColor, NodotsMoveDirection } from '../../..'
+import { randomBoolean } from '..'
+
 import { client } from '../../../../src'
+import { NodotsColor, NodotsMoveDirection } from '../Game'
+
+export const initializePlayers = (
+  player1: PlayerReady | PlayerKnocking,
+  player2: PlayerReady | PlayerKnocking
+): [PlayerReady, PlayerReady] => {
+  console.log('[initializePlayers] player1:', player1)
+  console.log('[initializePlayers] player2:', player2)
+
+  const colors = assignPlayerColors(player1, player2)
+  const directions = assignPlayerDirections(player1, player2)
+
+  let playerReady1: PlayerReady
+  let playerReady2: PlayerReady
+
+  playerReady1 =
+    player1.kind === 'player-knocking'
+      ? transmogrifyPlayer(player1, colors[0], directions[0])
+      : {
+          ...player1,
+          kind: 'player-ready',
+        }
+  playerReady2 =
+    player2.kind === 'player-knocking'
+      ? transmogrifyPlayer(player2, colors[1], directions[1])
+      : {
+          ...player2,
+          kind: 'player-ready',
+        }
+
+  return [playerReady1, playerReady2]
+}
 
 export const getActivePlayer = (
   activeColor: NodotsColor,
@@ -77,7 +110,7 @@ export const assignPlayerColors = (
     }
     if (!player1.preferences?.color && !player2.preferences?.color) {
       // neither player has a preference
-      return randomBinary() ? ['black', 'white'] : ['white', 'black']
+      return randomBoolean() ? ['black', 'white'] : ['white', 'black']
     }
     if (player1.preferences?.color && !player2.preferences?.color) {
       // only player1 has a preference
@@ -93,7 +126,7 @@ export const assignPlayerColors = (
     }
     if (player1.preferences?.color === player2.preferences?.color) {
       // both players have the same preference
-      return randomBinary() ? ['black', 'white'] : ['white', 'black']
+      return randomBoolean() ? ['black', 'white'] : ['white', 'black']
     }
     throw Error('assignPlayerColors: unexpected case')
   }
@@ -122,7 +155,7 @@ export const assignPlayerDirections = (
     }
     if (!player1.preferences?.direction && !player2.preferences?.direction) {
       // neither player has a preference
-      return randomBinary()
+      return randomBoolean()
         ? ['clockwise', 'counterclockwise']
         : ['counterclockwise', 'clockwise']
     }
@@ -142,7 +175,7 @@ export const assignPlayerDirections = (
     }
     if (player1.preferences?.direction === player2.preferences?.direction) {
       // both players have the same preference
-      return randomBinary()
+      return randomBoolean()
         ? ['clockwise', 'counterclockwise']
         : ['counterclockwise', 'clockwise']
     }
@@ -152,4 +185,38 @@ export const assignPlayerDirections = (
     return [player1.direction, player2.direction]
   }
   throw Error('assignPlayerDirections: unexpected case')
+}
+
+const transmogrifyPlayer = (
+  player: PlayerKnocking,
+  color: NodotsColor,
+  direction: NodotsMoveDirection
+): PlayerReady => {
+  return {
+    ...player,
+    kind: 'player-ready',
+    color,
+    direction,
+  }
+}
+
+export const transmogrifyPlayers = (
+  players: [PlayerKnocking | PlayerReady, PlayerKnocking | PlayerReady]
+): NodotsPlayersReady => {
+  const colors = assignPlayerColors(players[0], players[1]) // FIXME: Should send a players tuple
+  const directions = assignPlayerDirections(players[0], players[1]) // FIXME: Should send a players tuple
+  const player1 =
+    players[0].kind === 'player-knocking'
+      ? transmogrifyPlayer(players[0], colors[0], directions[0])
+      : players[0]
+  const player2 =
+    players[1].kind === 'player-knocking'
+      ? transmogrifyPlayer(players[1], colors[1], directions[1])
+      : players[1]
+
+  return {
+    kind: 'players-ready',
+    black: player1.color === 'black' ? player1 : player2,
+    white: player1.color === 'white' ? player1 : player2,
+  }
 }

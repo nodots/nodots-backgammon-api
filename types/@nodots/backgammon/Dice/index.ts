@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import { NodotsColor } from '../..'
+import { NodotsColor } from '../Game'
 export type DieValue = 1 | 2 | 3 | 4 | 5 | 6
 export type DieOrder = 0 | 1
 export type NodotsRoll = [DieValue, DieValue]
@@ -15,6 +15,42 @@ export type NodotsPlayerDice = {
   dice: [NodotsDie, NodotsDie]
 }
 
+export const buildDice = (): NodotsPlayersDiceInactive => {
+  return {
+    black: {
+      kind: 'inactive',
+      color: 'black',
+      dice: [
+        {
+          color: 'black',
+          order: 0,
+          value: 1,
+        },
+        {
+          color: 'black',
+          order: 1,
+          value: 1,
+        },
+      ],
+    },
+    white: {
+      kind: 'inactive',
+      color: 'white',
+      dice: [
+        {
+          color: 'white',
+          order: 0,
+          value: 1,
+        },
+        {
+          color: 'white',
+          order: 1,
+          value: 1,
+        },
+      ],
+    },
+  }
+}
 export interface NodotsPlayerDiceActive extends NodotsPlayerDice {
   kind: 'active'
   dice: [NodotsDie, NodotsDie]
@@ -126,5 +162,7 @@ export const setPlayersDiceActive = (
           kind: 'inactive',
         },
       }
+    default:
+      throw Error('setPlayersDiceActive: unexpected case') // should never happen and compiler is failing
   }
 }

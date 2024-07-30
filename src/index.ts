@@ -7,8 +7,9 @@ import {
   assignPlayerColors,
   assignPlayerDirections,
   findNodotsPlayerFromPlayerKnocking,
+  initializePlayers,
 } from '../types/@nodots/backgammon/Player/helpers'
-import { NodotsColor, NodotsMoveDirection } from '../types'
+
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -59,50 +60,6 @@ const main = async () => {
       res.status(500).json({ error: 'Internal Server Error' })
     }
   })
-
-  const transmogrifyPlayer = (
-    player: PlayerKnocking,
-    color: NodotsColor,
-    direction: NodotsMoveDirection
-  ): PlayerReady => {
-    return {
-      ...player,
-      kind: 'player-ready',
-      color,
-      direction,
-    }
-  }
-
-  const initializePlayers = (
-    player1: PlayerReady | PlayerKnocking,
-    player2: PlayerReady | PlayerKnocking
-  ): [PlayerReady, PlayerReady] => {
-    console.log('[initializePlayers] player1:', player1)
-    console.log('[initializePlayers] player2:', player2)
-
-    const colors = assignPlayerColors(player1, player2)
-    const directions = assignPlayerDirections(player1, player2)
-
-    let playerReady1: PlayerReady
-    let playerReady2: PlayerReady
-
-    playerReady1 =
-      player1.kind === 'player-knocking'
-        ? transmogrifyPlayer(player1, colors[0], directions[0])
-        : {
-            ...player1,
-            kind: 'player-ready',
-          }
-    playerReady2 =
-      player2.kind === 'player-knocking'
-        ? transmogrifyPlayer(player2, colors[1], directions[1])
-        : {
-            ...player2,
-            kind: 'player-ready',
-          }
-
-    return [playerReady1, playerReady2]
-  }
 
   // Route for starting a game
   app.post('/games', async (req, res) => {
