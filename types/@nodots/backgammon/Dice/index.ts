@@ -9,7 +9,7 @@ interface NodotsDie {
   order: DieOrder
 }
 
-export type NodotsPlayerDice = {
+export type INodotsPlayerDice = {
   color: NodotsColor
   dice: [NodotsDie, NodotsDie]
 }
@@ -50,38 +50,38 @@ export const buildDice = (): NodotsPlayersDiceInactive => {
     },
   }
 }
-export interface NodotsPlayerDiceActive extends NodotsPlayerDice {
+export interface INodotsPlayerDiceActive extends INodotsPlayerDice {
   kind: 'active'
   dice: [NodotsDie, NodotsDie]
 }
 
-export interface NodotsPlayerDiceInactive extends NodotsPlayerDice {
+export interface INodotsPlayerDiceInactive extends INodotsPlayerDice {
   kind: 'inactive'
   dice: [NodotsDie, NodotsDie]
 }
 
 export type NodotsPlayerDiceState =
-  | NodotsPlayerDiceActive
-  | NodotsPlayerDiceInactive
+  | INodotsPlayerDiceActive
+  | INodotsPlayerDiceInactive
 
 export type NodotsPlayersDiceWhite = {
-  white: NodotsPlayerDiceActive
-  black: NodotsPlayerDiceInactive
+  white: INodotsPlayerDiceActive
+  black: INodotsPlayerDiceInactive
 }
 
 export type NodotsPlayersDiceBlack = {
-  white: NodotsPlayerDiceInactive
-  black: NodotsPlayerDiceActive
+  white: INodotsPlayerDiceInactive
+  black: INodotsPlayerDiceActive
 }
 
 export type NodotsPlayersDiceInactive = {
-  white: NodotsPlayerDiceInactive
-  black: NodotsPlayerDiceInactive
+  white: INodotsPlayerDiceInactive
+  black: INodotsPlayerDiceInactive
 }
 
 const initializingPlayerDice = (
   color: NodotsColor
-): NodotsPlayerDiceInactive => {
+): INodotsPlayerDiceInactive => {
   const die1: NodotsDie = {
     color,
     order: 0,
@@ -113,8 +113,8 @@ export const rollDice = (): NodotsRoll => [roll(), roll()]
 const isDoubles = (roll: NodotsRoll) => roll[0] === roll[1]
 
 export const rolling = (
-  diceState: NodotsPlayerDiceActive
-): NodotsPlayerDiceInactive => {
+  diceState: INodotsPlayerDiceActive
+): INodotsPlayerDiceInactive => {
   const roll = rollDice()
   diceState.dice[0].value = roll[0]
   diceState.dice[1].value = roll[1]

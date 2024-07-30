@@ -1,6 +1,6 @@
 import { uuid as generateId } from 'uuidv4'
-import { NodotsChecker, buildCheckersForCheckercontainerId } from '../Checker'
-import { Bar, Checkercontainer, Off, Point } from '../Checkercontainer'
+import { INodotsChecker, buildCheckersForCheckercontainerId } from '../Checker'
+import { Bar, INodotsCheckercontainer, Off, Point } from '../Checkercontainer'
 
 export interface NodotsCheckercontainerImport {
   position: CheckercontainerPosition
@@ -56,121 +56,127 @@ export type Points = [
 
 export type CheckercontainerCheckers =
   | []
-  | [NodotsChecker]
-  | [NodotsChecker, NodotsChecker]
-  | [NodotsChecker, NodotsChecker, NodotsChecker]
-  | [NodotsChecker, NodotsChecker, NodotsChecker, NodotsChecker]
-  | [NodotsChecker, NodotsChecker, NodotsChecker, NodotsChecker, NodotsChecker]
+  | [INodotsChecker]
+  | [INodotsChecker, INodotsChecker]
+  | [INodotsChecker, INodotsChecker, INodotsChecker]
+  | [INodotsChecker, INodotsChecker, INodotsChecker, INodotsChecker]
   | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker
     ]
   | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker
     ]
   | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker
     ]
   | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker
     ]
   | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker
     ]
   | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker
     ]
   | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker
     ]
   | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker
     ]
   | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker
+    ]
+  | [
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker,
+      INodotsChecker
     ]
 
-export interface NodotsBoard {
+export interface INodotsBoard {
   points: Point[]
   bar: {
     white: Bar
@@ -333,7 +339,7 @@ const buildOff = (
 export const buildBoard = (
   players: NodotsPlayersPlaying | NodotsPlayersReady,
   boardImports?: NodotsBoardImports
-): NodotsBoard => {
+): INodotsBoard => {
   let clockwiseBoardImport: NodotsBoardImport = BOARD_IMPORT_DEFAULT
   let counterclockwiseBoardImport = BOARD_IMPORT_DEFAULT
 
@@ -356,7 +362,7 @@ export const buildBoard = (
 
   for (let i = 0; i < 24; i++) {
     const pointId = generateId()
-    const checkers: NodotsChecker[] = []
+    const checkers: INodotsChecker[] = []
 
     const clockwisePosition: PointPosition = (i + 1) as number as PointPosition
     const counterclockwisePosition = (25 - clockwisePosition) as PointPosition
@@ -412,9 +418,9 @@ export const buildBoard = (
   }
 }
 
-export const getCheckers = (board: NodotsBoard): NodotsChecker[] => {
+export const getCheckers = (board: INodotsBoard): INodotsChecker[] => {
   const checkercontainers = getCheckercontainers(board)
-  const checkers: NodotsChecker[] = []
+  const checkers: INodotsChecker[] = []
 
   checkercontainers.map((checkercontainer) =>
     checkers.push(...checkercontainer.checkers)
@@ -423,35 +429,35 @@ export const getCheckers = (board: NodotsBoard): NodotsChecker[] => {
 }
 
 export const getCheckersForColor = (
-  board: NodotsBoard,
+  board: INodotsBoard,
   color: NodotsColor
-): NodotsChecker[] =>
+): INodotsChecker[] =>
   getCheckers(board).filter((checker) => checker.color === color)
 
-export const getPoints = (board: NodotsBoard): Point[] => board.points
-export const getBars = (board: NodotsBoard): Bar[] => [
+export const getPoints = (board: INodotsBoard): Point[] => board.points
+export const getBars = (board: INodotsBoard): Bar[] => [
   board.bar.white,
   board.bar.black,
 ]
 
-export const getOffs = (board: NodotsBoard): Off[] => [
+export const getOffs = (board: INodotsBoard): Off[] => [
   board.off.white,
   board.off.black,
 ]
 
 export const getCheckercontainers = (
-  board: NodotsBoard
-): Checkercontainer[] => {
-  const points = getPoints(board) as Checkercontainer[]
-  const bar = getBars(board) as Checkercontainer[]
-  const off = getOffs(board) as Checkercontainer[]
+  board: INodotsBoard
+): INodotsCheckercontainer[] => {
+  const points = getPoints(board) as INodotsCheckercontainer[]
+  const bar = getBars(board) as INodotsCheckercontainer[]
+  const off = getOffs(board) as INodotsCheckercontainer[]
   return points.concat(...bar).concat(...off)
 }
 
 export const getCheckercontainer = (
-  board: NodotsBoard,
+  board: INodotsBoard,
   id: string
-): Checkercontainer => {
+): INodotsCheckercontainer => {
   const container = getCheckercontainers(board).find((c) => c.id === id)
   if (!container) {
     throw Error(`No checkercontainer found for ${id}`)
@@ -459,7 +465,7 @@ export const getCheckercontainer = (
   return container
 }
 
-export const getPipCounts = (board: NodotsBoard, players: NodotsPlayers) => {
+export const getPipCounts = (board: INodotsBoard, players: NodotsPlayers) => {
   const pipCounts = {
     white: board.bar.white.checkers.length * 24,
     black: board.bar.black.checkers.length * 24,

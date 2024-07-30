@@ -1,7 +1,7 @@
 import chalk from 'chalk'
-import { NodotsBoard, buildBoard } from '../Board'
-import { NodotsCube, buildCube } from '../Cube'
-import { NodotsChecker } from '../Checker'
+import { INodotsBoard, buildBoard } from '../Board'
+import { INodotsCube, buildCube } from '../Cube'
+import { INodotsChecker } from '../Checker'
 import { NodotsPlay } from '../Play'
 import {
   buildDice,
@@ -49,21 +49,21 @@ export type PointPosition =
   | 24
 
 export type PlayerCheckers = [
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker,
+  INodotsChecker
 ]
 
 export type CheckercontainerPosition = PointPosition | 'bar' | 'off'
@@ -80,24 +80,24 @@ export interface GameInitialized {
   kind: 'game-initialized'
   dice: NodotsPlayersDiceInactive
   players: NodotsPlayersReady
-  board: NodotsBoard
-  cube: NodotsCube
+  board: INodotsBoard
+  cube: INodotsCube
 }
 
 export interface GameRollingForStart {
   kind: 'game-rolling-for-start'
   players: NodotsPlayersReady
   dice: NodotsPlayersDiceInactive
-  board: NodotsBoard
-  cube: NodotsCube
+  board: INodotsBoard
+  cube: INodotsCube
 }
 
 export interface GamePlayingRolling {
   kind: 'game-playing-rolling'
   players: INodotsPlayers
   dice: NodotsPlayersDiceWhite | NodotsPlayersDiceBlack
-  board: NodotsBoard
-  cube: NodotsCube
+  board: INodotsBoard
+  cube: INodotsCube
   activeColor: NodotsColor
   activePlay?: NodotsPlay
 }
@@ -106,8 +106,8 @@ export interface GamePlayingMoving {
   kind: 'game-playing-moving'
   players: INodotsPlayers
   dice: NodotsPlayersDiceWhite | NodotsPlayersDiceBlack
-  board: NodotsBoard
-  cube: NodotsCube
+  board: INodotsBoard
+  cube: INodotsCube
   activeColor: NodotsColor
   activePlay?: NodotsPlay
 }
@@ -115,8 +115,8 @@ export interface GamePlayingMoving {
 export interface GameCompleted {
   kind: 'game-completed'
   activeColor: NodotsColor
-  board: NodotsBoard
-  cube: NodotsCube
+  board: INodotsBoard
+  cube: INodotsCube
   roll: NodotsRoll
   players: INodotsPlayers
   winner: PlayerWinning

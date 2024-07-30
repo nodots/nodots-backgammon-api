@@ -1,13 +1,13 @@
-import { NodotsColor, PointPosition } from '../Types'
-import { NodotsChecker } from './Checker'
+import { INodotsChecker } from '../Checker'
+import { NodotsColor, PointPosition } from '../Game'
 
-export type Checkercontainer = {
+export type INodotsCheckercontainer = {
   id: string
   kind: string
-  checkers: NodotsChecker[]
+  checkers: INodotsChecker[]
 }
 
-export interface Point extends Checkercontainer {
+export interface Point extends INodotsCheckercontainer {
   kind: 'point'
   position: {
     clockwise: PointPosition
@@ -15,13 +15,13 @@ export interface Point extends Checkercontainer {
   }
 }
 
-export interface Bar extends Checkercontainer {
+export interface Bar extends INodotsCheckercontainer {
   kind: 'bar'
   color: NodotsColor
   position: 'bar'
 }
 
-export interface Off extends Checkercontainer {
+export interface Off extends INodotsCheckercontainer {
   kind: 'off'
   color: NodotsColor
   position: 'off'
