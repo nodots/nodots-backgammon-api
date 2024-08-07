@@ -6,7 +6,7 @@ export { INodotsChecker } from './Checker'
 export { INodotsCube } from './Cube'
 export { INodotsPlayer } from './Player'
 export { INodotsMove } from './Move'
-// export { INodotsGame } from './Game'
+export { INodotsGame } from './Game'
 
 export type NodotsBackgammonEntity =
   | 'board'

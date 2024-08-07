@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import { Client } from 'pg'
 import { PlayerRouter } from './routes/player'
 import { GameRouter } from './routes/game'
+import { BoardRouter } from './routes/board'
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -23,14 +24,16 @@ const main = async () => {
 
   // Define a simple route
   app.get('/', (req, res) => {
-    res.send('Hello, world!')
+    res.send('Welcome to the Nodots Backgammon API!')
   })
 
   const playerRouter = PlayerRouter(db)
   const gameRouter = GameRouter(db)
+  const boardRouter = BoardRouter()
 
   app.use('/player', playerRouter)
   app.use('/game', gameRouter)
+  app.use('/board', boardRouter)
 
   // Start the server
   app.listen(port, () => {

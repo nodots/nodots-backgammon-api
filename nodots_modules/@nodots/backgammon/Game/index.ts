@@ -1,26 +1,23 @@
-import chalk from 'chalk'
-import { INodotsBoard, buildBoard } from '../Board'
-import { INodotsCube, buildCube } from '../Cube'
+import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import { randomBoolean } from '..'
+import { INodotsBoard } from '../Board'
 import { INodotsChecker } from '../Checker'
-import { NodotsPlay } from '../Play'
+import { INodotsCube } from '../Cube'
 import {
-  buildDice,
   NodotsPlayersDiceBlack,
   NodotsPlayersDiceInactive,
   NodotsPlayersDiceWhite,
   NodotsRoll,
   setPlayersDiceActive,
 } from '../Dice'
+import { NodotsPlay } from '../Play'
 import {
   INodotsPlayers,
-  NodotsPlayers,
   NodotsPlayersReady,
   NodotsPlayersSeekingGame,
   PlayerWinning,
 } from '../Player'
-import { randomBoolean } from '..'
-import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { getAll } from './db'
+import { create, getAll } from './db'
 
 export const CHECKERS_PER_PLAYER = 15
 export type PointPosition =
@@ -73,19 +70,24 @@ export type DestinationPosition = PointPosition | 'off'
 export type NodotsColor = 'black' | 'white'
 export type NodotsMoveDirection = 'clockwise' | 'counterclockwise'
 
-export interface GameInitializing {
-  kind: 'game-initializing'
+export interface INodotsGame {
+  players: INodotsPlayers
 }
 
-export interface GameInitialized {
-  kind: 'game-initialized'
-  dice: NodotsPlayersDiceInactive
+export interface GameInitializing extends INodotsGame {
+  kind: 'game-initializing'
   players: NodotsPlayersReady
+}
+
+export interface GameInitialized extends INodotsGame {
+  kind: 'game-initialized'
+  players: NodotsPlayersReady
+  dice: NodotsPlayersDiceInactive
   board: INodotsBoard
   cube: INodotsCube
 }
 
-export interface GameRollingForStart {
+export interface GameRollingForStart extends INodotsGame {
   kind: 'game-rolling-for-start'
   players: NodotsPlayersReady
   dice: NodotsPlayersDiceInactive
@@ -93,7 +95,7 @@ export interface GameRollingForStart {
   cube: INodotsCube
 }
 
-export interface GamePlayingRolling {
+export interface GamePlayingRolling extends INodotsGame {
   kind: 'game-playing-rolling'
   players: INodotsPlayers
   dice: NodotsPlayersDiceWhite | NodotsPlayersDiceBlack
@@ -103,7 +105,7 @@ export interface GamePlayingRolling {
   activePlay?: NodotsPlay
 }
 
-export interface GamePlayingMoving {
+export interface GamePlayingMoving extends INodotsGame {
   kind: 'game-playing-moving'
   players: INodotsPlayers
   dice: NodotsPlayersDiceWhite | NodotsPlayersDiceBlack
@@ -113,7 +115,7 @@ export interface GamePlayingMoving {
   activePlay?: NodotsPlay
 }
 
-export interface GameCompleted {
+export interface GameCompleted extends INodotsGame {
   kind: 'game-completed'
   activeColor: NodotsColor
   board: INodotsBoard
@@ -127,32 +129,28 @@ export type NodotsGameState =
   | GameInitializing
   | GameInitialized
   | GameRollingForStart
-  | GamePlayingMoving
   | GamePlayingRolling
+  | GamePlayingMoving
   | GameCompleted
 
-export const initialized = (
-  players: NodotsPlayersReady,
+export const initializeGame = async (
+  players: NodotsPlayersReady | NodotsPlayersSeekingGame,
   db: NodePgDatabase<Record<string, never>>
-): GameInitialized => {
-  const board = buildBoard()
-  const dice = buildDice()
-  const cube = buildCube()
-
-  return {
-    kind: 'game-initialized',
-    dice,
-    players,
-    board,
-    cube,
+) => {
+  switch (players.kind) {
+    case 'players-ready':
+      return await create(players, db)
+    case 'players-seeking-game':
+      const playersReady = setPlayersReady(players)
+      return await create(playersReady, db)
   }
 }
 
-export const list = async (db: NodePgDatabase<Record<string, never>>) => {
+export const listGames = async (db: NodePgDatabase<Record<string, never>>) => {
   return await getAll(db)
 }
 
-export const rollingForStart = (
+export const rollForStart = (
   gameState: GameInitialized,
   players: NodotsPlayersReady
 ): GamePlayingRolling => {

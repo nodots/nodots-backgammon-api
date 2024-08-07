@@ -3,12 +3,12 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export default defineConfig({
-  schema: process.env.DB_SCHEMA,
+  schema: process.env.DB_SCHEMA || './src/drizzle-schema/schema.ts',
   dialect: 'postgresql',
   dbCredentials: {
     url:
       process.env.DB_URL ||
-      'postgres://<user>:<password>@localhost:5432/<database_name>',
+      'postgres://nodots:nodots@localhost:5432/nodots_backgammon_dev',
   },
   verbose: true,
   strict: true,

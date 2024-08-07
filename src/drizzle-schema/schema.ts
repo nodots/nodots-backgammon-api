@@ -1,4 +1,9 @@
 export {
   PlayersTable,
   PlayerTypeEnum,
-} from '../../types/@nodots/backgammon/Player/db'
+} from '../../nodots_modules/@nodots/backgammon/Player/db.ts'
+
+export {
+  GamesTable,
+  GameTypeEnum,
+} from '../../nodots_modules/@nodots/backgammon/Game/db.ts'

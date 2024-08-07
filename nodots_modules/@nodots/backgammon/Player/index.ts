@@ -1,7 +1,18 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { NodotsColor, NodotsMoveDirection } from '../Game'
-import { create, getAll, getSeekingGame, setSeekingGame } from './db'
 import { PgUUID } from 'drizzle-orm/pg-core'
+import { NodotsColor, NodotsMoveDirection } from '../Game'
+import {
+  dbCreatePlayer,
+  dbFetchPlayer,
+  // dbCreatePlayer,
+  dbFetchPlayers,
+  dbFetchPlayersSeekingGame,
+  dbSetPlayerReady,
+  dbSetPlayerSeekingGame,
+  PlayersTable,
+  // dbFetchPlayersSeekingGame,
+  // dbSetPlayerSeekingGame,
+} from './db'
 
 export type NodotsLocale = 'en' | 'es'
 
@@ -200,65 +211,93 @@ export type NodotsPlayerState =
   | PlayerResiginging
   | PlayerWinning
 
-export const initialized = async (
-  player: PlayerKnocking,
+export const initialize = async (
+  playerKnocking: PlayerKnocking,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  return await create(player, db)
+  return await dbCreatePlayer(playerKnocking, db)
 }
 
-export const list = async (db: NodePgDatabase<Record<string, never>>) => {
-  return await getAll(db)
+export const fetchAll = async (db: NodePgDatabase<Record<string, never>>) => {
+  return await dbFetchPlayers(db)
 }
 
 export const seekingGame = async (
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  return await getSeekingGame(db)
+  return await dbFetchPlayersSeekingGame(db)
 }
+
 export const setPlayerSeekingGame = async (
-  playerId: string,
+  uuid: PgUUID<any>,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const guid = playerId as unknown as PgUUID<any> // FIXME
-  const seeking = await setSeekingGame(guid, db)
+  const seeking = await dbSetPlayerSeekingGame(uuid, db)
   console.log('[Types: Player] seeking:', seeking)
   return seeking
 }
 
-export const setPlayersActive = (
-  color: NodotsColor,
-  players:
-    | NodotsPlayersReady
-    | NodotsPlayersBlackActive
-    | NodotsPlayersWhiteActive
-): NodotsPlayersBlackActive | NodotsPlayersWhiteActive => {
-  console.log('[Types: Player] setPlayersActive color:', color)
-  console.log('[Types: Player] setPlayersActive players:', players)
-  switch (color) {
-    case 'black':
-      return {
-        white: {
-          ...players.white,
-          kind: 'player-waiting',
-        },
-        black: {
-          ...players.black,
-          kind: 'player-rolling',
-        },
-      }
-    case 'white':
-      return {
-        white: {
-          ...players.white,
-          kind: 'player-rolling',
-        },
-        black: {
-          ...players.black,
-          kind: 'player-waiting',
-        },
-      }
-    default:
-      throw new Error('error.invalid-color')
+export const setPlayerReady = async (
+  uuid: PgUUID<any>,
+  db: NodePgDatabase<Record<string, never>>
+): Promise<PlayerReady> => {
+  const player = await dbFetchPlayer(uuid, db)
+  if (!player) {
+    throw new Error('error.invalid-player')
+  }
+  switch (player[0].kind) {
   }
 }
+
+export const setPlayersReady = async (
+  players: NodotsPlayersSeekingGame,
+  db: NodePgDatabase<Record<string, never>>
+): Promise<NodotsPlayersReady> => {
+  const blackUuid = players.black.id as unknown as PgUUID<any> // FIXME
+  const whiteUuid = players.white.id as unknown as PgUUID<any> // FIXME
+  const blackPlayerReady = await setPlayerReady(blackUuid, db)
+  const whitePlayerReady = await setPlayerReady(whiteUuid, db)
+  return {
+    kind: 'players-ready',
+    black: blackPlayerReady,
+    white: whitePlayerReady,
+  }
+}
+
+// TODO: Hook up to db
+// export const setPlayersActive = (
+//   color: NodotsColor,
+//   players:
+//     | NodotsPlayersReady
+//     | NodotsPlayersBlackActive
+//     | NodotsPlayersWhiteActive
+// ): NodotsPlayersBlackActive | NodotsPlayersWhiteActive => {
+//   console.log('[Types: Player] setPlayersActive color:', color)
+//   console.log('[Types: Player] setPlayersActive players:', players)
+//   switch (color) {
+//     case 'black':
+//       return {
+//         white: {
+//           ...players.white,
+//           kind: 'player-waiting',
+//         },
+//         black: {
+//           ...players.black,
+//           kind: 'player-rolling',
+//         },
+//       }
+//     case 'white':
+//       return {
+//         white: {
+//           ...players.white,
+//           kind: 'player-rolling',
+//         },
+//         black: {
+//           ...players.black,
+//           kind: 'player-waiting',
+//         },
+//       }
+//     default:
+//       throw new Error('error.invalid-color')
+//   }
+// }
