@@ -1,5 +1,4 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { randomBoolean } from '..'
 import { buildBoard, NodotsBoard } from '../Board'
 import { NodotsChecker } from '../Checker'
 import { buildCube, INodotsCube } from '../Cube'
@@ -20,7 +19,7 @@ import {
   PlayerWinning,
   setPlayerReady,
 } from '../Player'
-import { dbCreateGame, getAll } from './db'
+import { dbCreateGame, dbGetGame, dbGetAll } from './db'
 import { assignPlayerColors, assignPlayerDirections } from '../Player/helpers'
 
 export const CHECKERS_PER_PLAYER = 15
@@ -193,27 +192,18 @@ export const initializeGame = async (
 }
 
 export const listGames = async (db: NodePgDatabase<Record<string, never>>) =>
-  await getAll(db)
+  await dbGetAll(db)
 
 export const getGame = async (
-  id: string,
+  gameId: string,
+  db: NodePgDatabase<Record<string, never>>
+) => await dbGetGame(gameId, db)
+
+export const rollForStart = async (
+  gameId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const games = await getAll(db)
-  return games.find((game) => game.id === id)
-}
-
-export const rollForStart = (
-  gameState: GameInitialized,
-  players: NodotsPlayersReady
-): GamePlayingRolling => {
-  const activeColor = randomBoolean() ? 'black' : 'white'
-  const dice = setPlayersDiceActive(gameState.dice, activeColor)
-  return {
-    ...gameState,
-    kind: 'game-playing-rolling',
-    activeColor,
-    players,
-    dice,
-  }
+  const game = await getGame(gameId, db)
+  const winningColor = Math.random() > 0.5 ? 'black' : 'white'
+  return winningColor
 }

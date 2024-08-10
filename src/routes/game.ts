@@ -4,6 +4,7 @@ import {
   getGame,
   initializeGame,
   listGames,
+  rollForStart,
 } from '../../nodots_modules/@nodots/backgammon/Game'
 import { PlayerSeekingGame } from '../../nodots_modules/@nodots/backgammon/Player'
 
@@ -25,8 +26,14 @@ export const GameRouter = (db: NodePgDatabase): IGameRouter => {
 
   router.post('/', async (req, res) => {
     const players: [PlayerSeekingGame, PlayerSeekingGame] = req.body
-    const initializedGame = await initializeGame(players, db)
-    res.status(200).json({ message: 'Game initialized', initializedGame })
+    const game = await initializeGame(players, db)
+    res.status(200).json(game)
+  })
+
+  router.post('/:id/roll-for-start', async (req, res) => {
+    const { id } = req.params
+    const game = await rollForStart(id, db)
+    res.status(200).json({ kind: 'roll-for-start', game })
   })
 
   return router

@@ -56,5 +56,20 @@ export const dbCreateGame = async (
   })
 }
 
-export const getAll = async (db: NodePgDatabase<Record<string, never>>) =>
+export const dbGetAll = async (db: NodePgDatabase<Record<string, never>>) =>
   await db.select().from(GamesTable)
+
+export const dbGetGame = async (
+  gameId: string,
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  const game = await db
+    .select()
+    .from(GamesTable)
+    .where(eq(GamesTable.id, gameId))
+    .limit(1)
+  if (!game) {
+    throw GameDbError(`Game not found: ${gameId}`)
+  }
+  return game
+}
