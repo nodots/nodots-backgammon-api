@@ -1,8 +1,8 @@
 import { generateId } from '..'
-import { INodotsBoard, getCheckers } from '../Board'
+import { NodotsBoard, getCheckers } from '../Board'
 import { NodotsColor, PlayerCheckers } from '../Game'
 
-export interface INodotsChecker {
+export interface NodotsChecker {
   id: string
   color: NodotsColor
   checkercontainerId: string
@@ -14,7 +14,7 @@ export interface NodotsGameCheckers {
   black: PlayerCheckers
 }
 
-export const getChecker = (board: INodotsBoard, id: string): INodotsChecker => {
+export const getChecker = (board: NodotsBoard, id: string): NodotsChecker => {
   const checker = getCheckers(board).find((checker) => checker.id === id)
   if (!checker) {
     throw Error(`No checker found for ${id}`)
@@ -25,7 +25,7 @@ export const getChecker = (board: INodotsBoard, id: string): INodotsChecker => {
 export const buildChecker = (
   color: NodotsColor,
   checkercontainerId: string
-): INodotsChecker => {
+): NodotsChecker => {
   return { id: generateId(), color, checkercontainerId }
 }
 
@@ -33,11 +33,11 @@ export const buildCheckersForCheckercontainerId = (
   color: NodotsColor,
   checkercontainerId: string,
   count: number
-): INodotsChecker[] => {
-  const checkers: INodotsChecker[] = []
+): NodotsChecker[] => {
+  const checkers: NodotsChecker[] = []
 
   for (let i = 0; i < count; i++) {
-    const checker: INodotsChecker = {
+    const checker: NodotsChecker = {
       id: generateId(),
       color,
       checkercontainerId,

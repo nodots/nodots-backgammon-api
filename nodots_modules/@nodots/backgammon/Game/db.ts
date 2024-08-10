@@ -4,8 +4,9 @@ import { generateId } from '..'
 import { GameDbError } from './errors'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { NodotsPlayersReady } from '../Player'
+import { GameInitialized, GameInitializing } from '.'
 
-export const GameTypeEnum = pgEnum('kind', [
+export const GameTypeEnum = pgEnum('game-kind', [
   'game-initializing',
   'game-initialized',
   'game-rolling-for-start',
@@ -14,30 +15,46 @@ export const GameTypeEnum = pgEnum('kind', [
   'game-completed',
 ])
 
+export const ColorEnum = pgEnum('color', ['black', 'white'])
+export const DirectionEnum = pgEnum('direction', [
+  'clockwise',
+  'counterclockwise',
+])
+
 export const GamesTable = pgTable('games', {
-  id: uuid('id'),
+  id: uuid('id').primaryKey().defaultRandom().notNull(),
   kind: GameTypeEnum('kind'),
-  players: jsonb('players'),
+  player1Id: uuid('player1_id').notNull(),
+  player2Id: uuid('player2_id').notNull(),
+  board: jsonb('board').notNull(),
+  cube: jsonb('cube').notNull(),
+  dice: jsonb('dice').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
-export const create = async (
-  players: NodotsPlayersReady,
+export const dbCreateGame = async (
+  game: GameInitialized,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  if (!players.black || !players.white) {
-    throw Error('[DB] Both players must be ready to initialize a game')
+  const normalizedGame = {
+    ...game,
+    player1Id: game.players.black.id,
+    player2Id: game.players.white.id,
+    board: JSON.stringify(game.board),
+    cube: JSON.stringify(game.cube),
+    dice: JSON.stringify(game.dice),
   }
-  const game: typeof GamesTable.$inferInsert = {
-    id: generateId(),
-    kind: 'game-initialized',
-    players,
-  }
-  console.log('[Game: db] create game:', game)
-  return await db.insert(GamesTable).values(game).returning()
+  return await db.insert(GamesTable).values(normalizedGame).returning({
+    id: GamesTable.id,
+    kind: GamesTable.kind,
+    player1Id: GamesTable.player1Id,
+    player2Id: GamesTable.player2Id,
+    board: GamesTable.board,
+    cube: GamesTable.cube,
+    dice: GamesTable.dice,
+  })
 }
 
-export const getAll = async (db: NodePgDatabase<Record<string, never>>) => {
-  return await db.select().from(GamesTable)
-}
+export const getAll = async (db: NodePgDatabase<Record<string, never>>) =>
+  await db.select().from(GamesTable)

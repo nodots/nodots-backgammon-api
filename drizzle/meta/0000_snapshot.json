@@ -1,5 +1,5 @@
 {
-  "id": "bb53dc5e-4f44-4f02-a095-a25c6d86fa30",
+  "id": "9a92ed02-5e7c-4ca3-9dbc-a4d8331240fd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -11,21 +11,46 @@
         "id": {
           "name": "id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "kind": {
           "name": "kind",
-          "type": "kind",
+          "type": "game-kind",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
-        "players": {
-          "name": "players",
+        "player1_id": {
+          "name": "player1_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player2_id": {
+          "name": "player2_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "board": {
+          "name": "board",
           "type": "jsonb",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
+        },
+        "cube": {
+          "name": "cube",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dice": {
+          "name": "dice",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -54,12 +79,13 @@
         "id": {
           "name": "id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "kind": {
           "name": "kind",
-          "type": "kind",
+          "type": "player-kind",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
@@ -73,6 +99,20 @@
         "email": {
           "name": "email",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "color": {
+          "name": "color",
+          "type": "color",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "direction": {
+          "name": "direction",
+          "type": "direction",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
@@ -119,8 +159,36 @@
     }
   },
   "enums": {
-    "public.kind": {
-      "name": "kind",
+    "public.color": {
+      "name": "color",
+      "schema": "public",
+      "values": [
+        "black",
+        "white"
+      ]
+    },
+    "public.direction": {
+      "name": "direction",
+      "schema": "public",
+      "values": [
+        "clockwise",
+        "counterclockwise"
+      ]
+    },
+    "public.game-kind": {
+      "name": "game-kind",
+      "schema": "public",
+      "values": [
+        "game-initializing",
+        "game-initialized",
+        "game-rolling-for-start",
+        "game-playing-rolling",
+        "game-playing-moving",
+        "game-completed"
+      ]
+    },
+    "public.player-kind": {
+      "name": "player-kind",
       "schema": "public",
       "values": [
         "player-knocking",

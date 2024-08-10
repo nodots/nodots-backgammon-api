@@ -1,8 +1,7 @@
-import { NodotsPlayer, PlayerInitialized, PlayerKnocking, PlayerReady } from '.'
+import { PlayerKnocking, PlayerReady, PlayerSeekingGame } from '.'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { eq, and } from 'drizzle-orm'
-import { generateId } from '..'
-import { PlayerDbError } from './errors'
+import { eq } from 'drizzle-orm'
+import { generateId, INodotsPlayer } from '..'
 import {
   jsonb,
   pgEnum,
@@ -12,8 +11,10 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { NodotsColor, NodotsMoveDirection } from '../Game'
+import { ColorEnum, DirectionEnum } from '../Game/db'
 
-export const PlayerTypeEnum = pgEnum('kind', [
+export const PlayerTypeEnum = pgEnum('player-kind', [
   'player-knocking',
   'player-initialized',
   'player-seeking-game',
@@ -25,10 +26,12 @@ export const PlayerTypeEnum = pgEnum('kind', [
 ])
 
 export const PlayersTable = pgTable('players', {
-  id: uuid('id'),
+  id: uuid('id').primaryKey().defaultRandom().notNull(),
   kind: PlayerTypeEnum('kind'),
   externalId: text('external_id').unique().notNull(),
   email: text('email').unique(),
+  color: ColorEnum('color') || undefined,
+  direction: DirectionEnum('direction') || undefined,
   preferences: jsonb('preferences'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -39,10 +42,7 @@ export const dbCreatePlayer = async (
   incomingPlayer: PlayerKnocking,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const playerType = typeof PlayersTable.$inferInsert
-  console.log('playerType:', playerType)
   const player: typeof PlayersTable.$inferInsert = {
-    id: generateId(),
     kind: 'player-initialized',
     externalId:
       incomingPlayer.externalId ||
@@ -58,55 +58,28 @@ export const dbCreatePlayer = async (
 // Read
 export const dbFetchPlayers = async (
   db: NodePgDatabase<Record<string, never>>
-) => {
-  return await db.select().from(PlayersTable)
-}
+) => await db.select().from(PlayersTable)
 
 export const dbFetchPlayer = async (
-  playerId: PgUUID<any>, // FIXME: wrong data type
+  id: string,
   db: NodePgDatabase<Record<string, never>>
-): Promise<NodotsPlayer> => {
-  const players = await db
-    .select()
-    .from(PlayersTable)
-    .where(eq(PlayersTable.id, playerId))
-    .limit(1)
-
-  const player = players[0]
-
-  if (!player) throw PlayerDbError('No player found for id')
-
-  switch (player.kind) {
-    case 'player-knocking':
-    case 'player-playing-moving':
-    case 'player-playing-rolling':
-    case 'player-playing-waiting':
-    case 'player-rolling-for-start':
-      break
-    case 'player-initialized':
-    case 'player-seeking-game':
-    case 'player-ready':
-      return {
-        ...player,
-        id: player.id as string, // FIXME
-        kind: player.kind,
-        email: player.email as string, // FIXME
-        externalId: player.externalId as string, // FIXME
-        preferences: player.preferences as Record<string, unknown>, // FIXME
-        source: 'unknown', // FIXME
-      }
-  }
-}
+) =>
+  await db.select().from(PlayersTable).where(eq(PlayersTable.id, id)).limit(1)
 
 // Specialized read
 export const dbFetchPlayersSeekingGame = async (
   db: NodePgDatabase<Record<string, never>>
-) => {
-  return await db
+) =>
+  await db
     .select()
     .from(PlayersTable)
     .where(eq(PlayersTable.kind, 'player-seeking-game'))
-}
+
+export const dbFetchPlayerByEmail = async (
+  email: string,
+  db: NodePgDatabase<Record<string, never>>
+) =>
+  db.select().from(PlayersTable).where(eq(PlayersTable.email, email)).limit(1)
 
 // Delete
 // export const dbDestroyPlayers = async (
@@ -133,51 +106,44 @@ export const dbFetchPlayersSeekingGame = async (
 
 // Specialized update
 export const dbSetPlayerSeekingGame = async (
-  uuid: PgUUID<any>, // FIXME
+  id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const initializedPlayer = await db
-    .select()
-    .from(PlayersTable)
-    .where(
-      and(
-        eq(PlayersTable.id, uuid),
-        eq(PlayersTable.kind, 'player-initialized')
-      )
-    )
-    .limit(1)
+  const updatedPlayer = await db
+    .update(PlayersTable)
+    .set({
+      kind: 'player-seeking-game',
+    })
+    .where(eq(PlayersTable.id, id))
+    .returning()
 
-  const incomingPlayer = initializedPlayer[0]
-
-  if (!incomingPlayer)
-    return PlayerDbError('No initialized player found for id')
-
-  switch (incomingPlayer.kind) {
-    case 'player-initialized':
-      return await db
-        .update(PlayersTable)
-        .set({ kind: 'player-seeking-game' })
-        .where(
-          and(
-            eq(PlayersTable.id, incomingPlayer.id as string), // FIXME
-            eq(PlayersTable.kind, 'player-initialized')
-          )
-        )
-        .returning({ player: PlayersTable })
-    case 'player-seeking-game':
-    case 'player-ready':
-      console.error('Player is already seeking game or ready')
-  }
+  return updatedPlayer
 }
 
-export const dbSetPlayerReady = async (
-  uuid: PgUUID<any>, // FIXME
+export interface ISetPlayerReady {
+  id: string
+  color: NodotsColor
+  direction: NodotsMoveDirection
   db: NodePgDatabase<Record<string, never>>
-) => {
-  // const playerType = typeof PlayersTable.$inferInsert
+}
+
+export const dbSetPlayerReady = async ({
+  id,
+  color,
+  direction,
+  db,
+}: ISetPlayerReady) => {
+  console.log('[dbSetPlayerReady] id:', id)
+  console.log('[dbSetPlayerReady] color:', color)
+  console.log('[dbSetPlayerReady] direction:', direction)
+
   return await db
     .update(PlayersTable)
-    .set({ kind: 'player-ready' })
-    .where(eq(PlayersTable.id, uuid))
-    .returning({ PlayersTable })
+    .set({
+      kind: 'player-ready',
+      color,
+      direction,
+    })
+    .where(eq(PlayersTable.id, id))
+    .returning({ updated: PlayersTable })
 }

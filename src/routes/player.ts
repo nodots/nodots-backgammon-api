@@ -1,8 +1,6 @@
-import { PgUUID } from 'drizzle-orm/pg-core'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { Router } from 'express'
 import {
-  dbFetchPlayer,
   dbFetchPlayers,
   dbFetchPlayersSeekingGame,
   dbSetPlayerSeekingGame,
@@ -41,21 +39,13 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   // Specialized read
   router.get('/seeking-game', async (req, res) => {
     const players = await dbFetchPlayersSeekingGame(db)
-    res.status(200).json({ players })
-  })
-
-  router.get('/:id', async (req, res) => {
-    const uuid = req.params.id as unknown as PgUUID<any> // FIXME
-    const player = {
-      name: 'A Player',
-    }
-    res.status(200).json(player)
+    res.status(200).json(players)
   })
 
   // Specialized update
   router.put('/:id/seeking-game', async (req, res) => {
-    const uuid = req.params.id as unknown as PgUUID<any> // FIXME
-    const result = await dbSetPlayerSeekingGame(uuid, db)
+    const id = req.params.id
+    const result = await dbSetPlayerSeekingGame(id, db)
     res.status(200).json(result)
   })
 

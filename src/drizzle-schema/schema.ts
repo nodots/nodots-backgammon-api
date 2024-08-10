@@ -6,4 +6,6 @@ export {
 export {
   GamesTable,
   GameTypeEnum,
+  ColorEnum,
+  DirectionEnum,
 } from '../../nodots_modules/@nodots/backgammon/Game/db.ts'

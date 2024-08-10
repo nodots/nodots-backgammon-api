@@ -1,11 +1,11 @@
 export { v4 as generateId } from 'uuid'
 export const randomBoolean = () => (Math.random() > 0.5 ? true : false)
 
-export { INodotsBoard } from './Board'
-export { INodotsChecker } from './Checker'
+export { NodotsBoard as INodotsBoard } from './Board'
+export { NodotsChecker as INodotsChecker } from './Checker'
 export { INodotsCube } from './Cube'
 export { INodotsPlayer } from './Player'
-export { INodotsMove } from './Move'
+export { NodotsMove as INodotsMove } from './Move'
 export { INodotsGame } from './Game'
 
 export type NodotsBackgammonEntity =
@@ -13,6 +13,7 @@ export type NodotsBackgammonEntity =
   | 'checker'
   | 'cube'
   | 'player'
+  | 'play'
   | 'move'
   | 'game'
 
