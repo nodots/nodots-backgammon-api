@@ -1,5 +1,5 @@
 {
-  "id": "9a92ed02-5e7c-4ca3-9dbc-a4d8331240fd",
+  "id": "b942167e-6920-4053-8df5-13e13103d290",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -20,7 +20,7 @@
           "type": "game-kind",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "player1_id": {
           "name": "player1_id",
@@ -90,11 +90,17 @@
           "primaryKey": false,
           "notNull": false
         },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "external_id": {
           "name": "external_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "email": {
           "name": "email",
@@ -194,6 +200,7 @@
         "player-knocking",
         "player-initialized",
         "player-seeking-game",
+        "player-waiting",
         "player-ready",
         "player-rolling-for-start",
         "player-playing-rolling",

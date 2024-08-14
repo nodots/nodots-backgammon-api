@@ -1,22 +1,19 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import {
-  INodotsPlayer,
+  IPlayer,
   PlayerKnocking,
   NodotsPlayerPlaying,
-  NodotsPlayersSeekingGame,
   NodotsPlayersReady,
-  NodotsPlayers,
   NodotsPlayersPlaying,
-  PlayerSeekingGame,
+  NodotsPlayerSeekingGame,
 } from '.'
-import { randomBoolean } from '..'
 import { NodotsColor, NodotsMoveDirection } from '../Game'
 import { dbFetchPlayerByEmail } from './db'
 
 export const getActivePlayer = (
   activeColor: NodotsColor,
-  players: NodotsPlayers
-): INodotsPlayer => (activeColor === 'black' ? players.black : players.white)
+  players: NodotsPlayersPlaying
+): IPlayer => (activeColor === 'black' ? players.black : players.white)
 
 export const getClockwisePlayer = (
   players: NodotsPlayersReady | NodotsPlayersPlaying
@@ -37,7 +34,7 @@ export const fetchPlayerByEmail = async (
 ) => await dbFetchPlayerByEmail(player.email, db)
 
 export const assignPlayerColors = (
-  players: [PlayerSeekingGame, PlayerSeekingGame]
+  players: [NodotsPlayerSeekingGame, NodotsPlayerSeekingGame]
 ): [NodotsColor, NodotsColor] => {
   console.log('assignPlayerColors', players)
   return ['black', 'white']
@@ -75,7 +72,7 @@ export const assignPlayerColors = (
 }
 
 export const assignPlayerDirections = (
-  players: [PlayerSeekingGame, PlayerSeekingGame]
+  players: [NodotsPlayerSeekingGame, NodotsPlayerSeekingGame]
 ): [NodotsMoveDirection, NodotsMoveDirection] => {
   return ['clockwise', 'counterclockwise']
   // const player1 = players.seekers[0]

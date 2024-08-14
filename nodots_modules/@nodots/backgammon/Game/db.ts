@@ -1,10 +1,8 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { eq, and } from 'drizzle-orm'
-import { generateId } from '..'
 import { GameDbError } from './errors'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
-import { NodotsPlayersReady } from '../Player'
-import { GameInitialized, GameInitializing } from '.'
+import { GameInitialized, GameInitializing, GamePlayingRolling } from '.'
 
 export const GameTypeEnum = pgEnum('game-kind', [
   'game-initializing',
@@ -23,7 +21,7 @@ export const DirectionEnum = pgEnum('direction', [
 
 export const GamesTable = pgTable('games', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
-  kind: GameTypeEnum('kind'),
+  kind: GameTypeEnum('kind').notNull(),
   player1Id: uuid('player1_id').notNull(),
   player2Id: uuid('player2_id').notNull(),
   board: jsonb('board').notNull(),
@@ -34,7 +32,7 @@ export const GamesTable = pgTable('games', {
 })
 
 export const dbCreateGame = async (
-  game: GameInitialized,
+  game: GameInitializing,
   db: NodePgDatabase<Record<string, never>>
 ) => {
   const normalizedGame = {
@@ -56,6 +54,14 @@ export const dbCreateGame = async (
   })
 }
 
+export const dbSetGameRolling = async (
+  game: GamePlayingRolling,
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  console.log('dbSetGameRolling', game)
+  await db.update(GamesTable).set(game).where(eq(GamesTable.id, game.id))
+}
+
 export const dbGetAll = async (db: NodePgDatabase<Record<string, never>>) =>
   await db.select().from(GamesTable)
 
@@ -69,7 +75,25 @@ export const dbGetGame = async (
     .where(eq(GamesTable.id, gameId))
     .limit(1)
   if (!game) {
-    throw GameDbError(`Game not found: ${gameId}`)
+    console.error('No game found')
   }
   return game
+}
+
+export const dbGetGameByIdAndKind = async (
+  gameId: string,
+  kind:
+    | 'game-initializing'
+    | 'game-initialized'
+    | 'game-rolling-for-start'
+    | 'game-playing-rolling'
+    | 'game-playing-moving'
+    | 'game-completed',
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  return await db
+    .select()
+    .from(GamesTable)
+    .where(and(eq(GamesTable.id, gameId), eq(GamesTable.kind, kind)))
+    .limit(1)
 }

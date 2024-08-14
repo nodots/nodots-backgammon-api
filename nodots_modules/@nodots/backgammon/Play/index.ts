@@ -2,9 +2,9 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { NodotsColor, NodotsMoveDirection } from '../Game'
 import { dbCreatePlay } from './db'
 import {
-  INodotsPlayer,
-  PlayerPlayingMoving,
-  PlayerPlayingRolling,
+  IPlayer,
+  NodotsPlayerPlayingMoving,
+  NodotsPlayerPlayingRolling,
   PlayerReady,
 } from '../Player'
 import { DieValue } from '../Dice'
@@ -23,7 +23,7 @@ export interface NodotsPlay {
     | 'play-doubling'
 
   activeColor: NodotsColor
-  player: PlayerPlayingRolling | PlayerPlayingMoving
+  player: NodotsPlayerPlayingRolling | NodotsPlayerPlayingMoving
 }
 
 export interface PlayInitializing extends NodotsPlay {
@@ -35,7 +35,7 @@ export interface PlayRolling extends NodotsPlay {
 }
 
 export const initialize = async (
-  player: PlayerPlayingRolling,
+  player: NodotsPlayerPlayingRolling,
   db: NodePgDatabase<Record<string, never>>
 ) => {}
 

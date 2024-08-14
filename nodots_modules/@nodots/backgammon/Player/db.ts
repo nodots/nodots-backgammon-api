@@ -1,23 +1,24 @@
-import { PlayerKnocking, PlayerReady, PlayerSeekingGame } from '.'
+import { PlayerKnocking, NodotsPlayerSeekingGame } from '.'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { generateId, INodotsPlayer } from '..'
 import {
   jsonb,
   pgEnum,
   pgTable,
-  PgUUID,
   text,
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core'
 import { NodotsColor, NodotsMoveDirection } from '../Game'
 import { ColorEnum, DirectionEnum } from '../Game/db'
+import { Auth0User } from '../../../../src/routes/player'
 
 export const PlayerTypeEnum = pgEnum('player-kind', [
   'player-knocking',
   'player-initialized',
   'player-seeking-game',
+  'player-waiting',
   'player-ready',
   'player-rolling-for-start',
   'player-playing-rolling',
@@ -28,7 +29,8 @@ export const PlayerTypeEnum = pgEnum('player-kind', [
 export const PlayersTable = pgTable('players', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
   kind: PlayerTypeEnum('kind'),
-  externalId: text('external_id').unique().notNull(),
+  source: text('source'),
+  externalId: text('external_id').unique(),
   email: text('email').unique(),
   color: ColorEnum('color') || undefined,
   direction: DirectionEnum('direction') || undefined,
@@ -55,12 +57,31 @@ export const dbCreatePlayer = async (
   return result
 }
 
+export const dbCreatePlayerFromAuth0User = async (
+  user: Auth0User,
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  if (!user.sub) {
+    throw new Error('No sub in Auth0 user')
+  }
+  const [source, externalId] = user.sub?.split('|')
+  const player: typeof PlayersTable.$inferInsert = {
+    kind: 'player-initialized',
+    source,
+    externalId,
+    email: user.email,
+  }
+  console.log(player)
+  const result = await db.insert(PlayersTable).values(player).returning()
+  return result
+}
+
 // Read
 export const dbFetchPlayers = async (
   db: NodePgDatabase<Record<string, never>>
 ) => await db.select().from(PlayersTable)
 
-export const dbFetchPlayer = async (
+export const dbFetchPlayerById = async (
   id: string,
   db: NodePgDatabase<Record<string, never>>
 ) =>
@@ -81,6 +102,21 @@ export const dbFetchPlayerByEmail = async (
 ) =>
   db.select().from(PlayersTable).where(eq(PlayersTable.email, email)).limit(1)
 
+export const dbFetchPlayerBySourceAndExternalId = async (
+  source: string,
+  externalId: string,
+  db: NodePgDatabase<Record<string, never>>
+) =>
+  db
+    .select()
+    .from(PlayersTable)
+    .where(
+      and(
+        eq(PlayersTable.externalId, externalId),
+        eq(PlayersTable.source, 'player-knocking')
+      )
+    )
+    .limit(1)
 // Delete
 // export const dbDestroyPlayers = async (
 //   db: NodePgDatabase<Record<string, never>>[]
@@ -143,6 +179,35 @@ export const dbSetPlayerReady = async ({
       kind: 'player-ready',
       color,
       direction,
+    })
+    .where(eq(PlayersTable.id, id))
+    .returning({ updated: PlayersTable })
+}
+
+export interface ISetPlayerState {
+  id: string
+  db: NodePgDatabase<Record<string, never>>
+}
+
+export const dbSetPlayerRolling = async ({ id, db }: ISetPlayerState) => {
+  console.log('[dbSetPlayerReady] id:', id)
+
+  return await db
+    .update(PlayersTable)
+    .set({
+      kind: 'player-playing-rolling',
+    })
+    .where(eq(PlayersTable.id, id))
+    .returning({ playerRolling: PlayersTable })
+}
+
+export const dbSetPlayerWaiting = async ({ id, db }: ISetPlayerState) => {
+  console.log('[dbSetPlayerWaiting] id:', id)
+
+  return await db
+    .update(PlayersTable)
+    .set({
+      kind: 'player-waiting',
     })
     .where(eq(PlayersTable.id, id))
     .returning({ updated: PlayersTable })

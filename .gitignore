@@ -6,3 +6,4 @@ drizzle/meta/_journal.json
 drizzle/meta/0000_snapshot.json
 src/.DS_Store
 .env
+.DS_Store

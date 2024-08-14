@@ -1,12 +1,15 @@
 import { NodotsCheckercontainer } from '../Checkercontainer'
 import { DieValue } from '../Dice'
 import { NodotsMoveDirection } from '../Game'
-import { PlayerPlayingMoving, PlayerPlayingRolling } from '../Player'
+import {
+  NodotsPlayerPlayingMoving,
+  NodotsPlayerPlayingRolling,
+} from '../Player'
 
 export interface NodotsMove {
   id: string
   playId: string
-  player: PlayerPlayingRolling | PlayerPlayingMoving
+  player: NodotsPlayerPlayingRolling | NodotsPlayerPlayingMoving
   isAuto: boolean
   isForced: boolean
   dieValue: DieValue
@@ -32,5 +35,5 @@ export interface MoveMoved extends NodotsMove {
 
 export const initializeMove = (
   playId: string,
-  player: PlayerPlayingMoving
+  player: NodotsPlayerPlayingMoving
 ) => {}

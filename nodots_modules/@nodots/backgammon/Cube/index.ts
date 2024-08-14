@@ -1,10 +1,10 @@
-import { INodotsPlayer } from '../Player'
+import { IPlayer } from '../Player'
 
 export type CubeValue = 2 | 4 | 8 | 16 | 32 | 64
 
 export interface INodotsCube {
   value: CubeValue
-  owner: INodotsPlayer | undefined
+  owner: IPlayer | undefined
 }
 
 export const buildCube = (): INodotsCube => {
