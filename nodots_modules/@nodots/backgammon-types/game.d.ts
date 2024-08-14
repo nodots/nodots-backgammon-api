@@ -5,9 +5,10 @@ import {
   NodotsDiceInitialized,
   NodotsDiceWhiteActive,
   NodotsDiceBlackActive,
+  NodotsRoll,
 } from './dice'
 import { NodotsPlay } from './play'
-import { NodotsPlayersReady, NodotsPlayersPlaying } from './player'
+import { NodotsPlayersInitialized, NodotsPlayersPlaying } from './players'
 
 export const CHECKERS_PER_PLAYER = 15
 export type PointPosition =
@@ -66,7 +67,7 @@ export interface NodotsGame {
 
 export interface GameInitializing extends NodotsGame {
   kind: 'game-initializing'
-  players: NodotsPlayersReady
+  players: NodotsPlayersInitialized
   dice: {
     white: NodotsDiceInitialized
     black: NodotsDiceInitialized
@@ -78,7 +79,7 @@ export interface GameInitializing extends NodotsGame {
 export interface GameInitialized extends NodotsGame {
   id: string
   kind: 'game-initialized'
-  players: NodotsPlayersReady
+  players: NodotsPlayersPlaying
   dice: {
     white: NodotsDiceInitialized
     black: NodotsDiceInitialized
@@ -90,7 +91,7 @@ export interface GameInitialized extends NodotsGame {
 export interface GameRollingForStart extends NodotsGame {
   id: string
   kind: 'game-rolling-for-start'
-  players: NodotsPlayersReady
+  players: NodotsPlayersPlaying
   dice: {
     white: NodotsDiceInitialized
     black: NodotsDiceInitialized
@@ -118,6 +119,7 @@ export interface GamePlayingMoving extends NodotsGame {
   board: NodotsBoard
   cube: NodotsCube
   activeColor: NodotsColor
+  activeRoll: NodotsRoll
   activePlay?: NodotsPlay
 }
 
@@ -133,6 +135,13 @@ export interface GamePlayingMoving extends NodotsGame {
 
 export type NodotsGameState =
   | GameInitializing
+  | GameInitialized
+  | GameRollingForStart
+  | GamePlayingRolling
+  | GamePlayingMoving
+
+export type NodotsGameStateInitializing = GameInitializing
+export type NodotsGameStateReady =
   | GameInitialized
   | GameRollingForStart
   | GamePlayingRolling

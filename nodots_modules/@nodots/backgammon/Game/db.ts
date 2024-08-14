@@ -1,8 +1,7 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { eq, and } from 'drizzle-orm'
-import { GameDbError } from './errors'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
-import { GameInitialized, GameInitializing, GamePlayingRolling } from '.'
+import { GameInitializing, GamePlayingRolling } from '../../backgammon-types'
 
 export const GameTypeEnum = pgEnum('game-kind', [
   'game-initializing',

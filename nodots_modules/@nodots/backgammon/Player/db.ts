@@ -1,7 +1,6 @@
 import { PlayerKnocking, NodotsPlayerSeekingGame } from './helpers'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { eq, and } from 'drizzle-orm'
-import { generateId, INodotsPlayer } from '..'
 import {
   jsonb,
   pgEnum,
@@ -10,9 +9,9 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { NodotsColor, NodotsMoveDirection } from '../Game'
 import { ColorEnum, DirectionEnum } from '../Game/db'
 import { Auth0User } from '../../../../src/routes/player'
+import { NodotsColor, NodotsMoveDirection } from '../../backgammon-types'
 
 export const PlayerTypeEnum = pgEnum('player-kind', [
   'player-knocking',

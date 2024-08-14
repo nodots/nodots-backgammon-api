@@ -54,7 +54,7 @@ export interface NodotsPlayerSeekingGame extends IPlayer {
   preferences?: IPlayerPreferences
 }
 
-export interface NodotsPlayerReady extends IPlayer {
+export interface NodotsPlayerPlayingReady extends IPlayer {
   kind: 'player-ready'
   source: string
   externalId: string
@@ -75,76 +75,13 @@ export interface NodotsPlayerPlayingMoving extends IPlayer {
 }
 
 export type NodotsPlayerPlaying =
+  | NodotsPlayerPlayingReady
   | NodotsPlayerPlayingRolling
   | NodotsPlayerPlayingMoving
 
 export type NodotsPlayer =
   | NodotsPlayerInitialized
   | NodotsPlayerSeekingGame
-  | NodotsPlayerReady
+  | NodotsPlayerPlayingReady
   | NodotsPlayerPlayingRolling
   | NodotsPlayerPlayingMoving
-  | NodotsPlayerPlaying
-
-// Combinations of players
-// We do not yet know the seeking players color and direction
-export interface NodotsPlayersSeekingGame {
-  kind: 'players-seeking-game'
-  seekers: [NodotsPlayerSeekingGame, NodotsPlayerSeekingGame]
-}
-
-// Players are both ready to play, with a color and direction
-export interface NodotsPlayersReady {
-  kind: 'players-ready'
-  black: NodotsPlayerReady
-  white: NodotsPlayerReady
-}
-
-export interface NodotsPlayersBlackRolling {
-  kind: 'players-black-rolling'
-  black: NodotsPlayerPlayingRolling
-  white: NodotsPlayerReady
-}
-
-export interface NodotsPlayersBlackMoving {
-  kind: 'players-black-moving'
-  black: NodotsPlayerPlayingMoving
-  white: NodotsPlayerReady
-}
-
-export type NodotsPlayersBlackActive =
-  | NodotsPlayersBlackRolling
-  | NodotsPlayersBlackMoving
-
-export interface NodotsPlayersWhiteRolling {
-  kind: 'players-white-rolling'
-  black: NodotsPlayerReady
-  white: NodotsPlayerPlayingRolling
-}
-
-export interface NodotsPlayersWhiteMoving {
-  kind: 'players-white-moving'
-  black: NodotsPlayerReady
-  white: NodotsPlayerPlayingMoving
-}
-
-export type NodotsPlayersWhiteActive =
-  | NodotsPlayersWhiteRolling
-  | NodotsPlayersWhiteMoving
-
-export type NodotsPlayersPlaying =
-  | NodotsPlayersBlackActive
-  | NodotsPlayersWhiteActive
-
-export type NodotsPlayers =
-  | NodotsPlayersSeekingGame
-  | NodotsPlayersReady
-  | NodotsPlayersPlaying
-
-// export interface NodotsPlayerWinning extends IPlayer {
-//   kind: 'player-winning'
-// }
-
-// export interface NodotsPlayerResiginging extends IPlayer {
-//   kind: 'player-resigning'
-// }
