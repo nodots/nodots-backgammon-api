@@ -8,10 +8,8 @@ import {
   dbFetchPlayersSeekingGame,
   dbSetPlayerSeekingGame,
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
-import {
-  initializePlayer,
-  PlayerKnocking,
-} from '../../nodots_modules/@nodots/backgammon/Player'
+import { initializePlayer } from '../../nodots_modules/@nodots/backgammon/Player'
+import { PlayerKnocking } from '../../nodots_modules/@nodots/backgammon/Player/helpers'
 
 // FIXME: Should import from Auth0 module
 export interface Auth0User {

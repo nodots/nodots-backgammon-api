@@ -1,190 +1,12 @@
 import { generateId } from '../../backgammon'
-import { NodotsChecker, buildCheckersForCheckercontainerId } from '../Checker'
-import { Bar, NodotsCheckercontainer, Off, Point } from '../Checkercontainer'
-
-export interface NodotsCheckercontainerImport {
-  position: CheckercontainerPosition
-  checkercount: number
-}
-
-export interface NodotsBoardImports {
-  clockwise: NodotsBoardImport
-  counterclockwise: NodotsBoardImport
-}
-
-import { BOARD_IMPORT_DEFAULT } from '../../../../board-setups'
-import { CheckercontainerPosition, NodotsColor, PointPosition } from '../Game'
-import { NodotsPlayersPlaying } from '../Player'
-import { getClockwisePlayer } from '../Player/helpers'
-
-export type Latitude = 'north' | 'south'
-export type Longitude = 'east' | 'west'
-
-export type Points = [
+import { NodotsChecker } from '../../backgammon-types'
+import { buildCheckersForCheckercontainerId } from '../Checker'
+import {
+  Bar,
+  NodotsCheckercontainer,
+  Off,
   Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point,
-  Point
-]
-
-export type CheckercontainerCheckers =
-  | []
-  | [NodotsChecker]
-  | [NodotsChecker, NodotsChecker]
-  | [NodotsChecker, NodotsChecker, NodotsChecker]
-  | [NodotsChecker, NodotsChecker, NodotsChecker, NodotsChecker]
-  | [NodotsChecker, NodotsChecker, NodotsChecker, NodotsChecker, NodotsChecker]
-  | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
-    ]
-  | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
-    ]
-  | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
-    ]
-  | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
-    ]
-  | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
-    ]
-  | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
-    ]
-  | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
-    ]
-  | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
-    ]
-  | [
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker,
-      NodotsChecker
-    ]
-
-export interface NodotsBoard {
-  points: Points
-  bar: {
-    white: Bar
-    black: Bar
-  }
-  off: {
-    white: Off
-    black: Off
-  }
-}
-
-export interface NodotsCheckercontainerImport {
-  position: CheckercontainerPosition
-  checkercount: number
-}
-
-export type NodotsBoardImport = NodotsCheckercontainerImport[]
+} from '../../backgammon-types/checkercontainer'
 
 const buildBar = (boards: NodotsBoardImports): { white: Bar; black: Bar } => {
   const clockwiseBoard = boards.clockwise
@@ -248,6 +70,18 @@ const buildBar = (boards: NodotsBoardImports): { white: Bar; black: Bar } => {
     }
   }
 }
+
+import { BOARD_IMPORT_DEFAULT } from '../../../../board-setups'
+import { NodotsColor, PointPosition } from '../../backgammon-types/game'
+import { NodotsPlayersPlaying } from '../Player/helpers'
+import { getClockwisePlayer } from '../Player/helpers'
+import {
+  NodotsBoardImports,
+  NodotsCheckercontainerImport,
+  NodotsBoard,
+  NodotsBoardImport,
+  Points,
+} from '../../backgammon-types/board'
 
 const buildOff = (boards: NodotsBoardImports): { white: Off; black: Off } => {
   const clockwiseBoard = boards.clockwise

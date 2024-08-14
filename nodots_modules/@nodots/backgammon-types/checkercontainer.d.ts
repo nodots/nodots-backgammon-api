@@ -1,5 +1,5 @@
-import { NodotsChecker } from '../Checker'
-import { NodotsColor, PointPosition } from '../Game'
+import { NodotsChecker } from './checker'
+import { NodotsColor, PointPosition } from './game'
 
 export type NodotsCheckercontainer = {
   id: string

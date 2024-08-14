@@ -1,18 +1,6 @@
 import { generateId } from '..'
-import { NodotsBoard, getCheckers } from '../Board'
-import { NodotsColor, PlayerCheckers } from '../Game'
-
-export interface NodotsChecker {
-  id: string
-  color: NodotsColor
-  checkercontainerId: string
-  highlight?: boolean
-}
-
-export interface NodotsGameCheckers {
-  white: PlayerCheckers
-  black: PlayerCheckers
-}
+import { NodotsBoard, NodotsChecker, NodotsColor } from '../../backgammon-types'
+import { getCheckers } from '../Board'
 
 export const getChecker = (board: NodotsBoard, id: string): NodotsChecker => {
   const checker = getCheckers(board).find((checker) => checker.id === id)

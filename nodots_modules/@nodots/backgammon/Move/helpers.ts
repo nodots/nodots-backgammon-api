@@ -1,13 +1,22 @@
-import { NodotsColor, CHECKERS_PER_PLAYER, NodotsGameState } from '../../Types'
-import { NodotsBoard, getCheckercontainers, getPoints } from '../../types/Board'
-import { Checkercontainer, Off, Point } from '../../types/Checkercontainer'
-import { DieValue } from '../Dice/Types'
-import { INodotsPlayer } from '../Player/Types'
+import { NodotsBoard } from '../../backgammon-types/board'
+import {
+  NodotsCheckercontainer,
+  Off,
+  Point,
+} from '../../backgammon-types/checkercontainer'
+import { DieValue } from '../../backgammon-types/dice'
+import {
+  NodotsColor,
+  CHECKERS_PER_PLAYER,
+  NodotsGameState,
+} from '../../backgammon-types/game'
+import { getCheckercontainers, getPoints } from '../Board'
+import { NodotsPlayerPlaying } from '../Player/helpers'
 
 export const getOriginsForColor = (
   board: NodotsBoard,
   color: NodotsColor
-): Checkercontainer[] => {
+): NodotsCheckercontainer[] => {
   return board.bar[color].checkers.length > 0
     ? [board.bar[color]]
     : getCheckercontainers(board).filter(
@@ -19,8 +28,8 @@ export const getOriginsForColor = (
 
 export const getDestinationForOrigin = (
   board: NodotsBoard,
-  player: INodotsPlayer,
-  origin: Checkercontainer,
+  player: NodotsPlayerPlaying,
+  origin: NodotsCheckercontainer,
   dieValue: DieValue
 ): Off | Point | undefined => {
   const mostDistantPointPosition = getMostDistantOccupiedPointPosition(
@@ -68,7 +77,7 @@ export const getDestinationForOrigin = (
 
 const getMostDistantOccupiedPointPosition = (
   board: NodotsBoard,
-  player: INodotsPlayer
+  player: NodotsPlayerPlaying
 ) => {
   if (board.bar[player.color].checkers.length > 0) return 25 // Player is on the bar
   const occupiedPoints = board.points.filter(
@@ -85,7 +94,7 @@ const getMostDistantOccupiedPointPosition = (
 
 export const isReentering = (
   board: NodotsBoard,
-  player: INodotsPlayer
+  player: NodotsPlayerPlaying
 ): boolean => (board.bar[player.color].checkers.length > 0 ? true : false)
 
 export const getOriginPointById = (board: NodotsBoard, id: string): Point => {
@@ -136,7 +145,7 @@ export const getOriginPointById = (board: NodotsBoard, id: string): Point => {
 
 export const isBearOffing = (
   board: NodotsBoard,
-  player: INodotsPlayer
+  player: NodotsPlayerPlaying
 ): boolean => {
   const homeBoardPoints = board.points.filter(
     (point) => point.position[player.direction] <= 6

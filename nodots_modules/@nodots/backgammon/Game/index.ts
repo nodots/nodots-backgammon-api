@@ -1,22 +1,9 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { buildBoard, NodotsBoard } from '../Board'
-import { NodotsChecker } from '../Checker'
-import { buildCube, INodotsCube } from '../Cube'
-import {
-  NodotsDiceInitialized,
-  NodotsDiceBlackActive,
-  NodotsDiceWhiteActive,
-  buildDice,
-  setActiveDice,
-} from '../Dice'
-import { NodotsPlay } from '../Play'
-import {
-  NodotsPlayersReady,
-  NodotsPlayerSeekingGame,
-  setActivePlayer,
-  setPlayerReady,
-  NodotsPlayersPlaying,
-} from '../Player'
+import { buildBoard } from '../Board'
+import { buildCube } from '../Cube'
+import { buildDice, setActiveDice } from '../Dice'
+import { setActivePlayer, setPlayerReady } from '../Player'
+import { NodotsPlayersReady, NodotsPlayerSeekingGame } from '../Player/helpers'
 import {
   dbCreateGame,
   dbGetGame,
@@ -27,135 +14,13 @@ import {
 import { assignPlayerColors, assignPlayerDirections } from '../Player/helpers'
 import { GameNotFoundError, GameStateError } from './errors'
 import { randomBoolean } from '..'
-
-export const CHECKERS_PER_PLAYER = 15
-export type PointPosition =
-  | 1
-  | 2
-  | 3
-  | 4
-  | 5
-  | 6
-  | 7
-  | 8
-  | 9
-  | 10
-  | 11
-  | 12
-  | 13
-  | 14
-  | 15
-  | 16
-  | 17
-  | 18
-  | 19
-  | 20
-  | 21
-  | 22
-  | 23
-  | 24
-
-export type PlayerCheckers = [
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker,
-  NodotsChecker
-]
-
-export type CheckercontainerPosition = PointPosition | 'bar' | 'off'
-export type OriginPosition = PointPosition | 'bar'
-export type DestinationPosition = PointPosition | 'off'
-export type NodotsColor = 'black' | 'white'
-export type NodotsMoveDirection = 'clockwise' | 'counterclockwise'
-
-export interface INodotsGame {
-  id: string | undefined
-}
-
-export interface GameInitializing extends INodotsGame {
-  kind: 'game-initializing'
-  players: NodotsPlayersReady
-  dice: {
-    white: NodotsDiceInitialized
-    black: NodotsDiceInitialized
-  }
-  board: NodotsBoard
-  cube: INodotsCube
-}
-
-export interface GameInitialized extends INodotsGame {
-  id: string
-  kind: 'game-initialized'
-  players: NodotsPlayersReady
-  dice: {
-    white: NodotsDiceInitialized
-    black: NodotsDiceInitialized
-  }
-  board: NodotsBoard
-  cube: INodotsCube
-}
-
-export interface GameRollingForStart extends INodotsGame {
-  id: string
-  kind: 'game-rolling-for-start'
-  players: NodotsPlayersReady
-  dice: {
-    white: NodotsDiceInitialized
-    black: NodotsDiceInitialized
-  }
-  board: NodotsBoard
-  cube: INodotsCube
-}
-
-export interface GamePlayingRolling extends INodotsGame {
-  id: string
-  kind: 'game-playing-rolling'
-  players: NodotsPlayersPlaying
-  dice: NodotsDiceWhiteActive | NodotsDiceBlackActive
-  board: NodotsBoard
-  cube: INodotsCube
-  activeColor: NodotsColor
-  activePlay?: NodotsPlay
-}
-
-export interface GamePlayingMoving extends INodotsGame {
-  id: string
-  kind: 'game-playing-moving'
-  players: NodotsPlayersPlaying
-  dice: NodotsDiceWhiteActive | NodotsDiceBlackActive
-  board: NodotsBoard
-  cube: INodotsCube
-  activeColor: NodotsColor
-  activePlay?: NodotsPlay
-}
-
-// export interface GameCompleted extends INodotsGame {
-//   kind: 'game-completed'
-//   activeColor: NodotsColor
-//   board: NodotsBoard
-//   cube: INodotsCube
-//   roll: NodotsRoll
-//   players: NodotsPlayers
-//   winner: PlayerWinning
-// }
-
-export type NodotsGameState =
-  | GameInitializing
-  | GameInitialized
-  | GameRollingForStart
-  | GamePlayingRolling
-  | GamePlayingMoving
+import {
+  GameInitialized,
+  GameInitializing,
+  GamePlayingMoving,
+  GamePlayingRolling,
+  GameRollingForStart,
+} from '../../backgammon-types'
 
 // State transitions
 export const initializeGame = async (

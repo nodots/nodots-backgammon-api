@@ -3,7 +3,7 @@ import { eq, and } from 'drizzle-orm'
 import { generateId } from '..'
 
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
-import { NodotsPlayersReady } from '../Player'
+import { NodotsPlayersReady } from '../Player/helpers'
 import { PlayInitializing } from '.'
 
 export const PlayTypeEnum = pgEnum('play-kind', [

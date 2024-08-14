@@ -1,4 +1,4 @@
-import { PlayerKnocking, NodotsPlayerSeekingGame } from '.'
+import { PlayerKnocking, NodotsPlayerSeekingGame } from './helpers'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { eq, and } from 'drizzle-orm'
 import { generateId, INodotsPlayer } from '..'
