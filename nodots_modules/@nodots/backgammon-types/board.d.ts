@@ -2,16 +2,6 @@ import { CheckercontainerPosition } from './game'
 import { NodotsChecker } from './checker'
 import { Bar, Off, Point } from './checkercontainer'
 
-export interface NodotsCheckercontainerImport {
-  position: CheckercontainerPosition
-  checkercount: number
-}
-
-export interface NodotsBoardImports {
-  clockwise: NodotsBoardImport
-  counterclockwise: NodotsBoardImport
-}
-
 export type Latitude = 'north' | 'south'
 export type Longitude = 'east' | 'west'
 
@@ -173,10 +163,3 @@ export interface NodotsBoard {
     black: Off
   }
 }
-
-export interface NodotsCheckercontainerImport {
-  position: CheckercontainerPosition
-  checkercount: number
-}
-
-export type NodotsBoardImport = NodotsCheckercontainerImport[]

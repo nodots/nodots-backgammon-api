@@ -1,11 +1,10 @@
 import {
   DieValue,
-  NodotsDie,
-  NodotsDiceInactive,
-  NodotsRoll,
+  NodotsColor,
   NodotsDiceInitialized,
-} from '.'
-import { NodotsColor } from '../Game'
+  NodotsDie,
+  NodotsRoll,
+} from '../../backgammon-types'
 
 export const roll = (): DieValue =>
   (Math.floor(Math.random() * 6) + 1) as DieValue

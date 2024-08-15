@@ -41,15 +41,15 @@ const main = async () => {
     res.status(200).json(req.body)
   })
 
-  // const userRouter = UserRouter(db)
+  const userRouter = UserRouter(db)
   const playerRouter = PlayerRouter(db)
-  // const gameRouter = GameRouter(db)
-  // const boardRouter = BoardRouter()
+  const gameRouter = GameRouter(db)
+  const boardRouter = BoardRouter()
 
-  // app.use('/user', userRouter)
+  app.use('/user', userRouter)
   app.use('/player', playerRouter)
-  // app.use('/game', gameRouter)
-  // app.use('/board', boardRouter)
+  app.use('/game', gameRouter)
+  app.use('/board', boardRouter)
 
   // Start the server
   app.listen(port, () => {

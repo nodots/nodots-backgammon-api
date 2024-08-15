@@ -1,6 +1,4 @@
-import { NodotsCheckercontainerImport } from '../nodots_modules/@nodots/backgammon-types'
-
-type NodotsBoardImport = NodotsCheckercontainerImport[]
+import { NodotsBoardImport } from '../types'
 
 export const BOARD_IMPORT_DEFAULT: NodotsBoardImport = [
   { position: 24, checkercount: 2 },

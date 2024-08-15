@@ -1,16 +1,24 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, or } from 'drizzle-orm'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
-import { GameInitializing, GamePlayingRolling } from '../../backgammon-types'
+import {
+  GameInitialized,
+  GameInitializing,
+  GameRollingForStart,
+  NodotsColor,
+} from '../../backgammon-types'
+import { kebab } from 'postgres'
 
-export const GameTypeEnum = pgEnum('game-kind', [
+const gameKinds = [
   'game-initializing',
   'game-initialized',
   'game-rolling-for-start',
   'game-playing-rolling',
   'game-playing-moving',
   'game-completed',
-])
+] as const
+
+export const GameTypeEnum = pgEnum('game-kind', gameKinds)
 
 export const ColorEnum = pgEnum('color', ['black', 'white'])
 export const DirectionEnum = pgEnum('direction', [
@@ -31,34 +39,34 @@ export const GamesTable = pgTable('games', {
 })
 
 export const dbCreateGame = async (
-  game: GameInitializing,
+  initializingGame: GameInitializing,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const normalizedGame = {
-    ...game,
-    player1Id: game.players.black.id,
-    player2Id: game.players.white.id,
-    board: JSON.stringify(game.board),
-    cube: JSON.stringify(game.cube),
-    dice: JSON.stringify(game.dice),
+  const game: typeof GamesTable.$inferInsert = {
+    kind: 'game-initialized',
+    player1Id: initializingGame.players.black.id,
+    player2Id: initializingGame.players.white.id,
+    board: initializingGame.board,
+    cube: initializingGame.cube,
+    dice: initializingGame.dice,
   }
-  return await db.insert(GamesTable).values(normalizedGame).returning({
-    id: GamesTable.id,
-    kind: GamesTable.kind,
-    player1Id: GamesTable.player1Id,
-    player2Id: GamesTable.player2Id,
-    board: GamesTable.board,
-    cube: GamesTable.cube,
-    dice: GamesTable.dice,
-  })
+  console.log('dbCreateGame game', game)
+  const result = await db.insert(GamesTable).values(game).returning()
+  console.log('dbCreateGame result', result)
+  return result
 }
 
 export const dbSetGameRolling = async (
-  game: GamePlayingRolling,
+  game: GameInitialized,
+  activeColor: NodotsColor,
   db: NodePgDatabase<Record<string, never>>
 ) => {
   console.log('dbSetGameRolling', game)
-  await db.update(GamesTable).set(game).where(eq(GamesTable.id, game.id))
+  return {
+    ...game,
+    kind: 'game-playing-rolling',
+    activeColor,
+  }
 }
 
 export const dbGetAll = async (db: NodePgDatabase<Record<string, never>>) =>
@@ -79,6 +87,18 @@ export const dbGetGame = async (
   return game
 }
 
+export const dbGetInitializedGameById = async (
+  gameId: string,
+  db: NodePgDatabase<Record<string, never>>
+) =>
+  await db
+    .select()
+    .from(GamesTable)
+    .where(
+      and(eq(GamesTable.id, gameId), eq(GamesTable.kind, 'game-initialized'))
+    )
+    .limit(1)
+
 export const dbGetGameByIdAndKind = async (
   gameId: string,
   kind:
@@ -95,4 +115,17 @@ export const dbGetGameByIdAndKind = async (
     .from(GamesTable)
     .where(and(eq(GamesTable.id, gameId), eq(GamesTable.kind, kind)))
     .limit(1)
+}
+
+export const dbGetGamesByPlayerId = async (
+  playerId: string,
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  console.log('dbGetGamesByPlayerId', playerId)
+  const games = await db.select().from(GamesTable)
+  // .where(
+  //   or(eq(GamesTable.player1Id, playerId), eq(GamesTable.player2Id, playerId))
+  // )
+  console.log('games', games)
+  return games
 }

@@ -2,41 +2,51 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { NodotsColor, NodotsMoveDirection } from '../../backgammon-types/game'
 import {
   dbCreatePlayer,
-  dbFetchPlayers,
-  dbFetchPlayersSeekingGame,
-  dbSetPlayerReady,
+  dbGetActivePlayerByEmail,
+  dbGetPlayers,
+  dbGetPlayersSeekingGame,
   dbSetPlayerRolling,
   dbSetPlayerSeekingGame,
-  dbSetPlayerWaiting,
+  dbSetPlayerReady,
+  dbGetPlayerByEmail,
 } from './db'
 import { PlayerStateError } from './errors'
 import {
+  NodotsPlayerPlayingReady,
   NodotsPlayerPlayingRolling,
-  NodotsPlayerReady,
-  NodotsPlayersPlaying,
-  NodotsPlayersReady,
   PlayerKnocking,
 } from '../../backgammon-types/player'
+import { NodotsPlayersPlaying } from '../../backgammon-types'
 
 export const initializePlayer = async (
   playerKnocking: PlayerKnocking,
   db: NodePgDatabase<Record<string, never>>
 ) => dbCreatePlayer(playerKnocking, db)
 
-export const fetchAllPlayers = async (
+export const getAllPlayers = async (
   db: NodePgDatabase<Record<string, never>>
-) => await dbFetchPlayers(db)
+) => await dbGetPlayers(db)
 
-export const fetchPlayersSeekingGame = async (
+export const getPlayersSeekingGame = async (
   db: NodePgDatabase<Record<string, never>>
-) => await dbFetchPlayersSeekingGame(db)
+) => await dbGetPlayersSeekingGame(db)
+
+export const getPlayerByEmail = async (
+  email: string,
+  db: NodePgDatabase<Record<string, never>>
+) => await dbGetPlayerByEmail(email, db)
+
+export const getActivePlayerByEmail = async (
+  email: string,
+  db: NodePgDatabase<Record<string, never>>
+) => await dbGetActivePlayerByEmail(email, db)
 
 export const setPlayerSeekingGame = async (
   id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => await dbSetPlayerSeekingGame(id, db)
 
-export const setPlayerReady = async (
+export const setPlayerPlayingReady = async (
   id: string,
   color: NodotsColor,
   direction: NodotsMoveDirection,
@@ -44,7 +54,7 @@ export const setPlayerReady = async (
 ) => await dbSetPlayerReady({ id, color, direction, db })
 
 export const setActivePlayer = async (
-  players: NodotsPlayersReady | NodotsPlayersPlaying,
+  players: NodotsPlayersPlaying,
   activeColor: NodotsColor,
   db: NodePgDatabase<Record<string, never>>
 ): Promise<NodotsPlayersPlaying> =>
@@ -52,7 +62,7 @@ export const setActivePlayer = async (
 
 // private functions
 const _setActivePlayer = async (
-  players: NodotsPlayersReady | NodotsPlayersPlaying,
+  players: NodotsPlayersPlaying,
   activeColor: NodotsColor,
   db: NodePgDatabase<Record<string, never>>
 ): Promise<NodotsPlayersPlaying> => {
@@ -61,25 +71,25 @@ const _setActivePlayer = async (
       let playersPlaying: NodotsPlayersPlaying
       await db.transaction(async (tx) => {
         playersPlaying.black = (await dbSetPlayerRolling({
-          id: players.black.id,
+          ...players.black,
           db,
         })) as unknown as NodotsPlayerPlayingRolling
-        playersPlaying.white = (await dbSetPlayerWaiting({
-          id: players.white.id,
+        playersPlaying.white = (await dbSetPlayerReady({
+          ...players.white,
           db,
-        })) as unknown as NodotsPlayerReady // FIXME
+        })) as unknown as NodotsPlayerPlayingReady // FIXME
         return playersPlaying
       })
     case 'white':
       await db.transaction(async (tx) => {
         playersPlaying.white = (await dbSetPlayerRolling({
-          id: players.white.id,
+          ...players.white,
           db,
         })) as unknown as NodotsPlayerPlayingRolling
-        playersPlaying.black = (await dbSetPlayerWaiting({
-          id: players.black.id,
+        playersPlaying.black = (await dbSetPlayerReady({
+          ...players.black,
           db,
-        })) as unknown as NodotsPlayerReady // FIXME
+        })) as unknown as NodotsPlayerPlayingReady // FIXME
       })
     default:
       throw PlayerStateError('Invalid active color')

@@ -2,65 +2,80 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { buildBoard } from '../Board'
 import { buildCube } from '../Cube'
 import { buildDice, setActiveDice } from '../Dice'
-import { setActivePlayer, setPlayerReady } from '../Player'
-import { NodotsPlayersReady, NodotsPlayerSeekingGame } from '../Player/helpers'
+import {
+  setActivePlayer,
+  setPlayerPlayingReady,
+  getActivePlayerByEmail as _getActivePlayerByEmail,
+} from '../Player'
 import {
   dbCreateGame,
   dbGetGame,
   dbGetAll,
-  dbGetGameByIdAndKind,
+  dbGetGamesByPlayerId,
+  dbGetInitializedGameById,
   dbSetGameRolling,
 } from './db'
 import { assignPlayerColors, assignPlayerDirections } from '../Player/helpers'
-import { GameNotFoundError, GameStateError } from './errors'
+import { GameStateError } from './errors'
 import { randomBoolean } from '..'
 import {
   GameInitialized,
   GameInitializing,
-  GamePlayingMoving,
-  GamePlayingRolling,
-  GameRollingForStart,
+  NodotsPlayerPlayingReady,
+  NodotsPlayerSeekingGame,
+  NodotsPlayersPlaying,
+  NodotsPlayersSeekingGame,
 } from '../../backgammon-types'
 
 // State transitions
 export const initializeGame = async (
-  players: [NodotsPlayerSeekingGame, NodotsPlayerSeekingGame],
+  players: NodotsPlayersSeekingGame,
   db: NodePgDatabase<Record<string, never>>
 ) => {
   const colors = assignPlayerColors(players)
   const directions = assignPlayerDirections(players)
-  console.log('[initializeGame] players:', players)
+  // Totally arbitrary
+  const blackPlayerSeeking: NodotsPlayerSeekingGame = players.seekers[0]
+  const whitePlayerSeeking: NodotsPlayerSeekingGame = players.seekers[1]
 
-  const blackReady = await setPlayerReady(
-    players[0].id,
+  const blackResults = await setPlayerPlayingReady(
+    blackPlayerSeeking.id,
     colors[0],
     directions[0],
     db
   )
 
-  const whiteReady = await setPlayerReady(
-    players[1].id,
+  const whiteResults = await setPlayerPlayingReady(
+    whitePlayerSeeking.id,
     colors[1],
     directions[1],
     db
   )
-  const playersReady: NodotsPlayersReady = {
-    kind: 'players-ready',
-    black: {
-      ...players[0],
-      ...blackReady,
-      kind: 'player-ready',
-      color: colors[1], // FIXME. Should be coming from blackReady
-      direction: directions[1], // FIXME. Should be coming from blackReady
-    },
 
-    white: {
-      ...players[1],
-      ...whiteReady,
-      kind: 'player-ready',
-      color: colors[1], // FIXME. Should be coming from whiteReady
-      direction: directions[1], // FIXME. Should be coming from whiteReady
-    },
+  const blackReady: NodotsPlayerPlayingReady = {
+    id: blackPlayerSeeking.id,
+    kind: 'player-playing-ready',
+    email: blackPlayerSeeking.email,
+    source: blackPlayerSeeking.source,
+    externalId: blackPlayerSeeking.externalId,
+    color: colors[0],
+    direction: directions[0],
+  }
+
+  const whiteReady: NodotsPlayerPlayingReady = {
+    id: whitePlayerSeeking.id,
+    kind: 'player-playing-ready',
+    email: whitePlayerSeeking.email,
+    source: whitePlayerSeeking.source,
+    externalId: whitePlayerSeeking.externalId,
+    color: colors[1],
+    direction: directions[1],
+  }
+
+  const playersPlaying: NodotsPlayersPlaying = {
+    kind: 'players-playing',
+    white: whiteReady,
+    black: blackReady,
   }
 
   const dice = buildDice()
@@ -68,12 +83,12 @@ export const initializeGame = async (
   const cube = buildCube()
 
   const gameInitializing: GameInitializing = {
-    id: undefined,
     kind: 'game-initializing',
-    players: playersReady,
+    players: playersPlaying,
     board,
     dice,
     cube,
+    id: undefined, // FIXME: This is a hack
   }
 
   return await dbCreateGame(gameInitializing, db)
@@ -83,26 +98,16 @@ export const rollForStart = async (
   gameId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const getGameResult = await getGameByIdAndKind(gameId, 'game-initialized', db)
-  switch (getGameResult?.kind) {
-    case 'game-initialized':
-      const gameInitialized = getGameResult as GameInitialized // FIXME. Code smell
-      const { players, dice } = gameInitialized
-      const activeColor = randomBoolean() ? 'black' : 'white'
-      const updatedPlayers = await setActivePlayer(players, activeColor, db)
-      const updatedDice = await setActiveDice(dice, activeColor)
-
-      const gamePlayingRolling: GamePlayingRolling = {
-        ...gameInitialized,
-        kind: 'game-playing-rolling',
-        activeColor,
-        players: updatedPlayers,
-        dice: updatedDice,
-      }
-      return await dbSetGameRolling(gamePlayingRolling, db)
-    default:
-      throw GameNotFoundError(`Game not found: ${gameId}`)
+  const game = await getInitializedGameById(gameId, db)
+  if (!game) {
+    throw GameStateError('Game not found')
   }
+  const _game = game as unknown as GameInitialized
+  const activeColor = randomBoolean() ? 'black' : 'white'
+  const players = setActivePlayer(_game.players, activeColor, db)
+  console.log('[players]', players)
+  const gameRolling = await dbSetGameRolling(_game, activeColor, db)
+  console.log('rollForStart game', gameRolling)
 }
 
 // Getters
@@ -114,64 +119,26 @@ export const getGame = async (
   db: NodePgDatabase<Record<string, never>>
 ) => await dbGetGame(gameId, db)
 
-// Private methods. Helpers?
-const getGameByIdAndKind = async (
-  gameId: string,
-  kind:
-    | 'game-initializing'
-    | 'game-initialized'
-    | 'game-rolling-for-start'
-    | 'game-playing-rolling'
-    | 'game-playing-moving'
-    | 'game-completed',
+export const getGamesByPlayerId = async (
+  playerId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  try {
-    const result = await dbGetGameByIdAndKind(gameId, kind, db)
-    const untypedGame = result[0] // FIXME. Code smell
-    switch (untypedGame.kind) {
-      case 'game-initializing':
-        const gameInitializing = untypedGame as unknown as GameInitializing // FIXME. Code smell
-        return {
-          ...gameInitializing,
-          kind: 'game-initializing',
-        }
-      case 'game-initialized':
-        const gameInitialized = untypedGame as unknown as GameInitialized // FIXME. Code smell
-        return {
-          ...gameInitialized,
-          kind: 'game-initialized',
-        }
-      case 'game-rolling-for-start':
-        const gameRollingForStart =
-          untypedGame as unknown as GameRollingForStart // FIXME. Code smell
-        return {
-          ...gameRollingForStart,
-          kind: 'game-rolling-for-start',
-        }
-      case 'game-playing-rolling':
-        const gamePlayingRolling = untypedGame as unknown as GamePlayingRolling // FIXME. Code smell
-        return {
-          ...gamePlayingRolling,
-          kind: 'game-playing-rolling',
-        }
-      case 'game-playing-moving':
-        const gamePlayingMoving = untypedGame as unknown as GamePlayingMoving // FIXME. Code smell
-        return {
-          ...gamePlayingMoving,
-          kind: 'game-playing-moving',
-        }
-      // case 'game-completed':
-      //   const gameCompleted = untypedGame as unknown as GameCompleted // FIXME. Code smell
-      //   return {
-      //     ...gameCompleted,
-      //     kind: 'game-completed',
-      //   }
+  console.log('getGamesByPlayerId', playerId)
+  return await dbGetGamesByPlayerId(playerId, db)
+}
 
-      default:
-        throw GameStateError(`Invalid game state: ${untypedGame.kind}`)
-    }
-  } catch (error) {
-    throw GameNotFoundError(`Game not found: ${gameId}`)
-  }
+export const getActivePlayerByEmail = async (
+  email: string,
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  return await _getActivePlayerByEmail(email, db)
+}
+
+export const getInitializedGameById = async (
+  gameId: string,
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  const initializedGame = await dbGetInitializedGameById(gameId, db)
+  console.log('getInitializedGameById', initializedGame)
+  return initializedGame
 }

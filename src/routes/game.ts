@@ -5,9 +5,13 @@ import {
   getGame,
   getGames,
   rollForStart,
+  getActivePlayerByEmail,
   // rollForStart,
 } from '../../nodots_modules/@nodots/backgammon/Game'
-import { NodotsPlayerSeekingGame } from '../../nodots_modules/@nodots/backgammon/Player'
+import {
+  NodotsPlayerPlaying,
+  NodotsPlayersSeekingGame,
+} from '../../nodots_modules/@nodots/backgammon-types'
 
 export interface IGameRouter extends Router {}
 
@@ -26,15 +30,24 @@ export const GameRouter = (db: NodePgDatabase): IGameRouter => {
   })
 
   router.post('/', async (req, res) => {
-    const players: [NodotsPlayerSeekingGame, NodotsPlayerSeekingGame] = req.body
+    const players: NodotsPlayersSeekingGame = req.body
     const game = await initializeGame(players, db)
     res.status(200).json(game)
   })
 
   router.post('/:id/roll-for-start', async (req, res) => {
     const { id } = req.params
+    console.log('roll-for-start id:', id)
     const game = await rollForStart(id, db)
-    res.status(200).json({ kind: 'game-rolling-for-start', id })
+    console.log('roll-for-start game:', game)
+    res.status(200).json({ game })
+  })
+
+  router.get(`/player/:email`, async (req, res) => {
+    const { email } = req.params
+    const player = await getActivePlayerByEmail(email, db)
+
+    res.status(200).json(player)
   })
 
   return router

@@ -2,14 +2,12 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { Router } from 'express'
 import {
   dbCreatePlayerFromAuth0User,
-  dbFetchPlayerById,
-  dbFetchPlayerBySourceAndExternalId,
-  dbFetchPlayers,
-  dbFetchPlayersSeekingGame,
+  dbGetPlayerById,
+  dbGetPlayerBySourceAndExternalId,
+  dbGetPlayers,
+  dbGetPlayersSeekingGame,
   dbSetPlayerSeekingGame,
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
-import { initializePlayer } from '../../nodots_modules/@nodots/backgammon/Player'
-import { PlayerKnocking } from '../../nodots_modules/@nodots/backgammon/Player/helpers'
 
 // FIXME: Should import from Auth0 module
 export interface Auth0User {
@@ -44,7 +42,7 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   router.get('/knocking/:auth0Id', async (req, res) => {
     const [source, externalId] = req.params.auth0Id.split('|')
     try {
-      const player = await dbFetchPlayerBySourceAndExternalId(
+      const player = await dbGetPlayerBySourceAndExternalId(
         source,
         externalId,
         db
@@ -67,9 +65,9 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   })
 
   router.post('/knocking/', async (req, res) => {
-    const auth0User: Auth0User = req.body
+    const externalUser: Auth0User = req.body
     try {
-      const player = await dbCreatePlayerFromAuth0User(auth0User, db)
+      const player = await dbCreatePlayerFromAuth0User(externalUser, db)
       res.status(200).json(player)
     } catch {
       res.status(500).json({ message: 'Error creating player' })
@@ -77,7 +75,7 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   })
 
   router.get('/', async (req, res) => {
-    const players = await dbFetchPlayers(db)
+    const players = await dbGetPlayers(db)
     res.status(200).json(players)
   })
 
@@ -86,7 +84,7 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
     async (req, res) => {
       const id = req.params.id
       try {
-        const player = await dbFetchPlayerById(id, db)
+        const player = await dbGetPlayerById(id, db)
         res.status(200).json(player)
       } catch {
         res.status(404).json({ message: `Player not found for id: ${id}` })
@@ -97,7 +95,7 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   // FIXME id/seeking-game are both strings so this is a hack
   // Specialized read
   router.get('/seeking-game', async (req, res) => {
-    const players = await dbFetchPlayersSeekingGame(db)
+    const players = await dbGetPlayersSeekingGame(db)
     res.status(200).json(players)
   })
 

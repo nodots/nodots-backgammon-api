@@ -1,6 +1,5 @@
-import { PlayerKnocking, NodotsPlayerSeekingGame } from './helpers'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, or } from 'drizzle-orm'
 import {
   jsonb,
   pgEnum,
@@ -11,19 +10,22 @@ import {
 } from 'drizzle-orm/pg-core'
 import { ColorEnum, DirectionEnum } from '../Game/db'
 import { Auth0User } from '../../../../src/routes/player'
-import { NodotsColor, NodotsMoveDirection } from '../../backgammon-types'
+import {
+  NodotsColor,
+  NodotsMoveDirection,
+  PlayerKnocking,
+} from '../../backgammon-types'
 
-export const PlayerTypeEnum = pgEnum('player-kind', [
+const playerKinds = [
   'player-knocking',
   'player-initialized',
   'player-seeking-game',
-  'player-waiting',
-  'player-ready',
-  'player-rolling-for-start',
   'player-playing-rolling',
   'player-playing-moving',
-  'player-playing-waiting',
-])
+  'player-playing-ready',
+] as const
+
+export const PlayerTypeEnum = pgEnum('player-kind', playerKinds)
 
 export const PlayersTable = pgTable('players', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
@@ -76,18 +78,17 @@ export const dbCreatePlayerFromAuth0User = async (
 }
 
 // Read
-export const dbFetchPlayers = async (
-  db: NodePgDatabase<Record<string, never>>
-) => await db.select().from(PlayersTable)
+export const dbGetPlayers = async (db: NodePgDatabase<Record<string, never>>) =>
+  await db.select().from(PlayersTable)
 
-export const dbFetchPlayerById = async (
+export const dbGetPlayerById = async (
   id: string,
   db: NodePgDatabase<Record<string, never>>
 ) =>
   await db.select().from(PlayersTable).where(eq(PlayersTable.id, id)).limit(1)
 
 // Specialized read
-export const dbFetchPlayersSeekingGame = async (
+export const dbGetPlayersSeekingGame = async (
   db: NodePgDatabase<Record<string, never>>
 ) =>
   await db
@@ -95,13 +96,32 @@ export const dbFetchPlayersSeekingGame = async (
     .from(PlayersTable)
     .where(eq(PlayersTable.kind, 'player-seeking-game'))
 
-export const dbFetchPlayerByEmail = async (
+export const dbGetPlayerByEmail = async (
   email: string,
   db: NodePgDatabase<Record<string, never>>
 ) =>
   db.select().from(PlayersTable).where(eq(PlayersTable.email, email)).limit(1)
 
-export const dbFetchPlayerBySourceAndExternalId = async (
+export const dbGetActivePlayerByEmail = async (
+  email: string,
+  db: NodePgDatabase<Record<string, never>>
+) =>
+  db
+    .select()
+    .from(PlayersTable)
+    .where(
+      and(
+        eq(PlayersTable.email, email),
+        or(
+          eq(PlayersTable.kind, 'player-playing-ready'),
+          eq(PlayersTable.kind, 'player-playing-rolling'),
+          eq(PlayersTable.kind, 'player-playing-moving')
+        )
+      )
+    )
+    .limit(1)
+
+export const dbGetPlayerBySourceAndExternalId = async (
   source: string,
   externalId: string,
   db: NodePgDatabase<Record<string, never>>
@@ -175,7 +195,7 @@ export const dbSetPlayerReady = async ({
   return await db
     .update(PlayersTable)
     .set({
-      kind: 'player-ready',
+      kind: 'player-playing-ready',
       color,
       direction,
     })
@@ -198,16 +218,4 @@ export const dbSetPlayerRolling = async ({ id, db }: ISetPlayerState) => {
     })
     .where(eq(PlayersTable.id, id))
     .returning({ playerRolling: PlayersTable })
-}
-
-export const dbSetPlayerWaiting = async ({ id, db }: ISetPlayerState) => {
-  console.log('[dbSetPlayerWaiting] id:', id)
-
-  return await db
-    .update(PlayersTable)
-    .set({
-      kind: 'player-waiting',
-    })
-    .where(eq(PlayersTable.id, id))
-    .returning({ updated: PlayersTable })
 }

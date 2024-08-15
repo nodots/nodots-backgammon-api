@@ -55,7 +55,7 @@ export interface NodotsPlayerSeekingGame extends IPlayer {
 }
 
 export interface NodotsPlayerPlayingReady extends IPlayer {
-  kind: 'player-ready'
+  kind: 'player-playing-ready'
   source: string
   externalId: string
   color: NodotsColor
@@ -64,15 +64,23 @@ export interface NodotsPlayerPlayingReady extends IPlayer {
 }
 
 export interface NodotsPlayerPlayingRolling extends IPlayer {
-  kind: 'player-rolling'
+  kind: 'player-playing-rolling'
   color: NodotsColor
   direction: NodotsMoveDirection
 }
 export interface NodotsPlayerPlayingMoving extends IPlayer {
-  kind: 'player-moving'
+  kind: 'player-playing-moving'
   color: NodotsColor
   direction: NodotsMoveDirection
 }
+
+export type PlayerKind =
+  | 'player-knocking'
+  | 'player-initialized'
+  | 'player-seeking-game'
+  | 'player-playing-ready'
+  | 'player-playing-rolling'
+  | 'player-playing-moving'
 
 export type NodotsPlayerPlaying =
   | NodotsPlayerPlayingReady

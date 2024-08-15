@@ -1,5 +1,5 @@
 {
-  "id": "b942167e-6920-4053-8df5-13e13103d290",
+  "id": "06f44e2c-0812-4d4e-b048-c99fc3324fc0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -200,12 +200,9 @@
         "player-knocking",
         "player-initialized",
         "player-seeking-game",
-        "player-waiting",
-        "player-ready",
-        "player-rolling-for-start",
         "player-playing-rolling",
         "player-playing-moving",
-        "player-playing-waiting"
+        "player-playing-ready"
       ]
     }
   },

@@ -8,7 +8,7 @@ import {
   NodotsRoll,
 } from './dice'
 import { NodotsPlay } from './play'
-import { NodotsPlayersInitialized, NodotsPlayersPlaying } from './players'
+import { NodotsPlayersPlaying } from './players'
 
 export const CHECKERS_PER_PLAYER = 15
 export type PointPosition =
@@ -67,7 +67,7 @@ export interface NodotsGame {
 
 export interface GameInitializing extends NodotsGame {
   kind: 'game-initializing'
-  players: NodotsPlayersInitialized
+  players: NodotsPlayersPlaying
   dice: {
     white: NodotsDiceInitialized
     black: NodotsDiceInitialized
