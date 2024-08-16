@@ -2,11 +2,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { buildBoard } from '../Board'
 import { buildCube } from '../Cube'
 import { buildDice, setActiveDice } from '../Dice'
-import {
-  setActivePlayer,
-  setPlayerPlayingReady,
-  getActivePlayerByEmail as _getActivePlayerByEmail,
-} from '../Player'
+import { getActivePlayerByEmail as _getActivePlayerByEmail } from '../Player'
 import {
   dbCreateGame,
   dbGetGame,
@@ -21,7 +17,7 @@ import { randomBoolean } from '..'
 import {
   GameInitialized,
   GameInitializing,
-  NodotsPlayerPlayingReady,
+  NodotsPlayerPlaying,
   NodotsPlayerSeekingGame,
   NodotsPlayersPlaying,
   NodotsPlayersSeekingGame,
@@ -38,44 +34,24 @@ export const initializeGame = async (
   const blackPlayerSeeking: NodotsPlayerSeekingGame = players.seekers[0]
   const whitePlayerSeeking: NodotsPlayerSeekingGame = players.seekers[1]
 
-  const blackResults = await setPlayerPlayingReady(
-    blackPlayerSeeking.id,
-    colors[0],
-    directions[0],
-    db
-  )
-
-  const whiteResults = await setPlayerPlayingReady(
-    whitePlayerSeeking.id,
-    colors[1],
-    directions[1],
-    db
-  )
-
-  const blackReady: NodotsPlayerPlayingReady = {
-    id: blackPlayerSeeking.id,
-    kind: 'player-playing-ready',
-    email: blackPlayerSeeking.email,
-    source: blackPlayerSeeking.source,
-    externalId: blackPlayerSeeking.externalId,
+  const blackPlaying: NodotsPlayerPlaying = {
+    ...blackPlayerSeeking,
+    kind: 'player-playing',
     color: colors[0],
     direction: directions[0],
   }
 
-  const whiteReady: NodotsPlayerPlayingReady = {
-    id: whitePlayerSeeking.id,
-    kind: 'player-playing-ready',
-    email: whitePlayerSeeking.email,
-    source: whitePlayerSeeking.source,
-    externalId: whitePlayerSeeking.externalId,
+  const whitePlaying: NodotsPlayerPlaying = {
+    ...whitePlayerSeeking,
+    kind: 'player-playing',
     color: colors[1],
     direction: directions[1],
   }
 
   const playersPlaying: NodotsPlayersPlaying = {
     kind: 'players-playing',
-    white: whiteReady,
-    black: blackReady,
+    black: blackPlaying,
+    white: whitePlaying,
   }
 
   const dice = buildDice()
@@ -104,8 +80,6 @@ export const rollForStart = async (
   }
   const _game = game as unknown as GameInitialized
   const activeColor = randomBoolean() ? 'black' : 'white'
-  const players = setActivePlayer(_game.players, activeColor, db)
-  console.log('[players]', players)
   const gameRolling = await dbSetGameRolling(_game, activeColor, db)
   console.log('rollForStart game', gameRolling)
 }

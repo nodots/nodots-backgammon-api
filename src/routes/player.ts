@@ -2,6 +2,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { Router } from 'express'
 import {
   dbCreatePlayerFromAuth0User,
+  dbGetPlayerByEmail,
   dbGetPlayerById,
   dbGetPlayerBySourceAndExternalId,
   dbGetPlayers,
@@ -64,7 +65,7 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
     }
   })
 
-  router.post('/knocking/', async (req, res) => {
+  router.post('/add-auth0-user/', async (req, res) => {
     const externalUser: Auth0User = req.body
     try {
       const player = await dbCreatePlayerFromAuth0User(externalUser, db)
@@ -78,6 +79,18 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
     const players = await dbGetPlayers(db)
     res.status(200).json(players)
   })
+
+  router.get(
+    '/:email([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+)',
+    async (req, res) => {
+      try {
+        const result = await dbGetPlayerByEmail(req.params.email, db)
+        result.length === 0
+          ? res.status(404).json({})
+          : res.status(200).json(result[0])
+      } catch {}
+    }
+  )
 
   router.get(
     '/:id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',

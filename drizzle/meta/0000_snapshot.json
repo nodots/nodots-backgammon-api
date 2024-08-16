@@ -1,5 +1,5 @@
 {
-  "id": "06f44e2c-0812-4d4e-b048-c99fc3324fc0",
+  "id": "6d6c0006-c7f2-4294-8792-98d9afd3c8a7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -22,15 +22,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "player1_id": {
-          "name": "player1_id",
-          "type": "uuid",
+        "player1": {
+          "name": "player1",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
-        "player2_id": {
-          "name": "player2_id",
-          "type": "uuid",
+        "player2": {
+          "name": "player2",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
@@ -105,20 +105,6 @@
         "email": {
           "name": "email",
           "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "color": {
-          "name": "color",
-          "type": "color",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "direction": {
-          "name": "direction",
-          "type": "direction",
-          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
@@ -197,12 +183,10 @@
       "name": "player-kind",
       "schema": "public",
       "values": [
-        "player-knocking",
+        "player-incoming",
         "player-initialized",
         "player-seeking-game",
-        "player-playing-rolling",
-        "player-playing-moving",
-        "player-playing-ready"
+        "player-playing"
       ]
     }
   },

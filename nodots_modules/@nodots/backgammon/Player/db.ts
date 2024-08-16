@@ -17,12 +17,10 @@ import {
 } from '../../backgammon-types'
 
 const playerKinds = [
-  'player-knocking',
+  'player-incoming',
   'player-initialized',
   'player-seeking-game',
-  'player-playing-rolling',
-  'player-playing-moving',
-  'player-playing-ready',
+  'player-playing',
 ] as const
 
 export const PlayerTypeEnum = pgEnum('player-kind', playerKinds)
@@ -33,8 +31,6 @@ export const PlayersTable = pgTable('players', {
   source: text('source'),
   externalId: text('external_id').unique(),
   email: text('email').unique(),
-  color: ColorEnum('color') || undefined,
-  direction: DirectionEnum('direction') || undefined,
   preferences: jsonb('preferences'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -112,11 +108,7 @@ export const dbGetActivePlayerByEmail = async (
     .where(
       and(
         eq(PlayersTable.email, email),
-        or(
-          eq(PlayersTable.kind, 'player-playing-ready'),
-          eq(PlayersTable.kind, 'player-playing-rolling'),
-          eq(PlayersTable.kind, 'player-playing-moving')
-        )
+        eq(PlayersTable.kind, 'player-playing')
       )
     )
     .limit(1)
@@ -136,28 +128,6 @@ export const dbGetPlayerBySourceAndExternalId = async (
       )
     )
     .limit(1)
-// Delete
-// export const dbDestroyPlayers = async (
-//   db: NodePgDatabase<Record<string, never>>[]
-// ) =>
-//   db.map(
-//     async (record) =>
-//       await record
-//         .delete(PlayersTable)
-//         .returning({ deleted: PlayersTable.email })
-//   )
-
-// export const dbDestroyPlayer = async (
-//   db: NodePgDatabase<Record<string, never>>[],
-//   playerId: PgUUID<any> // FIXME: wrong data type
-// ) =>
-//   db.map(
-//     async (record) =>
-//       await record
-//         .delete(PlayersTable)
-//         .where(eq(PlayersTable.id, playerId))
-//         .returning({ deleted: PlayersTable.email })
-//   )
 
 // Specialized update
 export const dbSetPlayerSeekingGame = async (
@@ -175,47 +145,19 @@ export const dbSetPlayerSeekingGame = async (
   return updatedPlayer
 }
 
-export interface ISetPlayerReady {
+export interface ISetPlayerPlaying {
   id: string
-  color: NodotsColor
-  direction: NodotsMoveDirection
   db: NodePgDatabase<Record<string, never>>
 }
 
-export const dbSetPlayerReady = async ({
-  id,
-  color,
-  direction,
-  db,
-}: ISetPlayerReady) => {
+export const dbSetPlayerPlaying = async ({ id, db }: ISetPlayerPlaying) => {
   console.log('[dbSetPlayerReady] id:', id)
-  console.log('[dbSetPlayerReady] color:', color)
-  console.log('[dbSetPlayerReady] direction:', direction)
 
   return await db
     .update(PlayersTable)
     .set({
-      kind: 'player-playing-ready',
-      color,
-      direction,
+      kind: 'player-playing',
     })
     .where(eq(PlayersTable.id, id))
     .returning({ updated: PlayersTable })
-}
-
-export interface ISetPlayerState {
-  id: string
-  db: NodePgDatabase<Record<string, never>>
-}
-
-export const dbSetPlayerRolling = async ({ id, db }: ISetPlayerState) => {
-  console.log('[dbSetPlayerReady] id:', id)
-
-  return await db
-    .update(PlayersTable)
-    .set({
-      kind: 'player-playing-rolling',
-    })
-    .where(eq(PlayersTable.id, id))
-    .returning({ playerRolling: PlayersTable })
 }

@@ -6,10 +6,17 @@ import {
   GameInitializing,
   GameRollingForStart,
   NodotsColor,
+  NodotsMoveDirection,
 } from '../../backgammon-types'
 import { kebab } from 'postgres'
 
-const gameKinds = [
+export const ColorEnum = pgEnum('color', ['black', 'white'])
+export const DirectionEnum = pgEnum('direction', [
+  'clockwise',
+  'counterclockwise',
+])
+
+const gameKind = [
   'game-initializing',
   'game-initialized',
   'game-rolling-for-start',
@@ -18,19 +25,20 @@ const gameKinds = [
   'game-completed',
 ] as const
 
-export const GameTypeEnum = pgEnum('game-kind', gameKinds)
+export const GameTypeEnum = pgEnum('game-kind', gameKind)
 
-export const ColorEnum = pgEnum('color', ['black', 'white'])
-export const DirectionEnum = pgEnum('direction', [
-  'clockwise',
-  'counterclockwise',
-])
+export interface ActiveBackgammonPlayer {
+  id: string
+  kind: 'player-rolling' | 'player-moving' | 'player-waiting'
+  color: NodotsColor
+  direction: NodotsMoveDirection
+}
 
 export const GamesTable = pgTable('games', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
   kind: GameTypeEnum('kind').notNull(),
-  player1Id: uuid('player1_id').notNull(),
-  player2Id: uuid('player2_id').notNull(),
+  player1: jsonb('player1').notNull(),
+  player2: jsonb('player2').notNull(),
   board: jsonb('board').notNull(),
   cube: jsonb('cube').notNull(),
   dice: jsonb('dice').notNull(),
@@ -44,8 +52,14 @@ export const dbCreateGame = async (
 ) => {
   const game: typeof GamesTable.$inferInsert = {
     kind: 'game-initialized',
-    player1Id: initializingGame.players.black.id,
-    player2Id: initializingGame.players.white.id,
+    player1: {
+      ...initializingGame.players.black,
+      kind: 'player-waiting',
+    },
+    player2: {
+      ...initializingGame.players.white,
+      kind: 'player-waiting',
+    },
     board: initializingGame.board,
     cube: initializingGame.cube,
     dice: initializingGame.dice,
