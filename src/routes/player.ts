@@ -105,7 +105,6 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
     }
   )
 
-  // FIXME id/seeking-game are both strings so this is a hack
   // Specialized read
   router.get('/seeking-game', async (req, res) => {
     const players = await dbGetPlayersSeekingGame(db)
