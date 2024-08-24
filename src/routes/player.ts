@@ -9,31 +9,33 @@ import {
   dbGetPlayersSeekingGame,
   dbSetPlayerSeekingGame,
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
+import { NodotsPlayerSeekingGame } from '../../nodots_modules/@nodots/backgammon-types'
 
-// FIXME: Should import from Auth0 module
-export interface Auth0User {
-  name?: string
-  given_name?: string
-  family_name?: string
-  middle_name?: string
-  nickname?: string
-  preferred_username?: string
-  profile?: string
-  picture?: string
-  website?: string
-  email?: string
-  email_verified?: boolean
-  gender?: string
-  birthdate?: string
-  zoneinfo?: string
-  locale?: string
-  phone_number?: string
-  phone_number_verified?: boolean
-  address?: string
-  updated_at?: string
-  sub?: string
-  [key: string]: any
-}
+import { UserInfoResponse as Auth0User } from 'auth0'
+// // FIXME: Should import from Auth0 module
+// export interface Auth0User {
+//   name?: string
+//   given_name?: string
+//   family_name?: string
+//   middle_name?: string
+//   nickname?: string
+//   preferred_username?: string
+//   profile?: string
+//   picture?: string
+//   website?: string
+//   email?: string
+//   email_verified?: boolean
+//   gender?: string
+//   birthdate?: string
+//   zoneinfo?: string
+//   locale?: string
+//   phone_number?: string
+//   phone_number_verified?: boolean
+//   address?: string
+//   updated_at?: string
+//   sub?: string
+//   [key: string]: any
+// }
 
 export interface IPlayerRouter extends Router {}
 
@@ -48,7 +50,7 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
         externalId,
         db
       )
-      if (player.length === 0) {
+      if (player) {
         const {} = res.status(404).json({
           message: `Player not found for source: ${source} externalId: ${externalId}`,
         })
@@ -95,12 +97,14 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   router.get(
     '/:id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
     async (req, res) => {
-      const id = req.params.id
+      const playerId = req.params.playerId
       try {
-        const player = await dbGetPlayerById(id, db)
+        const player = await dbGetPlayerById(playerId, db)
         res.status(200).json(player)
       } catch {
-        res.status(404).json({ message: `Player not found for id: ${id}` })
+        res
+          .status(404)
+          .json({ message: `Player not found for id: ${playerId}` })
       }
     }
   )
@@ -112,10 +116,11 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   })
 
   // Specialized update
-  router.put('/:id/seeking-game', async (req, res) => {
-    const id = req.params.id
+  router.put('/seeking-game', async (req, res) => {
+    const { playerId } = req.body
+    console.log(req.body)
     try {
-      const result = await dbSetPlayerSeekingGame(id, db)
+      const result = await dbSetPlayerSeekingGame(playerId, db)
       res.status(200).json(result)
     } catch {
       res.status(500).json({ message: 'Error setting player seeking game' })

@@ -6,6 +6,7 @@ import { PlayerRouter } from './routes/player'
 import { GameRouter } from './routes/game'
 import { BoardRouter } from './routes/board'
 import { UserRouter } from './routes/user'
+import { OfferRouter } from './routes/offer'
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -43,6 +44,7 @@ const main = async () => {
 
   const userRouter = UserRouter(db)
   const playerRouter = PlayerRouter(db)
+  const offerRouter = OfferRouter(db)
   const gameRouter = GameRouter(db)
   const boardRouter = BoardRouter()
 
@@ -50,6 +52,7 @@ const main = async () => {
   app.use('/player', playerRouter)
   app.use('/game', gameRouter)
   app.use('/board', boardRouter)
+  app.use('/offer', offerRouter)
 
   // Start the server
   app.listen(port, () => {

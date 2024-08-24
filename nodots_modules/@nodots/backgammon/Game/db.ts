@@ -1,14 +1,12 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { eq, and, or } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
 import {
   GameInitialized,
   GameInitializing,
-  GameRollingForStart,
   NodotsColor,
   NodotsMoveDirection,
 } from '../../backgammon-types'
-import { kebab } from 'postgres'
 
 export const ColorEnum = pgEnum('color', ['black', 'white'])
 export const DirectionEnum = pgEnum('direction', [

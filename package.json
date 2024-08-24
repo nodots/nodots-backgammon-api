@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "auth0": "^4.8.0",
     "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "drizzle-orm": "^0.32.1",

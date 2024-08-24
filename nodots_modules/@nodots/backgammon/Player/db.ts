@@ -1,5 +1,6 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { eq, and, or } from 'drizzle-orm'
+import { UserInfoResponse as Auth0User } from 'auth0'
+import { eq, and, or, ne } from 'drizzle-orm'
 import {
   jsonb,
   pgEnum,
@@ -8,12 +9,12 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { ColorEnum, DirectionEnum } from '../Game/db'
-import { Auth0User } from '../../../../src/routes/player'
 import {
-  NodotsColor,
-  NodotsMoveDirection,
   PlayerKnocking,
+  NodotsPlayerSeekingGame,
+  NodotsPlayer,
+  NodotsPlayerInitialized,
+  NodotsPlayerPlaying,
 } from '../../backgammon-types'
 
 const playerKinds = [
@@ -81,7 +82,13 @@ export const dbGetPlayerById = async (
   id: string,
   db: NodePgDatabase<Record<string, never>>
 ) =>
-  await db.select().from(PlayersTable).where(eq(PlayersTable.id, id)).limit(1)
+  await db
+    .select()
+    .from(PlayersTable)
+    .where(
+      and(eq(PlayersTable.id, id), ne(PlayersTable.kind, 'player-incoming'))
+    )
+    .limit(1)
 
 // Specialized read
 export const dbGetPlayersSeekingGame = async (
@@ -117,23 +124,81 @@ export const dbGetPlayerBySourceAndExternalId = async (
   source: string,
   externalId: string,
   db: NodePgDatabase<Record<string, never>>
-) =>
-  db
+): Promise<NodotsPlayer | null> => {
+  const players = await db
     .select()
     .from(PlayersTable)
     .where(
       and(
-        eq(PlayersTable.externalId, externalId),
-        eq(PlayersTable.source, 'player-knocking')
+        eq(PlayersTable.source, source),
+        eq(PlayersTable.externalId, externalId)
       )
     )
     .limit(1)
+
+  if (players.length === 1) {
+    const player = players[0]
+    switch (player.kind) {
+      case 'player-initialized':
+        return player as NodotsPlayerInitialized
+      case 'player-seeking-game':
+        return player as NodotsPlayerSeekingGame
+      case 'player-playing':
+        return player as unknown as NodotsPlayerPlaying
+      case 'player-incoming':
+        return null // not really a player
+      default:
+      // assert never
+      // return null
+    }
+  }
+  return null
+}
+
+export const dbGetPlayerBySourceAndExternalIdAndKind = async (
+  source: string,
+  externalId: string,
+  kind: 'player-seeking-game' | 'player-playing',
+  db: NodePgDatabase<Record<string, never>>
+): Promise<NodotsPlayer | null> => {
+  const players = await db
+    .select()
+    .from(PlayersTable)
+    .where(
+      and(
+        eq(PlayersTable.source, source),
+        eq(PlayersTable.externalId, externalId),
+        eq(PlayersTable.kind, kind)
+      )
+    )
+    .limit(1)
+
+  if (players.length === 1) {
+    const player = players[0]
+    switch (player.kind) {
+      case 'player-initialized':
+        return player as NodotsPlayerInitialized
+      case 'player-seeking-game':
+        return player as NodotsPlayerSeekingGame
+      case 'player-playing':
+        return player as unknown as NodotsPlayerPlaying
+      case 'player-incoming':
+        return null // not really a player
+      default:
+      // assert never
+      // return null
+    }
+  }
+
+  return null
+}
 
 // Specialized update
 export const dbSetPlayerSeekingGame = async (
   id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
+  console.log('[dbSetPlayerSeekingGame] id:', id)
   const updatedPlayer = await db
     .update(PlayersTable)
     .set({

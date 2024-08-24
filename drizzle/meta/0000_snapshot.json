@@ -1,5 +1,5 @@
 {
-  "id": "6d6c0006-c7f2-4294-8792-98d9afd3c8a7",
+  "id": "ed870ad7-4e28-45e2-b8a5-0d126c1744c2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -49,6 +49,56 @@
         "dice": {
           "name": "dice",
           "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.offers": {
+      "name": "offers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "kind": {
+          "name": "kind",
+          "type": "offer-kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "offering_player_id": {
+          "name": "offering_player_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "offered_player_id": {
+          "name": "offered_player_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -177,6 +227,15 @@
         "game-playing-rolling",
         "game-playing-moving",
         "game-completed"
+      ]
+    },
+    "public.offer-kind": {
+      "name": "offer-kind",
+      "schema": "public",
+      "values": [
+        "play",
+        "double",
+        "resign"
       ]
     },
     "public.player-kind": {

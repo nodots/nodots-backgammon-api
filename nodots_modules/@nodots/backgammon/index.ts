@@ -12,6 +12,7 @@ export type NodotsBackgammonEntity =
   | 'play'
   | 'move'
   | 'game'
+  | 'offer'
 
 export interface NodotsBackgammonError extends Error {
   entity: NodotsBackgammonEntity
