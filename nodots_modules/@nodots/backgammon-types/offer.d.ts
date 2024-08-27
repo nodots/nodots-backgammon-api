@@ -1,8 +1,8 @@
 import { NodotsPlayerSeekingGame } from './player'
 
 interface Offer {
-  offeringPlayer: NodotsPlayerSeekingGame
-  offeredPlayer: NodotsPlayerSeekingGame
+  offeringPlayerId: string
+  offeredPlayerId: string
   kind: 'play' | 'double' | 'resign'
 }
 

@@ -7,6 +7,9 @@ import {
 } from 'drizzle-orm/pg-core'
 import { eq, and, or, ne } from 'drizzle-orm'
 import { NodotsOfferPlay } from '../../backgammon-types'
+import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+
+export type OfferKind = 'play' | 'double' | 'resign'
 
 const offerKinds = ['play', 'double', 'resign'] as const
 
@@ -14,11 +17,9 @@ export const OfferTypeEnum = pgEnum('offer-kind', offerKinds)
 
 export interface OfferRecord {
   id: string
-  kind: 'play' | 'double' | 'resign'
+  kind: OfferKind
   offeringPlayerId: string
   offeredPlayerId: string
-  createdAt: string
-  updatedAt: string
 }
 
 export const OffersTable = pgTable('offers', {
@@ -30,22 +31,17 @@ export const OffersTable = pgTable('offers', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
-const dbCreateOffer = async (offer: any, db: any) => {
-  const result = await db.insert(OffersTable).values(offer).returning()
-  return result
-}
-
 export const dbCreatePlayOffer = async (
-  offeringPlayer: any,
-  offeredPlayer: any,
-  db: any
+  offeringPlayerId: string,
+  offeredPlayerId: string,
+  db: NodePgDatabase<Record<string, never>>
 ) => {
   const offer = {
-    kind: 'play',
-    offeringPlayerId: offeringPlayer.id,
-    offeredPlayerId: offeredPlayer.id,
+    kind: 'play' as OfferKind,
+    offeringPlayerId: offeringPlayerId,
+    offeredPlayerId: offeredPlayerId,
   }
-  return await dbCreateOffer(offer, db)
+  return await db.insert(OffersTable).values(offer).returning()
 }
 
 export const dbGetPlayOffers = async (
@@ -56,5 +52,6 @@ export const dbGetPlayOffers = async (
     .select()
     .from(OffersTable)
     .where(ne(OffersTable.offeredPlayerId, playerId))
+  console.log(offers)
   return offers
 }

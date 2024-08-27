@@ -8,10 +8,12 @@ import {
   dbGetPlayers,
   dbGetPlayersSeekingGame,
   dbSetPlayerSeekingGame,
+  dbUpdatePlayerPreferences,
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
 import { NodotsPlayerSeekingGame } from '../../nodots_modules/@nodots/backgammon-types'
 
 import { UserInfoResponse as Auth0User } from 'auth0'
+import { UpdatedPlayerPreferences } from '../../nodots_modules/@nodots/backgammon/Player'
 // // FIXME: Should import from Auth0 module
 // export interface Auth0User {
 //   name?: string
@@ -101,6 +103,22 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
       try {
         const player = await dbGetPlayerById(playerId, db)
         res.status(200).json(player)
+      } catch {
+        res
+          .status(404)
+          .json({ message: `Player not found for id: ${playerId}` })
+      }
+    }
+  )
+
+  router.patch(
+    '/:id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+    async (req, res) => {
+      const playerId = req.params.playerId
+      const updatedPlayerPreferences: UpdatedPlayerPreferences = req.body
+      try {
+        await dbUpdatePlayerPreferences(playerId, updatedPlayerPreferences, db)
+        res.status(200).json({ message: 'Player preferences updated' })
       } catch {
         res
           .status(404)

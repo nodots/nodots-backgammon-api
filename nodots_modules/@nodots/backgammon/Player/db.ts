@@ -16,6 +16,7 @@ import {
   NodotsPlayerInitialized,
   NodotsPlayerPlaying,
 } from '../../backgammon-types'
+import { UpdatedPlayerPreferences } from '.'
 
 const playerKinds = [
   'player-incoming',
@@ -62,12 +63,16 @@ export const dbCreatePlayerFromAuth0User = async (
   if (!user.sub) {
     throw new Error('No sub in Auth0 user')
   }
+  console.log(user)
   const [source, externalId] = user.sub?.split('|')
   const player: typeof PlayersTable.$inferInsert = {
     kind: 'player-initialized',
     source,
     externalId,
     email: user.email,
+    preferences: {
+      locale: user.locale ? user.locale : 'en',
+    },
   }
   console.log(player)
   const result = await db.insert(PlayersTable).values(player).returning()
@@ -225,4 +230,18 @@ export const dbSetPlayerPlaying = async ({ id, db }: ISetPlayerPlaying) => {
     })
     .where(eq(PlayersTable.id, id))
     .returning({ updated: PlayersTable })
+}
+
+export const dbUpdatePlayerPreferences = async (
+  id: string,
+  preferences: UpdatedPlayerPreferences,
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  return await db
+    .update(PlayersTable)
+    .set({
+      preferences,
+    })
+    .where(eq(PlayersTable.id, id))
+    .returning()
 }

@@ -1,6 +1,6 @@
 import { NodotsColor, NodotsMoveDirection } from './game'
 
-export type NodotsLocale = 'en' | 'es'
+export type NodotsLocale = 'en' | 'es' | 'fr' | 'ar' | 'tr'
 export interface NodotsPipCounts {
   black: number
   white: number

@@ -7,8 +7,13 @@ import {
   dbSetPlayerSeekingGame,
   dbGetPlayerByEmail,
   dbSetPlayerPlaying,
+  dbUpdatePlayerPreferences,
 } from './db'
-import { PlayerKnocking } from '../../backgammon-types/player'
+import {
+  IPlayerPreferences,
+  NodotsPlayer,
+  PlayerKnocking,
+} from '../../backgammon-types/player'
 
 export const initializePlayer = async (
   playerKnocking: PlayerKnocking,
@@ -42,3 +47,11 @@ export const setPlayerPlayingReady = async (
   id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => await dbSetPlayerPlaying({ id, db })
+
+export type UpdatedPlayerPreferences = Partial<IPlayerPreferences>
+
+export const updatePlayerPreferences = async (
+  id: string,
+  preferences: UpdatedPlayerPreferences,
+  db: NodePgDatabase<Record<string, never>>
+) => await dbUpdatePlayerPreferences(id, preferences, db)
