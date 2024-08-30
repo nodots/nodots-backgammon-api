@@ -1,11 +1,9 @@
-import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { NodotsColor, NodotsMoveDirection } from '../../backgammon-types/game'
 import {
   IPlayer,
   NodotsPlayerPlaying,
   NodotsPlayersPlaying,
   NodotsPlayersSeekingGame,
-  PlayerKnocking,
 } from '../../backgammon-types'
 
 export const getActivePlayer = (

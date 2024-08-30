@@ -1,24 +1,18 @@
+import { UserInfoResponse as Auth0User } from 'auth0'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import {
-  dbCreatePlayer,
+  dbCreatePlayerFromAuth0User,
   dbGetActivePlayerByEmail,
+  dbGetPlayerByEmail,
+  dbGetPlayerBySourceAndExternalId,
   dbGetPlayers,
   dbGetPlayersSeekingGame,
-  dbSetPlayerSeekingGame,
-  dbGetPlayerByEmail,
   dbSetPlayerPlaying,
+  dbSetPlayerSeekingGame,
   dbUpdatePlayerPreferences,
 } from './db'
-import {
-  IPlayerPreferences,
-  NodotsPlayer,
-  PlayerKnocking,
-} from '../../backgammon-types/player'
 
-export const initializePlayer = async (
-  playerKnocking: PlayerKnocking,
-  db: NodePgDatabase<Record<string, never>>
-) => dbCreatePlayer(playerKnocking, db)
+import { IPlayerPreferences } from '../../backgammon-types/player'
 
 export const getAllPlayers = async (
   db: NodePgDatabase<Record<string, never>>
@@ -55,3 +49,21 @@ export const updatePlayerPreferences = async (
   preferences: UpdatedPlayerPreferences,
   db: NodePgDatabase<Record<string, never>>
 ) => await dbUpdatePlayerPreferences(id, preferences, db)
+
+export const createPlayerFromAuthOUser = async (
+  user: Auth0User,
+  isLoggedIn: boolean,
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  const { sub } = user
+  const [source, externalId] = sub.split('|')
+  try {
+    let player = await dbGetPlayerBySourceAndExternalId(source, externalId, db)
+    return player
+      ? player
+      : await dbCreatePlayerFromAuth0User(user, isLoggedIn, db)
+  } catch (error) {
+    console.error('Error creating player from Auth0 user:', error)
+    return null
+  }
+}

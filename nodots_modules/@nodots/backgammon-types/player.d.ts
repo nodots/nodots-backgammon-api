@@ -8,6 +8,9 @@ export interface NodotsPipCounts {
 
 export interface IPlayerPreferences {
   username?: string
+  givenName?: string
+  familyName?: string
+  avatar?: string
   color?: NodotsColor
   direction?: NodotsMoveDirection
   locale?: NodotsLocale
@@ -20,19 +23,13 @@ export interface IPlayerPreferences {
 export type IPlayer = {
   id: string
   email: string
+  isLoggedIn: boolean
   preferences?: IPlayerPreferences
 }
 
 export interface IPlayers {
   black: IPlayer
   white: IPlayer
-}
-
-export interface PlayerKnocking extends IPlayer {
-  kind: 'player-knocking'
-  source: string
-  externalId: string
-  preferences?: IPlayerPreferences
 }
 
 // REFACTOR: There is a line somewhere around here where we are

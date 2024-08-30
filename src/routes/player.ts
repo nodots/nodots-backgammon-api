@@ -4,88 +4,42 @@ import {
   dbCreatePlayerFromAuth0User,
   dbGetPlayerByEmail,
   dbGetPlayerById,
-  dbGetPlayerBySourceAndExternalId,
+  dbGetPlayerBySourceAndExternalIdAndKind,
   dbGetPlayers,
   dbGetPlayersSeekingGame,
   dbSetPlayerSeekingGame,
   dbUpdatePlayerPreferences,
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
-import { NodotsPlayerSeekingGame } from '../../nodots_modules/@nodots/backgammon-types'
 
-import { UserInfoResponse as Auth0User } from 'auth0'
 import { UpdatedPlayerPreferences } from '../../nodots_modules/@nodots/backgammon/Player'
-// // FIXME: Should import from Auth0 module
-// export interface Auth0User {
-//   name?: string
-//   given_name?: string
-//   family_name?: string
-//   middle_name?: string
-//   nickname?: string
-//   preferred_username?: string
-//   profile?: string
-//   picture?: string
-//   website?: string
-//   email?: string
-//   email_verified?: boolean
-//   gender?: string
-//   birthdate?: string
-//   zoneinfo?: string
-//   locale?: string
-//   phone_number?: string
-//   phone_number_verified?: boolean
-//   address?: string
-//   updated_at?: string
-//   sub?: string
-//   [key: string]: any
-// }
 
 export interface IPlayerRouter extends Router {}
 
 export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   const router = Router()
 
-  router.get('/knocking/:auth0Id', async (req, res) => {
-    const [source, externalId] = req.params.auth0Id.split('|')
-    try {
-      const player = await dbGetPlayerBySourceAndExternalId(
-        source,
-        externalId,
-        db
-      )
-      if (player) {
-        const {} = res.status(404).json({
-          message: `Player not found for source: ${source} externalId: ${externalId}`,
-        })
-        return
-      }
-
-      res.status(200).json({
-        message: `Player knocking for source: ${source} externalId: ${externalId}`,
-      })
-    } catch {
-      res.status(500).json({
-        message: `Failed to find player`,
-      })
-    }
-  })
-
-  router.post('/add-auth0-user/', async (req, res) => {
-    const externalUser: Auth0User = req.body
-    try {
-      const player = await dbCreatePlayerFromAuth0User(externalUser, db)
-      res.status(200).json(player)
-    } catch {
-      res.status(500).json({ message: 'Error creating player' })
-    }
-  })
-
   router.get('/', async (req, res) => {
     const players = await dbGetPlayers(db)
     res.status(200).json(players)
   })
+  router.get('/sub/:source/:externalId', async (req, res) => {
+    const source = req.params.source
+    const externalId = req.params.externalId
+    try {
+      const result = await dbGetPlayerBySourceAndExternalIdAndKind(
+        source,
+        externalId,
+        db
+      )
+      console.log(result)
+      res.status(200).json(result)
+    } catch {
+      res.status(500).json({ message: 'Error retrieving player' })
+    }
+  })
 
   router.get(
-    '/:email([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+)',
+    '/email/:email([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+)',
     async (req, res) => {
       try {
         const result = await dbGetPlayerByEmail(req.params.email, db)

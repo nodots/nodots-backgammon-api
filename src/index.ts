@@ -7,6 +7,7 @@ import { GameRouter } from './routes/game'
 import { BoardRouter } from './routes/board'
 import { UserRouter } from './routes/user'
 import { OfferRouter } from './routes/offer'
+import { AuthRouter } from './routes/auth'
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -42,12 +43,14 @@ const main = async () => {
     res.status(200).json(req.body)
   })
 
+  const authRouter = AuthRouter(db)
   const userRouter = UserRouter(db)
   const playerRouter = PlayerRouter(db)
   const offerRouter = OfferRouter(db)
   const gameRouter = GameRouter(db)
   const boardRouter = BoardRouter()
 
+  app.use('/auth', authRouter)
   app.use('/user', userRouter)
   app.use('/player', playerRouter)
   app.use('/game', gameRouter)

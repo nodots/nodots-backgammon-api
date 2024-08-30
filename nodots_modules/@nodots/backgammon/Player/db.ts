@@ -1,8 +1,10 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { UserInfoResponse as Auth0User } from 'auth0'
+import { boolean } from 'drizzle-orm/pg-core'
 import { eq, and, or, ne } from 'drizzle-orm'
 import {
   jsonb,
+  PgBoolean,
   pgEnum,
   pgTable,
   text,
@@ -10,7 +12,6 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 import {
-  PlayerKnocking,
   NodotsPlayerSeekingGame,
   NodotsPlayer,
   NodotsPlayerInitialized,
@@ -19,7 +20,6 @@ import {
 import { UpdatedPlayerPreferences } from '.'
 
 const playerKinds = [
-  'player-incoming',
   'player-initialized',
   'player-seeking-game',
   'player-playing',
@@ -34,49 +34,58 @@ export const PlayersTable = pgTable('players', {
   externalId: text('external_id').unique(),
   email: text('email').unique(),
   preferences: jsonb('preferences'),
+  isLoggedIn: boolean('is_logged_in').default(false).notNull(),
+  lastLogIn: timestamp('last_log_in'),
+  lastLogOut: timestamp('last_log_out'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
 // // Create
-export const dbCreatePlayer = async (
-  incomingPlayer: PlayerKnocking,
-  db: NodePgDatabase<Record<string, never>>
-) => {
-  const player: typeof PlayersTable.$inferInsert = {
-    kind: 'player-initialized',
-    externalId:
-      incomingPlayer.externalId ||
-      `${incomingPlayer.source}:${incomingPlayer.email}`,
-    email: incomingPlayer.email,
-    preferences: incomingPlayer.preferences,
-  }
-  const result = await db.insert(PlayersTable).values(player).returning()
+// export const dbCreatePlayer = async (
+//   incomingPlayer: PlayerKnocking,
+//   db: NodePgDatabase<Record<string, never>>
+// ) => {
+//   const player: typeof PlayersTable.$inferInsert = {
+//     kind: 'player-initialized',
+//     externalId:
+//       incomingPlayer.externalId ||
+//       `${incomingPlayer.source}:${incomingPlayer.email}`,
+//     email: incomingPlayer.email,
+//     preferences: incomingPlayer.preferences,
+//   }
+//   const result = await db.insert(PlayersTable).values(player).returning()
 
-  return result
-}
+//   return result
+// }
 
 export const dbCreatePlayerFromAuth0User = async (
   user: Auth0User,
+  isLoggedIn: boolean,
   db: NodePgDatabase<Record<string, never>>
 ) => {
   if (!user.sub) {
     throw new Error('No sub in Auth0 user')
   }
-  console.log(user)
   const [source, externalId] = user.sub?.split('|')
   const player: typeof PlayersTable.$inferInsert = {
     kind: 'player-initialized',
     source,
     externalId,
     email: user.email,
+    isLoggedIn: isLoggedIn,
+    lastLogIn: isLoggedIn ? new Date() : null,
     preferences: {
+      username: user.preferred_username
+        ? user.preferred_username
+        : user.nickname,
+      address: user.address,
+      avatar: user.picture,
       locale: user.locale ? user.locale : 'en',
     },
   }
-  console.log(player)
   const result = await db.insert(PlayersTable).values(player).returning()
-  return result
+  return result[0] ? result[0] : null
 }
 
 // Read
@@ -90,9 +99,7 @@ export const dbGetPlayerById = async (
   await db
     .select()
     .from(PlayersTable)
-    .where(
-      and(eq(PlayersTable.id, id), ne(PlayersTable.kind, 'player-incoming'))
-    )
+    .where(and(eq(PlayersTable.id, id)))
     .limit(1)
 
 // Specialized read
@@ -150,8 +157,6 @@ export const dbGetPlayerBySourceAndExternalId = async (
         return player as NodotsPlayerSeekingGame
       case 'player-playing':
         return player as unknown as NodotsPlayerPlaying
-      case 'player-incoming':
-        return null // not really a player
       default:
       // assert never
       // return null
@@ -163,7 +168,6 @@ export const dbGetPlayerBySourceAndExternalId = async (
 export const dbGetPlayerBySourceAndExternalIdAndKind = async (
   source: string,
   externalId: string,
-  kind: 'player-seeking-game' | 'player-playing',
   db: NodePgDatabase<Record<string, never>>
 ): Promise<NodotsPlayer | null> => {
   const players = await db
@@ -172,8 +176,7 @@ export const dbGetPlayerBySourceAndExternalIdAndKind = async (
     .where(
       and(
         eq(PlayersTable.source, source),
-        eq(PlayersTable.externalId, externalId),
-        eq(PlayersTable.kind, kind)
+        eq(PlayersTable.externalId, externalId)
       )
     )
     .limit(1)
@@ -187,8 +190,6 @@ export const dbGetPlayerBySourceAndExternalIdAndKind = async (
         return player as NodotsPlayerSeekingGame
       case 'player-playing':
         return player as unknown as NodotsPlayerPlaying
-      case 'player-incoming':
-        return null // not really a player
       default:
       // assert never
       // return null

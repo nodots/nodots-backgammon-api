@@ -1,5 +1,5 @@
 {
-  "id": "ed870ad7-4e28-45e2-b8a5-0d126c1744c2",
+  "id": "2e6b6ee3-d369-4948-9627-2a4f5e90fc11",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -164,6 +164,25 @@
           "primaryKey": false,
           "notNull": false
         },
+        "is_logged_in": {
+          "name": "is_logged_in",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "last_log_in": {
+          "name": "last_log_in",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_log_out": {
+          "name": "last_log_out",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -242,7 +261,6 @@
       "name": "player-kind",
       "schema": "public",
       "values": [
-        "player-incoming",
         "player-initialized",
         "player-seeking-game",
         "player-playing"
