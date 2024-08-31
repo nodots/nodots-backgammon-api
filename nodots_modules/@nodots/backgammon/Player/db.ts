@@ -1,10 +1,9 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { UserInfoResponse as Auth0User } from 'auth0'
 import { boolean } from 'drizzle-orm/pg-core'
-import { eq, and, or, ne } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import {
   jsonb,
-  PgBoolean,
   pgEnum,
   pgTable,
   text,
@@ -41,24 +40,7 @@ export const PlayersTable = pgTable('players', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
-// // Create
-// export const dbCreatePlayer = async (
-//   incomingPlayer: PlayerKnocking,
-//   db: NodePgDatabase<Record<string, never>>
-// ) => {
-//   const player: typeof PlayersTable.$inferInsert = {
-//     kind: 'player-initialized',
-//     externalId:
-//       incomingPlayer.externalId ||
-//       `${incomingPlayer.source}:${incomingPlayer.email}`,
-//     email: incomingPlayer.email,
-//     preferences: incomingPlayer.preferences,
-//   }
-//   const result = await db.insert(PlayersTable).values(player).returning()
-
-//   return result
-// }
-
+// Create
 export const dbCreatePlayerFromAuth0User = async (
   user: Auth0User,
   isLoggedIn: boolean,
@@ -88,6 +70,31 @@ export const dbCreatePlayerFromAuth0User = async (
   return result[0] ? result[0] : null
 }
 
+export const dbLoginPlayer = async (
+  id: string,
+  db: NodePgDatabase<Record<string, never>>
+) =>
+  await db
+    .update(PlayersTable)
+    .set({
+      isLoggedIn: true,
+      lastLogIn: new Date(),
+    })
+    .where(eq(PlayersTable.id, id))
+
+export const dbLogoutPlayer = async (
+  id: string,
+  db: NodePgDatabase<Record<string, never>>
+) =>
+  await db
+    .update(PlayersTable)
+    .set({
+      isLoggedIn: false,
+      lastLogOut: new Date(),
+    })
+    .where(eq(PlayersTable.id, id))
+    .returning()
+
 // Read
 export const dbGetPlayers = async (db: NodePgDatabase<Record<string, never>>) =>
   await db.select().from(PlayersTable)
@@ -95,12 +102,14 @@ export const dbGetPlayers = async (db: NodePgDatabase<Record<string, never>>) =>
 export const dbGetPlayerById = async (
   id: string,
   db: NodePgDatabase<Record<string, never>>
-) =>
-  await db
+) => {
+  const result = await db
     .select()
     .from(PlayersTable)
     .where(and(eq(PlayersTable.id, id)))
     .limit(1)
+  return result?.length === 1 ? result[0] : null
+}
 
 // Specialized read
 export const dbGetPlayersSeekingGame = async (
@@ -202,13 +211,15 @@ export const dbGetPlayerBySourceAndExternalIdAndKind = async (
 // Specialized update
 export const dbSetPlayerSeekingGame = async (
   id: string,
+  kind: 'player-initialized' | 'player-seeking-game',
   db: NodePgDatabase<Record<string, never>>
 ) => {
   console.log('[dbSetPlayerSeekingGame] id:', id)
+  console.log('[dbSetPlayerSeekingGame] kind:', kind)
   const updatedPlayer = await db
     .update(PlayersTable)
     .set({
-      kind: 'player-seeking-game',
+      kind,
     })
     .where(eq(PlayersTable.id, id))
     .returning()

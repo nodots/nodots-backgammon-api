@@ -4,15 +4,18 @@ import {
   dbCreatePlayerFromAuth0User,
   dbGetActivePlayerByEmail,
   dbGetPlayerByEmail,
+  dbGetPlayerById,
   dbGetPlayerBySourceAndExternalId,
   dbGetPlayers,
   dbGetPlayersSeekingGame,
   dbSetPlayerPlaying,
-  dbSetPlayerSeekingGame,
   dbUpdatePlayerPreferences,
 } from './db'
 
 import { IPlayerPreferences } from '../../backgammon-types/player'
+
+export const getPlayerById = async (playerId: string, db: NodePgDatabase) =>
+  await dbGetPlayerById(playerId, db)
 
 export const getAllPlayers = async (
   db: NodePgDatabase<Record<string, never>>
@@ -31,11 +34,6 @@ export const getActivePlayerByEmail = async (
   email: string,
   db: NodePgDatabase<Record<string, never>>
 ) => await dbGetActivePlayerByEmail(email, db)
-
-export const setPlayerSeekingGame = async (
-  id: string,
-  db: NodePgDatabase<Record<string, never>>
-) => await dbSetPlayerSeekingGame(id, db)
 
 export const setPlayerPlayingReady = async (
   id: string,
