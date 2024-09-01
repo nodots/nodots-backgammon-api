@@ -5,7 +5,9 @@ import {
   GameInitialized,
   GameInitializing,
   NodotsColor,
+  NodotsGame,
   NodotsMoveDirection,
+  NodotsPlayer,
 } from '../../backgammon-types'
 
 export const ColorEnum = pgEnum('color', ['black', 'white'])
@@ -62,10 +64,8 @@ export const dbCreateGame = async (
     cube: initializingGame.cube,
     dice: initializingGame.dice,
   }
-  console.log('dbCreateGame game', game)
   const result = await db.insert(GamesTable).values(game).returning()
-  console.log('dbCreateGame result', result)
-  return result
+  return result?.length === 1 ? result[0] : null
 }
 
 export const dbSetGameRolling = async (
@@ -97,6 +97,26 @@ export const dbGetGame = async (
     console.error('No game found')
   }
   return game
+}
+
+export const dbGetInitializedGameByPlayerId = async (
+  playerId: string,
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  const games = await (
+    await dbGetAll(db)
+  ).filter((game) => game.kind === 'game-initialized')
+  const playerGames: NodotsGame[] = []
+
+  for (const game of games) {
+    const player1 = game.player1 as NodotsPlayer
+    const player2 = game.player2 as NodotsPlayer
+    if (player1.id === playerId || player2.id === playerId) {
+      playerGames.push(game)
+    }
+  }
+
+  return playerGames.length === 1 ? playerGames[0] : null
 }
 
 export const dbGetInitializedGameById = async (

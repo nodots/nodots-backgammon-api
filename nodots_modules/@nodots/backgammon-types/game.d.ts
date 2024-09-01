@@ -2,10 +2,10 @@ import { NodotsBoard } from './board'
 import { NodotsChecker } from './checker'
 import { NodotsCube } from './cube'
 import {
-  NodotsDiceInitialized,
-  NodotsDiceWhiteActive,
-  NodotsDiceBlackActive,
   NodotsRoll,
+  NodotsGameDice,
+  NodotsDiceInitialized,
+  NodotsDice,
 } from './dice'
 import { NodotsPlay } from './play'
 import { NodotsPlayersPlaying } from './players'
@@ -93,8 +93,8 @@ export interface GameRollingForStart extends NodotsGame {
   kind: 'game-rolling-for-start'
   players: NodotsPlayersPlaying
   dice: {
-    white: NodotsDiceInitialized
-    black: NodotsDiceInitialized
+    white: NodotsDice
+    black: NodotsDice
   }
   board: NodotsBoard
   cube: NodotsCube
@@ -104,7 +104,7 @@ export interface GamePlayingRolling extends NodotsGame {
   id: string
   kind: 'game-playing-rolling'
   players: NodotsPlayersPlaying
-  dice: NodotsDiceWhiteActive | NodotsDiceBlackActive
+  dice: NodotsGameDice
   board: NodotsBoard
   cube: NodotsCube
   activeColor: NodotsColor
@@ -115,7 +115,7 @@ export interface GamePlayingMoving extends NodotsGame {
   id: string
   kind: 'game-playing-moving'
   players: NodotsPlayersPlaying
-  dice: NodotsDiceWhiteActive | NodotsDiceBlackActive
+  dice: NodotsGameDice
   board: NodotsBoard
   cube: NodotsCube
   activeColor: NodotsColor
@@ -141,7 +141,7 @@ export type NodotsGameState =
   | GamePlayingMoving
 
 export type NodotsGameStateInitializing = GameInitializing
-export type NodotsGameStateReady =
+export type NodotsGameStateActive =
   | GameInitialized
   | GameRollingForStart
   | GamePlayingRolling

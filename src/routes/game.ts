@@ -1,7 +1,7 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { Router } from 'express'
 import {
-  initializeGame,
+  createGame,
   getGame,
   getGames,
   rollForStart,
@@ -25,13 +25,13 @@ export const GameRouter = (db: NodePgDatabase): IGameRouter => {
 
   router.get('/:id', async (req, res) => {
     const { id } = req.params
-    const game = await getGame(id, db)
-    res.status(200).json(game)
+    const result = await getGame(id, db)
+    result.length === 1 ? res.status(200).json(result[0]) : res.status(404)
   })
 
   router.post('/', async (req, res) => {
-    const players: NodotsPlayersSeekingGame = req.body
-    const game = await initializeGame(players, db)
+    const { player1Id, player2Id } = req.body
+    const game = await createGame(player1Id, player2Id, db)
     res.status(200).json(game)
   })
 

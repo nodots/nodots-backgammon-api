@@ -4,6 +4,7 @@ export type DieValue = 1 | 2 | 3 | 4 | 5 | 6
 export type DieOrder = 0 | 1
 export type NodotsRoll = [DieValue, DieValue]
 
+export type NodotsDiceKind = 'active' | 'inactive' | 'initialized' | 'rolled'
 export interface NodotsDie {
   color: NodotsColor
   value: DieValue
@@ -11,8 +12,14 @@ export interface NodotsDie {
 }
 
 export type NodotsDice = {
+  kind: NodotsDiceKind
   color: NodotsColor
   dice: [NodotsDie, NodotsDie]
+}
+
+export type NodotsGameDice = {
+  white: NodotsDice
+  black: NodotsDice
 }
 
 export interface NodotsDiceInitialized extends NodotsDice {

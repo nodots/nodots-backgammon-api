@@ -13,6 +13,14 @@ import {
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
 
 import { UpdatedPlayerPreferences } from '../../nodots_modules/@nodots/backgammon/Player'
+import {
+  NodotsGame,
+  NodotsGameStateActive,
+} from '../../nodots_modules/@nodots/backgammon-types'
+import {
+  dbGetAll,
+  dbGetInitializedGameByPlayerId,
+} from '../../nodots_modules/@nodots/backgammon/Game/db'
 
 export interface IPlayerRouter extends Router {}
 
@@ -52,6 +60,19 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
       }
     }
   )
+
+  router.get('/active-game/:playerId', async (req, res) => {
+    const playerId = req.params.playerId
+    try {
+      const playerGames = await dbGetInitializedGameByPlayerId(playerId, db)
+      console.log(playerGames)
+      res.status(200).json(playerGames)
+    } catch {
+      res
+        .status(404)
+        .json({ message: `Game not found for player id: ${playerId}` })
+    }
+  })
 
   router.get('/sub/:source/:externalId', async (req, res) => {
     const source = req.params.source

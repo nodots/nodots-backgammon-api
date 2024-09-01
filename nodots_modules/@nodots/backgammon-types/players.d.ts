@@ -1,9 +1,6 @@
 import {
   NodotsPlayerInitialized,
   NodotsPlayerPlaying,
-  NodotsPlayerPlayingMoving,
-  NodotsPlayerPlayingReady,
-  NodotsPlayerPlayingRolling,
   NodotsPlayerSeekingGame,
 } from './player'
 

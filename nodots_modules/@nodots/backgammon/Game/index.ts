@@ -2,7 +2,10 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { buildBoard } from '../Board'
 import { buildCube } from '../Cube'
 import { buildDice, setActiveDice } from '../Dice'
-import { getActivePlayerByEmail as _getActivePlayerByEmail } from '../Player'
+import {
+  getActivePlayerByEmail as _getActivePlayerByEmail,
+  getPlayerById,
+} from '../Player'
 import {
   dbCreateGame,
   dbGetGame,
@@ -24,15 +27,26 @@ import {
 } from '../../backgammon-types'
 
 // State transitions
-export const initializeGame = async (
-  players: NodotsPlayersSeekingGame,
+export const createGame = async (
+  player1Id: string,
+  player2Id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
+  const player1 = await getPlayerById(player1Id, db)
+  const player2 = await getPlayerById(player2Id, db)
+  if (!player1 || !player2) {
+    throw GameStateError('Player not found')
+  }
+  const players = [player1, player2] as [
+    NodotsPlayerSeekingGame,
+    NodotsPlayerSeekingGame
+  ]
+
   const colors = assignPlayerColors(players)
   const directions = assignPlayerDirections(players)
   // Totally arbitrary
-  const blackPlayerSeeking: NodotsPlayerSeekingGame = players.seekers[0]
-  const whitePlayerSeeking: NodotsPlayerSeekingGame = players.seekers[1]
+  const blackPlayerSeeking: NodotsPlayerSeekingGame = players[0]
+  const whitePlayerSeeking: NodotsPlayerSeekingGame = players[1]
 
   const blackPlaying: NodotsPlayerPlaying = {
     ...blackPlayerSeeking,
