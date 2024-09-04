@@ -8,7 +8,7 @@ import {
   NodotsDice,
 } from './dice'
 import { NodotsPlay } from './play'
-import { NodotsPlayersPlaying } from './players'
+import { NodotsPlayers, NodotsPlayersPlaying } from './players'
 
 export const CHECKERS_PER_PLAYER = 15
 export type PointPosition =
@@ -61,13 +61,9 @@ export type DestinationPosition = PointPosition | 'off'
 export type NodotsColor = 'black' | 'white'
 export type NodotsMoveDirection = 'clockwise' | 'counterclockwise'
 
-export interface NodotsGame {
-  id: string | undefined
-}
-
-export interface GameInitializing extends NodotsGame {
+export interface GameInitializing {
   kind: 'game-initializing'
-  players: NodotsPlayersPlaying
+  players: NodotsPlayers
   dice: {
     white: NodotsDiceInitialized
     black: NodotsDiceInitialized
@@ -76,7 +72,7 @@ export interface GameInitializing extends NodotsGame {
   cube: NodotsCube
 }
 
-export interface GameInitialized extends NodotsGame {
+export interface GameInitialized {
   id: string
   kind: 'game-initialized'
   players: NodotsPlayersPlaying
@@ -88,7 +84,7 @@ export interface GameInitialized extends NodotsGame {
   cube: NodotsCube
 }
 
-export interface GameRollingForStart extends NodotsGame {
+export interface GameRollingForStart {
   id: string
   kind: 'game-rolling-for-start'
   players: NodotsPlayersPlaying
@@ -100,7 +96,7 @@ export interface GameRollingForStart extends NodotsGame {
   cube: NodotsCube
 }
 
-export interface GamePlayingRolling extends NodotsGame {
+export interface GamePlayingRolling {
   id: string
   kind: 'game-playing-rolling'
   players: NodotsPlayersPlaying
@@ -111,7 +107,7 @@ export interface GamePlayingRolling extends NodotsGame {
   activePlay?: NodotsPlay
 }
 
-export interface GamePlayingMoving extends NodotsGame {
+export interface GamePlayingMoving {
   id: string
   kind: 'game-playing-moving'
   players: NodotsPlayersPlaying
@@ -133,15 +129,14 @@ export interface GamePlayingMoving extends NodotsGame {
 //   winner: PlayerWinning
 // }
 
-export type NodotsGameState =
-  | GameInitializing
+export type NodotsGameActive =
   | GameInitialized
   | GameRollingForStart
   | GamePlayingRolling
   | GamePlayingMoving
 
-export type NodotsGameStateInitializing = GameInitializing
-export type NodotsGameStateActive =
+export type NodotsGame =
+  | GameInitializing
   | GameInitialized
   | GameRollingForStart
   | GamePlayingRolling

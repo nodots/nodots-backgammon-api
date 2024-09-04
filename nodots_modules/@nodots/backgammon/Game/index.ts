@@ -20,67 +20,66 @@ import { randomBoolean } from '..'
 import {
   GameInitialized,
   GameInitializing,
-  NodotsPlayerPlaying,
-  NodotsPlayerSeekingGame,
+  NodotsPlayers,
   NodotsPlayersPlaying,
-  NodotsPlayersSeekingGame,
+  PlayerPlaying,
+  PlayerSeekingGame,
 } from '../../backgammon-types'
 
 // State transitions
-export const createGame = async (
+export const startGame = async (
   player1Id: string,
   player2Id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
   const player1 = await getPlayerById(player1Id, db)
   const player2 = await getPlayerById(player2Id, db)
+
   if (!player1 || !player2) {
     throw GameStateError('Player not found')
   }
-  const players = [player1, player2] as [
-    NodotsPlayerSeekingGame,
-    NodotsPlayerSeekingGame
-  ]
+
+  console.log('[@nodots/Game] startGame player1:', player1)
+  console.log('[@nodots/Game] startGame player2:', player2)
+
+  const players = [player1, player2] as NodotsPlayers
 
   const colors = assignPlayerColors(players)
-  const directions = assignPlayerDirections(players)
-  // Totally arbitrary
-  const blackPlayerSeeking: NodotsPlayerSeekingGame = players[0]
-  const whitePlayerSeeking: NodotsPlayerSeekingGame = players[1]
+  console.log('[@nodots/Game] startGame colors:', colors)
 
-  const blackPlaying: NodotsPlayerPlaying = {
+  const directions = assignPlayerDirections(players)
+  console.log('[@nodots/Game] startGame directions:', directions)
+  // // Totally arbitrary
+  const blackPlayerSeeking = players[0] as PlayerSeekingGame
+  const whitePlayerSeeking = players[1] as PlayerSeekingGame
+  const blackPlaying: PlayerPlaying = {
     ...blackPlayerSeeking,
     kind: 'player-playing',
     color: colors[0],
     direction: directions[0],
   }
-
-  const whitePlaying: NodotsPlayerPlaying = {
+  const whitePlaying: PlayerPlaying = {
     ...whitePlayerSeeking,
     kind: 'player-playing',
     color: colors[1],
     direction: directions[1],
   }
-
   const playersPlaying: NodotsPlayersPlaying = {
     kind: 'players-playing',
     black: blackPlaying,
     white: whitePlaying,
   }
-
+  console.log('[@nodots/Game] startGame playersPlaying:', playersPlaying)
   const dice = buildDice()
   const board = buildBoard()
   const cube = buildCube()
-
   const gameInitializing: GameInitializing = {
     kind: 'game-initializing',
-    players: playersPlaying,
+    players: [blackPlaying, whitePlaying],
     board,
     dice,
     cube,
-    id: undefined, // FIXME: This is a hack
   }
-
   return await dbCreateGame(gameInitializing, db)
 }
 

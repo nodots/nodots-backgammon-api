@@ -1,4 +1,4 @@
-import { NodotsPlayerSeekingGame } from './player'
+import { PlayerSeekingGame } from './player'
 
 interface Offer {
   offeringPlayerId: string

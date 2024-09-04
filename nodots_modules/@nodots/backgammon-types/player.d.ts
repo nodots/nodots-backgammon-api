@@ -37,21 +37,27 @@ export interface IPlayers {
 // about users. It cares about players. Move all of the non-player
 // stuff to a User module and keep the Player module focused
 // on the entities that roll dice, move checkers, etc.
-export interface NodotsPlayerInitialized extends IPlayer {
+export interface PlayerInitializing extends IPlayer {
+  kind: 'player-initializing'
+  email: 'fake@nodots.com'
+  isLoggedIn: true
+}
+
+export interface PlayerInitialized extends IPlayer {
   kind: 'player-initialized'
   source: string
   externalId: string
   preferences?: IPlayerPreferences
 }
 
-export interface NodotsPlayerSeekingGame extends IPlayer {
+export interface PlayerSeekingGame extends IPlayer {
   kind: 'player-seeking-game'
   source: string
   externalId: string
   preferences?: IPlayerPreferences
 }
 
-export interface NodotsPlayerPlaying extends IPlayer {
+export interface PlayerPlaying extends IPlayer {
   kind: 'player-playing'
   source: string
   externalId: string
@@ -61,12 +67,13 @@ export interface NodotsPlayerPlaying extends IPlayer {
 }
 
 export type PlayerKind =
-  | 'player-knocking'
+  | 'player-initializing'
   | 'player-initialized'
   | 'player-seeking-game'
   | 'player-playing'
 
 export type NodotsPlayer =
-  | NodotsPlayerInitialized
-  | NodotsPlayerSeekingGame
-  | NodotsPlayerPlaying
+  | PlayerInitializing
+  | PlayerInitialized
+  | PlayerSeekingGame
+  | PlayerPlaying

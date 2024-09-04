@@ -4,13 +4,7 @@ import { Router } from 'express'
 import {
   dbCreatePlayOffer,
   dbGetPlayOffers,
-  OfferRecord,
 } from '../../nodots_modules/@nodots/backgammon/Offer/db'
-import {
-  NodotsOfferPlay,
-  NodotsPlayerSeekingGame,
-} from '../../nodots_modules/@nodots/backgammon-types'
-import { dbGetPlayerById } from '../../nodots_modules/@nodots/backgammon/Player/db'
 
 export interface IOfferRouter extends Router {}
 

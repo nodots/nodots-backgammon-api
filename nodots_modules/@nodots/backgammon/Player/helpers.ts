@@ -1,10 +1,12 @@
 import { NodotsColor, NodotsMoveDirection } from '../../backgammon-types/game'
 import {
   IPlayer,
-  NodotsPlayerPlaying,
-  NodotsPlayerSeekingGame,
+  PlayerPlaying,
+  PlayerSeekingGame,
   NodotsPlayersPlaying,
   NodotsPlayersSeekingGame,
+  NodotsPlayer,
+  NodotsPlayers,
 } from '../../backgammon-types'
 
 export const getActivePlayer = (
@@ -21,10 +23,10 @@ export const getCounterclockwisePlayer = (players: NodotsPlayersPlaying) =>
 export const getPlayerForMoveDirection = (
   players: NodotsPlayersPlaying,
   direction: NodotsMoveDirection
-): NodotsPlayerPlaying => getPlayerForMoveDirection(players, direction)
+): PlayerPlaying => getPlayerForMoveDirection(players, direction)
 
 export const assignPlayerColors = (
-  players: [NodotsPlayerSeekingGame, NodotsPlayerSeekingGame]
+  players: [NodotsPlayer, NodotsPlayer]
 ): [NodotsColor, NodotsColor] => {
   console.log('assignPlayerColors', players)
   return ['black', 'white']
@@ -62,7 +64,7 @@ export const assignPlayerColors = (
 }
 
 export const assignPlayerDirections = (
-  players: [NodotsPlayerSeekingGame, NodotsPlayerSeekingGame]
+  players: NodotsPlayers
 ): [NodotsMoveDirection, NodotsMoveDirection] => {
   return ['clockwise', 'counterclockwise']
   // const player1 = players.seekers[0]

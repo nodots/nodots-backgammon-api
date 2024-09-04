@@ -11,10 +11,10 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 import {
-  NodotsPlayerSeekingGame,
+  PlayerSeekingGame,
   NodotsPlayer,
-  NodotsPlayerInitialized,
-  NodotsPlayerPlaying,
+  PlayerInitialized,
+  PlayerPlaying,
 } from '../../backgammon-types'
 import { UpdatedPlayerPreferences } from '.'
 
@@ -161,11 +161,11 @@ export const dbGetPlayerBySourceAndExternalId = async (
     const player = players[0]
     switch (player.kind) {
       case 'player-initialized':
-        return player as NodotsPlayerInitialized
+        return player as PlayerInitialized
       case 'player-seeking-game':
-        return player as NodotsPlayerSeekingGame
+        return player as PlayerSeekingGame
       case 'player-playing':
-        return player as unknown as NodotsPlayerPlaying
+        return player as unknown as PlayerPlaying
       default:
       // assert never
       // return null
@@ -194,11 +194,11 @@ export const dbGetPlayerBySourceAndExternalIdAndKind = async (
     const player = players[0]
     switch (player.kind) {
       case 'player-initialized':
-        return player as NodotsPlayerInitialized
+        return player as PlayerInitialized
       case 'player-seeking-game':
-        return player as NodotsPlayerSeekingGame
+        return player as PlayerSeekingGame
       case 'player-playing':
-        return player as unknown as NodotsPlayerPlaying
+        return player as unknown as PlayerPlaying
       default:
       // assert never
       // return null

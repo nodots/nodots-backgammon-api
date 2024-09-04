@@ -14,10 +14,6 @@ import {
 
 import { UpdatedPlayerPreferences } from '../../nodots_modules/@nodots/backgammon/Player'
 import {
-  NodotsGame,
-  NodotsGameStateActive,
-} from '../../nodots_modules/@nodots/backgammon-types'
-import {
   dbGetAll,
   dbGetInitializedGameByPlayerId,
 } from '../../nodots_modules/@nodots/backgammon/Game/db'

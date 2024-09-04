@@ -53,11 +53,11 @@ export const dbCreateGame = async (
   const game: typeof GamesTable.$inferInsert = {
     kind: 'game-initialized',
     player1: {
-      ...initializingGame.players.black,
+      ...initializingGame.players[0],
       kind: 'player-waiting',
     },
     player2: {
-      ...initializingGame.players.white,
+      ...initializingGame.players[1],
       kind: 'player-waiting',
     },
     board: initializingGame.board,
@@ -105,18 +105,8 @@ export const dbGetInitializedGameByPlayerId = async (
 ) => {
   const games = await (
     await dbGetAll(db)
-  ).filter((game) => game.kind === 'game-initialized')
-  const playerGames: NodotsGame[] = []
-
-  for (const game of games) {
-    const player1 = game.player1 as NodotsPlayer
-    const player2 = game.player2 as NodotsPlayer
-    if (player1.id === playerId || player2.id === playerId) {
-      playerGames.push(game)
-    }
-  }
-
-  return playerGames.length === 1 ? playerGames[0] : null
+  ).filter((g) => g.kind === 'game-initialized')
+  return games.length === 1 ? games[0] : null
 }
 
 export const dbGetInitializedGameById = async (
