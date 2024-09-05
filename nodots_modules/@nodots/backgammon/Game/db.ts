@@ -4,10 +4,14 @@ import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
 import {
   GameInitialized,
   GameInitializing,
+  NodotsBoard,
   NodotsColor,
+  NodotsCube,
+  NodotsDice,
   NodotsGame,
   NodotsMoveDirection,
   NodotsPlayer,
+  NodotsPlayersPlaying,
 } from '../../backgammon-types'
 
 export const ColorEnum = pgEnum('color', ['black', 'white'])
@@ -45,24 +49,19 @@ export const GamesTable = pgTable('games', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
-
 export const dbCreateGame = async (
-  initializingGame: GameInitializing,
+  initializedGame: GameInitialized,
   db: NodePgDatabase<Record<string, never>>
 ) => {
+  const player1 = initializedGame.players.black
+  const player2 = initializedGame.players.white
   const game: typeof GamesTable.$inferInsert = {
-    kind: 'game-initialized',
-    player1: {
-      ...initializingGame.players[0],
-      kind: 'player-waiting',
-    },
-    player2: {
-      ...initializingGame.players[1],
-      kind: 'player-waiting',
-    },
-    board: initializingGame.board,
-    cube: initializingGame.cube,
-    dice: initializingGame.dice,
+    ...initializedGame,
+    player1,
+    player2,
+    board: initializedGame.board,
+    cube: initializedGame.cube,
+    dice: initializedGame.dice,
   }
   const result = await db.insert(GamesTable).values(game).returning()
   return result?.length === 1 ? result[0] : null

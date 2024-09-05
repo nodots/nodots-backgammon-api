@@ -62,14 +62,8 @@ export type NodotsColor = 'black' | 'white'
 export type NodotsMoveDirection = 'clockwise' | 'counterclockwise'
 
 export interface GameInitializing {
+  id: 'fake'
   kind: 'game-initializing'
-  players: NodotsPlayers
-  dice: {
-    white: NodotsDiceInitialized
-    black: NodotsDiceInitialized
-  }
-  board: NodotsBoard
-  cube: NodotsCube
 }
 
 export interface GameInitialized {

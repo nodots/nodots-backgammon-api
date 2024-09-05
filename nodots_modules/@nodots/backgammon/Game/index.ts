@@ -20,6 +20,7 @@ import { randomBoolean } from '..'
 import {
   GameInitialized,
   GameInitializing,
+  NodotsPlayer,
   NodotsPlayers,
   NodotsPlayersPlaying,
   PlayerPlaying,
@@ -32,8 +33,8 @@ export const startGame = async (
   player2Id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const player1 = await getPlayerById(player1Id, db)
-  const player2 = await getPlayerById(player2Id, db)
+  const player1 = (await getPlayerById(player1Id, db)) as NodotsPlayer
+  const player2 = (await getPlayerById(player2Id, db)) as NodotsPlayer
 
   if (!player1 || !player2) {
     throw GameStateError('Player not found')
@@ -50,37 +51,47 @@ export const startGame = async (
   const directions = assignPlayerDirections(players)
   console.log('[@nodots/Game] startGame directions:', directions)
   // // Totally arbitrary
-  const blackPlayerSeeking = players[0] as PlayerSeekingGame
-  const whitePlayerSeeking = players[1] as PlayerSeekingGame
-  const blackPlaying: PlayerPlaying = {
-    ...blackPlayerSeeking,
-    kind: 'player-playing',
-    color: colors[0],
-    direction: directions[0],
+
+  switch (player1.kind) {
+    case 'player-initializing':
+    case 'player-initialized':
+    case 'player-seeking-game':
+      break
+    case 'player-playing':
+      player1.kind = 'player-playing'
+      player1.color = colors[0]
+      player1.direction = directions[0]
   }
-  const whitePlaying: PlayerPlaying = {
-    ...whitePlayerSeeking,
-    kind: 'player-playing',
-    color: colors[1],
-    direction: directions[1],
+  switch (player2.kind) {
+    case 'player-initializing':
+    case 'player-initialized':
+    case 'player-seeking-game':
+      break
+    case 'player-playing':
+      player2.kind = 'player-playing'
+      player2.color = colors[1]
+      player2.direction = directions[1]
   }
-  const playersPlaying: NodotsPlayersPlaying = {
-    kind: 'players-playing',
-    black: blackPlaying,
-    white: whitePlaying,
+
+  if (player1.kind === 'player-playing' && player2.kind === 'player-playing') {
+    console.log('[@nodots/Game] startGame players:', players)
+    const dice = buildDice()
+    const board = buildBoard()
+    const cube = buildCube()
+    const gameInitialized: GameInitialized = {
+      id: 'fake-game-id',
+      kind: 'game-initialized',
+      players: {
+        kind: 'players-playing',
+        black: player1.color === 'black' ? player1 : player2,
+        white: player1.color === 'white' ? player1 : player2,
+      },
+      board,
+      dice,
+      cube,
+    }
+    return await dbCreateGame(gameInitialized, db)
   }
-  console.log('[@nodots/Game] startGame playersPlaying:', playersPlaying)
-  const dice = buildDice()
-  const board = buildBoard()
-  const cube = buildCube()
-  const gameInitializing: GameInitializing = {
-    kind: 'game-initializing',
-    players: [blackPlaying, whitePlaying],
-    board,
-    dice,
-    cube,
-  }
-  return await dbCreateGame(gameInitializing, db)
 }
 
 export const rollForStart = async (
