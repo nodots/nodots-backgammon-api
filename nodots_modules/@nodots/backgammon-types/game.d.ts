@@ -8,7 +8,7 @@ import {
   NodotsDice,
 } from './dice'
 import { NodotsPlay } from './play'
-import { NodotsPlayers, NodotsPlayersPlaying } from './players'
+import { NodotsPlayersReady, NodotsPlayersPlaying } from './players'
 
 export const CHECKERS_PER_PLAYER = 15
 export type PointPosition =
@@ -61,15 +61,26 @@ export type DestinationPosition = PointPosition | 'off'
 export type NodotsColor = 'black' | 'white'
 export type NodotsMoveDirection = 'clockwise' | 'counterclockwise'
 
+// GameInitializing should never hit the db. Check the db.ts file for the actual db schema
 export interface GameInitializing {
-  id: 'fake'
   kind: 'game-initializing'
+  players: NodotsPlayersReady
+  board: NodotsBoard
+  dice: {
+    white: NodotsDiceInitialized
+    black: NodotsDiceInitialized
+  }
+  cube: NodotsCube
 }
 
-export interface GameInitialized {
+export interface GameReady {
   id: string
-  kind: 'game-initialized'
+  kind: 'game-ready'
   players: NodotsPlayersPlaying
+  directions: {
+    white: NodotsMoveDirection
+    black: NodotsMoveDirection
+  }
   dice: {
     white: NodotsDiceInitialized
     black: NodotsDiceInitialized
@@ -113,25 +124,8 @@ export interface GamePlayingMoving {
   activePlay?: NodotsPlay
 }
 
-// export interface GameCompleted extends INodotsGame {
-//   kind: 'game-completed'
-//   activeColor: NodotsColor
-//   board: NodotsBoard
-//   cube: NodotsCube
-//   roll: NodotsRoll
-//   players:
-//   winner: PlayerWinning
-// }
-
-export type NodotsGameActive =
-  | GameInitialized
-  | GameRollingForStart
-  | GamePlayingRolling
-  | GamePlayingMoving
-
 export type NodotsGame =
-  | GameInitializing
-  | GameInitialized
+  | GameReady
   | GameRollingForStart
   | GamePlayingRolling
   | GamePlayingMoving

@@ -2,13 +2,10 @@ import { UserInfoResponse as Auth0User } from 'auth0'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import {
   dbCreatePlayerFromAuth0User,
-  dbGetActivePlayerByEmail,
-  dbGetPlayerByEmail,
   dbGetPlayerById,
-  dbGetPlayerBySourceAndExternalId,
+  dbGetPlayerByExternalSource,
   dbGetPlayers,
   dbGetPlayersSeekingGame,
-  dbSetPlayerPlaying,
   dbUpdatePlayerPreferences,
 } from './db'
 
@@ -24,21 +21,6 @@ export const getAllPlayers = async (
 export const getPlayersSeekingGame = async (
   db: NodePgDatabase<Record<string, never>>
 ) => await dbGetPlayersSeekingGame(db)
-
-export const getPlayerByEmail = async (
-  email: string,
-  db: NodePgDatabase<Record<string, never>>
-) => await dbGetPlayerByEmail(email, db)
-
-export const getActivePlayerByEmail = async (
-  email: string,
-  db: NodePgDatabase<Record<string, never>>
-) => await dbGetActivePlayerByEmail(email, db)
-
-export const setPlayerPlayingReady = async (
-  id: string,
-  db: NodePgDatabase<Record<string, never>>
-) => await dbSetPlayerPlaying({ id, db })
 
 export type UpdatedPlayerPreferences = Partial<IPlayerPreferences>
 
@@ -56,7 +38,7 @@ export const createPlayerFromAuthOUser = async (
   const { sub } = user
   const [source, externalId] = sub.split('|')
   try {
-    let player = await dbGetPlayerBySourceAndExternalId(source, externalId, db)
+    let player = await dbGetPlayerByExternalSource({ source, externalId }, db)
     return player
       ? player
       : await dbCreatePlayerFromAuth0User(user, isLoggedIn, db)

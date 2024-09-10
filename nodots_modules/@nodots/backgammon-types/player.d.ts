@@ -20,45 +20,31 @@ export interface IPlayerPreferences {
   }
 }
 
+/* Minimum player information -- this could come from a variety of sources, hence "I" for interface. */
 export type IPlayer = {
-  id: string
   email: string
   isLoggedIn: boolean
   preferences?: IPlayerPreferences
 }
 
-export interface IPlayers {
-  black: IPlayer
-  white: IPlayer
-}
-
-// REFACTOR: There is a line somewhere around here where we are
-// transitioning from a User to a Player. Backgammon doesn't care
-// about users. It cares about players. Move all of the non-player
-// stuff to a User module and keep the Player module focused
-// on the entities that roll dice, move checkers, etc.
+// PlayerInitializing should never hit the db. Check the db.ts file for the actual db schema
 export interface PlayerInitializing extends IPlayer {
   kind: 'player-initializing'
-  email: 'fake@nodots.com'
-  isLoggedIn: true
 }
 
-export interface PlayerInitialized extends IPlayer {
-  kind: 'player-initialized'
+export interface PlayerReady extends IPlayer {
+  id: string
+  kind: 'player-ready'
   source: string
-  externalId: string
-  preferences?: IPlayerPreferences
-}
-
-export interface PlayerSeekingGame extends IPlayer {
-  kind: 'player-seeking-game'
-  source: string
+  isSeekingGame: boolean
   externalId: string
   preferences?: IPlayerPreferences
 }
 
 export interface PlayerPlaying extends IPlayer {
+  id: string
   kind: 'player-playing'
+  activity: PlayerActivity
   source: string
   externalId: string
   color: NodotsColor
@@ -68,12 +54,9 @@ export interface PlayerPlaying extends IPlayer {
 
 export type PlayerKind =
   | 'player-initializing'
-  | 'player-initialized'
-  | 'player-seeking-game'
+  | 'player-ready'
   | 'player-playing'
 
-export type NodotsPlayer =
-  | PlayerInitializing
-  | PlayerInitialized
-  | PlayerSeekingGame
-  | PlayerPlaying
+export type PlayerActivity = 'rolling' | 'moving' | 'waiting' | undefined
+
+export type NodotsPlayer = PlayerReady | PlayerPlaying

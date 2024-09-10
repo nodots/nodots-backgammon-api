@@ -1,10 +1,8 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { Router } from 'express'
 import {
-  dbCreatePlayerFromAuth0User,
-  dbGetPlayerByEmail,
+  dbGetPlayerByExternalSource,
   dbGetPlayerById,
-  dbGetPlayerBySourceAndExternalIdAndKind,
   dbGetPlayers,
   dbGetPlayersSeekingGame,
   dbLogoutPlayer,
@@ -12,10 +10,13 @@ import {
   dbUpdatePlayerPreferences,
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
 
-import { UpdatedPlayerPreferences } from '../../nodots_modules/@nodots/backgammon/Player'
+import {
+  getPlayerById,
+  UpdatedPlayerPreferences,
+} from '../../nodots_modules/@nodots/backgammon/Player'
 import {
   dbGetAll,
-  dbGetInitializedGameByPlayerId,
+  dbGetReadyGameByPlayerId,
 } from '../../nodots_modules/@nodots/backgammon/Game/db'
 
 export interface IPlayerRouter extends Router {}
@@ -60,7 +61,7 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   router.get('/active-game/:playerId', async (req, res) => {
     const playerId = req.params.playerId
     try {
-      const playerGames = await dbGetInitializedGameByPlayerId(playerId, db)
+      const playerGames = await dbGetReadyGameByPlayerId(playerId, db)
       console.log(playerGames)
       res.status(200).json(playerGames)
     } catch {
@@ -74,9 +75,8 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
     const source = req.params.source
     const externalId = req.params.externalId
     try {
-      const result = await dbGetPlayerBySourceAndExternalIdAndKind(
-        source,
-        externalId,
+      const result = await dbGetPlayerByExternalSource(
+        { source, externalId },
         db
       )
       console.log(result)
@@ -86,26 +86,24 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
     }
   })
 
-  router.get(
-    '/email/:email([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+)',
-    async (req, res) => {
-      try {
-        const result = await dbGetPlayerByEmail(req.params.email, db)
-        result.length === 0
-          ? res.status(404).json({})
-          : res.status(200).json(result[0])
-      } catch {}
-    }
-  )
-
   router.patch(
-    '/:id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+    '/seeking-game/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/',
     async (req, res) => {
       const playerId = req.params.playerId
-      const updatedPlayerPreferences: UpdatedPlayerPreferences = req.body
+      const seekingGame = req.body.seekingGame
+      console.log('[PlayerRouter] seeking-game req.body:', req.body)
       try {
-        await dbUpdatePlayerPreferences(playerId, updatedPlayerPreferences, db)
-        res.status(200).json({ message: 'Player preferences updated' })
+        const player = await dbGetPlayerById(playerId, db)
+        if (!player) {
+          res
+            .status(404)
+            .json({ message: `Player not found for id: ${playerId}` })
+          return
+        }
+        await dbSetPlayerSeekingGame(playerId, seekingGame, db)
+        res.status(200).json({
+          message: `Player seeking game set to: ${!player.isSeekingGame}`,
+        })
       } catch {
         res
           .status(404)
@@ -113,6 +111,22 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
       }
     }
   )
+
+  // router.patch(
+  //   '/:id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+  //   async (req, res) => {
+  //     const playerId = req.params.playerId
+  //     const updatedPlayerPreferences: UpdatedPlayerPreferences = req.body
+  //     try {
+  //       await dbUpdatePlayerPreferences(playerId, updatedPlayerPreferences, db)
+  //       res.status(200).json({ message: 'Player preferences updated' })
+  //     } catch {
+  //       res
+  //         .status(404)
+  //         .json({ message: `Player not found for id: ${playerId}` })
+  //     }
+  //   }
+  // )
 
   router.patch(
     '/logout/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
@@ -120,7 +134,7 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
       const playerId = req.params.playerId
       try {
         await dbLogoutPlayer(playerId, db)
-        res.status(200).json({ message: 'Player preferences updated' })
+        res.status(200).json({ message: 'Player logged out' })
       } catch {
         res
           .status(404)
@@ -128,19 +142,6 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
       }
     }
   )
-
-  router.patch('/set-seeking-game/:playerId', async (req, res) => {
-    console.log('req.body', req.body)
-    const kind = req.body.kind
-    const playerId = req.params.playerId
-    try {
-      const result = await dbSetPlayerSeekingGame(playerId, kind, db)
-      console.log('******', result)
-      res.status(200).json(result)
-    } catch {
-      res.status(500).json({ message: 'Error setting player seeking game' })
-    }
-  })
 
   // Specialized read
   router.get('/seeking-game', async (req, res) => {

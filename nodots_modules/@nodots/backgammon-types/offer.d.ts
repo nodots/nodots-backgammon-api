@@ -1,4 +1,4 @@
-import { PlayerSeekingGame } from './player'
+import { PlayerReady } from './player'
 
 interface Offer {
   offeringPlayerId: string

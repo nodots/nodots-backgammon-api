@@ -2,16 +2,9 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { eq, and } from 'drizzle-orm'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
 import {
-  GameInitialized,
-  GameInitializing,
-  NodotsBoard,
+  GameReady,
   NodotsColor,
-  NodotsCube,
-  NodotsDice,
-  NodotsGame,
   NodotsMoveDirection,
-  NodotsPlayer,
-  NodotsPlayersPlaying,
 } from '../../backgammon-types'
 
 export const ColorEnum = pgEnum('color', ['black', 'white'])
@@ -21,8 +14,7 @@ export const DirectionEnum = pgEnum('direction', [
 ])
 
 const gameKind = [
-  'game-initializing',
-  'game-initialized',
+  'game-ready',
   'game-rolling-for-start',
   'game-playing-rolling',
   'game-playing-moving',
@@ -50,7 +42,7 @@ export const GamesTable = pgTable('games', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 export const dbCreateGame = async (
-  initializedGame: GameInitialized,
+  initializedGame: GameReady,
   db: NodePgDatabase<Record<string, never>>
 ) => {
   const player1 = initializedGame.players.black
@@ -68,7 +60,7 @@ export const dbCreateGame = async (
 }
 
 export const dbSetGameRolling = async (
-  game: GameInitialized,
+  game: GameReady,
   activeColor: NodotsColor,
   db: NodePgDatabase<Record<string, never>>
 ) => {
@@ -98,44 +90,14 @@ export const dbGetGame = async (
   return game
 }
 
-export const dbGetInitializedGameByPlayerId = async (
+export const dbGetReadyGameByPlayerId = async (
   playerId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
   const games = await (
     await dbGetAll(db)
-  ).filter((g) => g.kind === 'game-initialized')
+  ).filter((g) => g.kind === 'game-ready')
   return games.length === 1 ? games[0] : null
-}
-
-export const dbGetInitializedGameById = async (
-  gameId: string,
-  db: NodePgDatabase<Record<string, never>>
-) =>
-  await db
-    .select()
-    .from(GamesTable)
-    .where(
-      and(eq(GamesTable.id, gameId), eq(GamesTable.kind, 'game-initialized'))
-    )
-    .limit(1)
-
-export const dbGetGameByIdAndKind = async (
-  gameId: string,
-  kind:
-    | 'game-initializing'
-    | 'game-initialized'
-    | 'game-rolling-for-start'
-    | 'game-playing-rolling'
-    | 'game-playing-moving'
-    | 'game-completed',
-  db: NodePgDatabase<Record<string, never>>
-) => {
-  return await db
-    .select()
-    .from(GamesTable)
-    .where(and(eq(GamesTable.id, gameId), eq(GamesTable.kind, kind)))
-    .limit(1)
 }
 
 export const dbGetGamesByPlayerId = async (
