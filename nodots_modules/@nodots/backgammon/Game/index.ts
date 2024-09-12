@@ -6,7 +6,11 @@ import { getPlayerById } from '../Player'
 import { dbCreateGame, dbGetGame, dbGetAll, dbGetGamesByPlayerId } from './db'
 import { GameStateError } from './errors'
 
-import { NodotsMoveDirection, PlayerReady } from '../../backgammon-types'
+import {
+  GameInitializing,
+  NodotsMoveDirection,
+  PlayerReady,
+} from '../../backgammon-types'
 
 export type GamePlayerReady = PlayerReady & { direction: NodotsMoveDirection }
 
@@ -36,9 +40,16 @@ export const startGame = async (
   const board = buildBoard()
   const cube = buildCube()
   const dice = buildDice()
-  console.log('[@nodots/Game] startGame player1:', player1Playing)
-  console.log('[@nodots/Game] startGame player2:', player2Playing)
-  // return await dbCreateGame(gameInitializing, db)
+
+  const gameInitializing: GameInitializing = {
+    kind: 'game-initializing',
+    players: [player1Playing, player2Playing],
+    board,
+    cube,
+    dice,
+  }
+
+  return await dbCreateGame(gameInitializing, db)
 }
 
 // Getters

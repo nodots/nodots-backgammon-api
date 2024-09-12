@@ -31,13 +31,10 @@ export const GameRouter = (db: NodePgDatabase): IGameRouter => {
     result.length === 1 ? res.status(200).json(result[0]) : res.status(404)
   })
 
-  interface IStartGamePayload {
-    player1Id: string
-    player2Id: string
-  }
+  type StartGamePayload = [string, string]
 
   router.post('/', async (req, res) => {
-    const { player1Id, player2Id } = req.body as IStartGamePayload
+    const [player1Id, player2Id] = req.body as StartGamePayload
     if (player1Id === 'fake' || player2Id === 'fake') {
       return {
         error: `Invalid id for player1Id: ${player1Id} or player2Id: ${player2Id}`,

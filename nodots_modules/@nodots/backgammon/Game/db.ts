@@ -2,6 +2,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { eq, and } from 'drizzle-orm'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
 import {
+  GameInitializing,
   GameReady,
   NodotsColor,
   NodotsMoveDirection,
@@ -42,18 +43,14 @@ export const GamesTable = pgTable('games', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 export const dbCreateGame = async (
-  initializedGame: GameReady,
+  gameInitializing: GameInitializing,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const player1 = initializedGame.players.black
-  const player2 = initializedGame.players.white
   const game: typeof GamesTable.$inferInsert = {
-    ...initializedGame,
-    player1,
-    player2,
-    board: initializedGame.board,
-    cube: initializedGame.cube,
-    dice: initializedGame.dice,
+    ...gameInitializing,
+    kind: 'game-ready',
+    player1: gameInitializing.players[0],
+    player2: gameInitializing.players[1],
   }
   const result = await db.insert(GamesTable).values(game).returning()
   return result?.length === 1 ? result[0] : null

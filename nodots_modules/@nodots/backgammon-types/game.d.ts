@@ -8,6 +8,7 @@ import {
   NodotsDice,
 } from './dice'
 import { NodotsPlay } from './play'
+import { PlayerReady } from './player'
 import { NodotsPlayersReady, NodotsPlayersPlaying } from './players'
 
 export const CHECKERS_PER_PLAYER = 15
@@ -64,7 +65,7 @@ export type NodotsMoveDirection = 'clockwise' | 'counterclockwise'
 // GameInitializing should never hit the db. Check the db.ts file for the actual db schema
 export interface GameInitializing {
   kind: 'game-initializing'
-  players: NodotsPlayersReady
+  players: [PlayerReady, PlayerReady]
   board: NodotsBoard
   dice: {
     white: NodotsDiceInitialized
