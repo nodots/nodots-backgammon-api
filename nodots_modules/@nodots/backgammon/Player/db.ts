@@ -102,6 +102,22 @@ export const dbSetPlayerSeekingGame = async (
   return result[0] ? result[0] : null
 }
 
+export const dbSetPlayerPlaying = async (
+  id: string,
+  db: NodePgDatabase<Record<string, never>>
+) => {
+  console.log('[dbSetPlayerPlaying] id:', id)
+  const result = await db
+    .update(PlayersTable)
+    .set({
+      kind: 'player-playing',
+    })
+    .where(eq(PlayersTable.id, id))
+    .returning()
+  console.log('dbSetPlayerPlaying result:', result)
+  return result[0] ? result[0] : null
+}
+
 export const dbLogoutPlayer = async (
   id: string,
   db: NodePgDatabase<Record<string, never>>

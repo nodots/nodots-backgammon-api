@@ -6,6 +6,7 @@ import {
   dbGetPlayers,
   dbGetPlayersSeekingGame,
   dbLogoutPlayer,
+  dbSetPlayerPlaying,
   dbSetPlayerSeekingGame,
   dbUpdatePlayerPreferences,
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
@@ -85,6 +86,37 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
       res.status(500).json({ message: 'Error retrieving player' })
     }
   })
+
+  router.patch(
+    '/playing/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/',
+    async (req, res) => {
+      const playerId = req.params.playerId
+      console.log('[PlayerRouter] playing playerId:', playerId)
+      try {
+        const player = await dbGetPlayerById(playerId, db)
+        if (!player) {
+          res
+            .status(404)
+            .json({ message: `Player not found for id: ${playerId}` })
+          return
+        }
+        if (player.kind !== 'player-ready') {
+          res.status(400).json({
+            message: `Cannot transition playerId ${playerId} from ${player.kind} to 'player-playing'`,
+          })
+          return
+        }
+        await dbSetPlayerPlaying(playerId, db)
+        res.status(200).json({
+          message: `Player ${playerId} is now kind PlayerPlaying`,
+        })
+      } catch {
+        res
+          .status(404)
+          .json({ message: `Player not found for id: ${playerId}` })
+      }
+    }
+  )
 
   router.patch(
     '/seeking-game/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/',

@@ -19,10 +19,9 @@ export const GameRouter = (db: NodePgDatabase): IGameRouter => {
   router.get('/:id', async (req, res) => {
     const { id } = req.params
     console.log('[GameRouter] get id:', id)
-    res.status(200).json({ id })
 
-    // const result = await getGame(id, db)
-    // result.length === 1 ? res.status(200).json(result[0]) : res.status(404)
+    const result = await getGame(id, db)
+    result.length === 1 ? res.status(200).json(result[0]) : res.status(404)
   })
 
   router.get('/active/:id', async (req, res) => {
