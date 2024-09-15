@@ -20,8 +20,8 @@ export const startGame = async (
   player2Id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const player1 = (await getPlayerById(player1Id, db)) as PlayerReady
-  const player2 = (await getPlayerById(player2Id, db)) as PlayerReady
+  const player1 = (await getPlayerById(player1Id, db)) as unknown as PlayerReady // FIXME: This is a hack
+  const player2 = (await getPlayerById(player2Id, db)) as unknown as PlayerReady
 
   const player1Playing: GamePlayerReady = {
     ...player1,

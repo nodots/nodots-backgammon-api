@@ -176,7 +176,7 @@ export const dbGetPlayerByExternalSource = async (
     const player = players[0]
     switch (player.kind) {
       case 'player-ready':
-        return player as PlayerReady
+        return player as unknown as PlayerReady
       case 'player-playing':
         return player as unknown as PlayerPlaying
       default:

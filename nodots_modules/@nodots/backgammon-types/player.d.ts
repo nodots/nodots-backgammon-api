@@ -38,6 +38,8 @@ export interface PlayerReady extends IPlayer {
   source: string
   isSeekingGame: boolean
   externalId: string
+  color: NodotsColor
+  direction: NodotsMoveDirection
   preferences?: IPlayerPreferences
 }
 

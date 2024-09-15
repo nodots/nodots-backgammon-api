@@ -130,3 +130,8 @@ export type NodotsGame =
   | GameRollingForStart
   | GamePlayingRolling
   | GamePlayingMoving
+
+export type NodotsGameActive =
+  | GameRollingForStart
+  | GamePlayingRolling
+  | GamePlayingMoving
