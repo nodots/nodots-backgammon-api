@@ -30,6 +30,8 @@ export type IPlayer = {
 // PlayerInitializing should never hit the db. Check the db.ts file for the actual db schema
 export interface PlayerInitializing extends IPlayer {
   kind: 'player-initializing'
+  source: string
+  externalId: string
 }
 
 export interface PlayerReady extends IPlayer {
@@ -48,6 +50,7 @@ export interface PlayerPlaying extends IPlayer {
   kind: 'player-playing'
   activity: PlayerActivity
   source: string
+  isSeekingGame: false
   externalId: string
   color: NodotsColor
   direction: NodotsMoveDirection
