@@ -40,7 +40,16 @@ export const startGame = async (
 
   const gameInitializing: NodotsGameInitializing = {
     kind: 'initializing',
-    players: [clockwisePlayer, counterclockwisePlayer],
+    players: {
+      black:
+        clockwisePlayer.color === 'black'
+          ? clockwisePlayer
+          : counterclockwisePlayer,
+      white:
+        clockwisePlayer.color === 'white'
+          ? clockwisePlayer
+          : counterclockwisePlayer,
+    },
     board,
     dice,
     cube,

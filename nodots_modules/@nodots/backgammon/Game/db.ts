@@ -42,8 +42,8 @@ export const dbCreateGame = async (
   const game: typeof GamesTable.$inferInsert = {
     ...gameInitializing,
     kind: 'ready',
-    player1: gameInitializing.players[0],
-    player2: gameInitializing.players[1],
+    player1: gameInitializing.players.black,
+    player2: gameInitializing.players.white,
   }
   const result = await db.insert(GamesTable).values(game).returning()
   return result?.length === 1 ? result[0] : null
