@@ -8,8 +8,7 @@ import {
   NodotsDice,
 } from './dice'
 import { NodotsPlay } from './play'
-import { NodotsPlayerReady } from './player'
-import { NodotsPlayersPlaying } from './players'
+import { NodotsPlayersPlaying, NodotsPlayersReady } from './players'
 
 export type NodotsColor = 'black' | 'white'
 export type NodotsMoveDirection = 'clockwise' | 'counterclockwise'
@@ -71,7 +70,7 @@ type _Game = {
 
 export interface NodotsGameInitializing {
   kind: 'initializing'
-  players: [NodotsPlayerReady, NodotsPlayerReady]
+  players: NodotsPlayersReady
   board: NodotsBoard
   dice: {
     white: NodotsDiceInitialized
