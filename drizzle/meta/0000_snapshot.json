@@ -1,5 +1,5 @@
 {
-  "id": "2e6b6ee3-d369-4948-9627-2a4f5e90fc11",
+  "id": "13a6966e-f5fd-4cb4-83a4-ab1b2237a58f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -158,14 +158,15 @@
           "primaryKey": false,
           "notNull": false
         },
-        "preferences": {
-          "name": "preferences",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
         "is_logged_in": {
           "name": "is_logged_in",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_seeking_game": {
+          "name": "is_seeking_game",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -180,6 +181,12 @@
         "last_log_out": {
           "name": "last_log_out",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "preferences": {
+          "name": "preferences",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -240,12 +247,11 @@
       "name": "game-kind",
       "schema": "public",
       "values": [
-        "game-initializing",
-        "game-initialized",
-        "game-rolling-for-start",
-        "game-playing-rolling",
-        "game-playing-moving",
-        "game-completed"
+        "initializing",
+        "ready",
+        "rolling-for-start",
+        "playing-rolling",
+        "playing-moving"
       ]
     },
     "public.offer-kind": {
@@ -261,9 +267,9 @@
       "name": "player-kind",
       "schema": "public",
       "values": [
-        "player-initialized",
-        "player-seeking-game",
-        "player-playing"
+        "ready",
+        "playing",
+        "initialilizing"
       ]
     }
   },

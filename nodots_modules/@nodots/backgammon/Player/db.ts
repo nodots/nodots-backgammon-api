@@ -1,8 +1,8 @@
-import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { UserInfoResponse as Auth0User } from 'auth0'
-import { boolean } from 'drizzle-orm/pg-core'
-import { eq, and } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
+import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import {
+  boolean,
   jsonb,
   pgEnum,
   pgTable,
@@ -10,15 +10,19 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { PlayerReady, PlayerPlaying, Player } from '../../backgammon-types'
 import { UpdatedPlayerPreferences } from '.'
+import {
+  NodotsPlayerActive,
+  NodotsPlayerInitializing,
+  NodotsPlayerKind,
+} from '../../backgammon-types'
 
 export interface ExternalPlayerReference {
   source: string
   externalId: string
 }
 
-const playerKinds = ['player-ready', 'player-playing'] as const
+const playerKinds = ['ready', 'playing', 'initialilizing'] as const
 export const PlayerTypeEnum = pgEnum('player-kind', playerKinds)
 
 export const PlayersTable = pgTable('players', {
@@ -27,11 +31,11 @@ export const PlayersTable = pgTable('players', {
   source: text('source'),
   externalId: text('external_id').unique(),
   email: text('email').unique(),
-  preferences: jsonb('preferences'),
   isLoggedIn: boolean('is_logged_in').default(false).notNull(),
   isSeekingGame: boolean('is_seeking_game').default(false).notNull(),
   lastLogIn: timestamp('last_log_in'),
   lastLogOut: timestamp('last_log_out'),
+  preferences: jsonb('preferences'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -46,7 +50,7 @@ export const dbCreatePlayerFromAuth0User = async (
   }
   const [source, externalId] = user.sub?.split('|')
   const player: typeof PlayersTable.$inferInsert = {
-    kind: 'player-ready',
+    kind: 'ready',
     source,
     externalId,
     email: user.email,
@@ -72,7 +76,7 @@ export const dbLoginPlayer = async (
   await db
     .update(PlayersTable)
     .set({
-      kind: 'player-ready',
+      kind: 'ready',
       isLoggedIn: true,
       lastLogIn: new Date(),
     })
@@ -87,7 +91,7 @@ export const dbSetPlayerSeekingGame = async (
   const result = await db
     .update(PlayersTable)
     .set({
-      kind: 'player-ready',
+      kind: 'ready',
       isSeekingGame: seekingGame,
     })
     .where(eq(PlayersTable.id, id))
@@ -104,7 +108,7 @@ export const dbSetPlayerPlaying = async (
   const result = await db
     .update(PlayersTable)
     .set({
-      kind: 'player-playing',
+      kind: 'playing',
     })
     .where(eq(PlayersTable.id, id))
     .returning()
@@ -119,7 +123,7 @@ export const dbLogoutPlayer = async (
   await db
     .update(PlayersTable)
     .set({
-      kind: 'player-ready',
+      kind: 'ready',
       isLoggedIn: false,
       lastLogOut: new Date(),
     })
@@ -144,16 +148,12 @@ export const dbGetPlayerById = async (
 // Specialized read
 export const dbGetPlayersSeekingGame = async (
   db: NodePgDatabase<Record<string, never>>
-) =>
-  await db
-    .select()
-    .from(PlayersTable)
-    .where(eq(PlayersTable.kind, 'player-ready'))
+) => await db.select().from(PlayersTable).where(eq(PlayersTable.kind, 'ready'))
 
 export const dbGetPlayerByExternalSource = async (
   reference: ExternalPlayerReference,
   db: NodePgDatabase<Record<string, never>>
-): Promise<Player | null> => {
+): Promise<NodotsPlayerActive | NodotsPlayerInitializing | null> => {
   const { source, externalId } = reference
   const players = await db
     .select()
@@ -169,13 +169,11 @@ export const dbGetPlayerByExternalSource = async (
   if (players.length === 1) {
     const player = players[0]
     switch (player.kind) {
-      case 'player-ready':
-        return player as unknown as PlayerReady
-      case 'player-playing':
-        return player as unknown as PlayerPlaying
+      case 'ready':
+      case 'playing':
+        return player as NodotsPlayerActive
       default:
-      // assert never
-      // return null
+        throw new Error('Unexpected player kind')
     }
   }
   return null

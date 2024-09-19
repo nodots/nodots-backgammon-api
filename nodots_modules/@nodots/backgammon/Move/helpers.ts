@@ -180,7 +180,7 @@ const saveGameState = (gameState: NodotsGameState): void => {
   //   state: state,
   // }
   // switch (state.kind) {
-  //   case 'game-initializing':
+  //   case 'initializing':
   //     localStorage.setItem(
   //       gameStateKey,
   //       JSON.stringify([gameStateHistoryEvent])

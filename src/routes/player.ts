@@ -8,17 +8,9 @@ import {
   dbLogoutPlayer,
   dbSetPlayerPlaying,
   dbSetPlayerSeekingGame,
-  dbUpdatePlayerPreferences,
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
 
-import {
-  getPlayerById,
-  UpdatedPlayerPreferences,
-} from '../../nodots_modules/@nodots/backgammon/Player'
-import {
-  dbGetAll,
-  dbGetReadyGameByPlayerId,
-} from '../../nodots_modules/@nodots/backgammon/Game/db'
+import { dbGetReadyGameByPlayerId } from '../../nodots_modules/@nodots/backgammon/Game/db'
 
 export interface IPlayerRouter extends Router {}
 
@@ -75,12 +67,14 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   router.get('/sub/:source/:externalId', async (req, res) => {
     const source = req.params.source
     const externalId = req.params.externalId
+    console.log('[PlayerRouter] sub source:', source)
+    console.log('[PlayerRouter] sub externalId:', externalId)
     try {
       const result = await dbGetPlayerByExternalSource(
         { source, externalId },
         db
       )
-      console.log(result)
+      console.log('[PlayerRouter] result:', result)
       res.status(200).json(result)
     } catch {
       res.status(500).json({ message: 'Error retrieving player' })
@@ -100,9 +94,9 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
             .json({ message: `Player not found for id: ${playerId}` })
           return
         }
-        if (player.kind !== 'player-ready') {
+        if (player.kind !== 'ready') {
           res.status(400).json({
-            message: `Cannot transition playerId ${playerId} from ${player.kind} to 'player-playing'`,
+            message: `Cannot transition playerId ${playerId} from ${player.kind} to 'playing'`,
           })
           return
         }

@@ -2,8 +2,8 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { eq, and } from 'drizzle-orm'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
 import {
-  GameInitializing,
-  GameReady,
+  NodotsGameInitializing,
+  NodotsGameReady,
   NodotsColor,
   NodotsMoveDirection,
 } from '../../backgammon-types'
@@ -15,21 +15,14 @@ export const DirectionEnum = pgEnum('direction', [
 ])
 
 const gameKind = [
-  'game-ready',
-  'game-rolling-for-start',
-  'game-playing-rolling',
-  'game-playing-moving',
-  'game-completed',
+  'initializing',
+  'ready',
+  'rolling-for-start',
+  'playing-rolling',
+  'playing-moving',
 ] as const
 
 export const GameTypeEnum = pgEnum('game-kind', gameKind)
-
-export interface ActiveBackgammonPlayer {
-  id: string
-  kind: 'player-rolling' | 'player-moving' | 'player-waiting'
-  color: NodotsColor
-  direction: NodotsMoveDirection
-}
 
 export const GamesTable = pgTable('games', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
@@ -43,12 +36,12 @@ export const GamesTable = pgTable('games', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 export const dbCreateGame = async (
-  gameInitializing: GameInitializing,
+  gameInitializing: NodotsGameInitializing,
   db: NodePgDatabase<Record<string, never>>
 ) => {
   const game: typeof GamesTable.$inferInsert = {
     ...gameInitializing,
-    kind: 'game-ready',
+    kind: 'ready',
     player1: gameInitializing.players[0],
     player2: gameInitializing.players[1],
   }
@@ -57,14 +50,14 @@ export const dbCreateGame = async (
 }
 
 export const dbSetGameRolling = async (
-  game: GameReady,
+  game: NodotsGameReady,
   activeColor: NodotsColor,
   db: NodePgDatabase<Record<string, never>>
 ) => {
   console.log('dbSetGameRolling', game)
   return {
     ...game,
-    kind: 'game-playing-rolling',
+    kind: 'playing-rolling',
     activeColor,
   }
 }
@@ -91,9 +84,7 @@ export const dbGetReadyGameByPlayerId = async (
   playerId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const games = await (
-    await dbGetAll(db)
-  ).filter((g) => g.kind === 'game-ready')
+  const games = await (await dbGetAll(db)).filter((g) => g.kind === 'ready')
   return games.length === 1 ? games[0] : null
 }
 

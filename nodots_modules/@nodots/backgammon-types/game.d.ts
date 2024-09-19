@@ -8,8 +8,11 @@ import {
   NodotsDice,
 } from './dice'
 import { NodotsPlay } from './play'
-import { PlayerReady } from './player'
-import { NodotsPlayersReady, NodotsPlayersPlaying } from './players'
+import { NodotsPlayerReady } from './player'
+import { NodotsPlayersPlaying } from './players'
+
+export type NodotsColor = 'black' | 'white'
+export type NodotsMoveDirection = 'clockwise' | 'counterclockwise'
 
 export const CHECKERS_PER_PLAYER = 15
 export type PointPosition =
@@ -59,13 +62,21 @@ export type PlayerCheckers = [
 export type CheckercontainerPosition = PointPosition | 'bar' | 'off'
 export type OriginPosition = PointPosition | 'bar'
 export type DestinationPosition = PointPosition | 'off'
-export type NodotsColor = 'black' | 'white'
-export type NodotsMoveDirection = 'clockwise' | 'counterclockwise'
 
 // GameInitializing should never hit the db. Check the db.ts file for the actual db schema
-export interface GameInitializing {
-  kind: 'game-initializing'
-  players: [PlayerReady, PlayerReady]
+type _Game = {
+  kind:
+    | 'initializing'
+    | 'ready'
+    | 'rolling-for-start'
+    | 'playing-rolling'
+    | 'playing-moving'
+  players: NodotsPlayersPlaying
+}
+
+export interface NodotsGameInitializing {
+  kind: 'initializing'
+  players: [NodotsPlayerReady, NodotsPlayerReady]
   board: NodotsBoard
   dice: {
     white: NodotsDiceInitialized
@@ -74,10 +85,10 @@ export interface GameInitializing {
   cube: NodotsCube
 }
 
-export interface GameReady {
+export interface NodotsGameReady {
   id: string
-  kind: 'game-ready'
-  players: NodotsPlayersPlaying
+  kind: 'ready'
+  NodotsGameInitializing: NodotsPlayersPlaying
   directions: {
     white: NodotsMoveDirection
     black: NodotsMoveDirection
@@ -87,51 +98,51 @@ export interface GameReady {
     black: NodotsDiceInitialized
   }
   board: NodotsBoard
-  cube: NodotsCube
+  cube: NodotsGameReady
 }
 
-export interface GameRollingForStart {
+export interface NodotsGameRollingForStart {
   id: string
-  kind: 'game-rolling-for-start'
+  kind: 'rolling-for-start'
   players: NodotsPlayersPlaying
   dice: {
     white: NodotsDice
     black: NodotsDice
   }
   board: NodotsBoard
-  cube: NodotsCube
+  cube: NodotsGameReady
 }
 
-export interface GamePlayingRolling {
+export interface NodotsGamePlayingRolling {
   id: string
-  kind: 'game-playing-rolling'
+  NodotsGameRollingForStart: 'playing-rolling'
   players: NodotsPlayersPlaying
   dice: NodotsGameDice
   board: NodotsBoard
-  cube: NodotsCube
+  cube: NodotsGameReady
   activeColor: NodotsColor
   activePlay?: NodotsPlay
 }
 
-export interface GamePlayingMoving {
+export interface NodotsGamePlayingMoving {
   id: string
-  kind: 'game-playing-moving'
+  kind: 'playing-moving'
   players: NodotsPlayersPlaying
   dice: NodotsGameDice
   board: NodotsBoard
-  cube: NodotsCube
+  cube: NodotsGameReady
   activeColor: NodotsColor
   activeRoll: NodotsRoll
   activePlay?: NodotsPlay
 }
 
 export type NodotsGame =
-  | GameReady
-  | GameRollingForStart
-  | GamePlayingRolling
-  | GamePlayingMoving
+  | NodotsGameReady
+  | NodotsGameRollingForStart
+  | NodotsGamePlayingRolling
+  | NodotsGamePlayingMoving
 
 export type NodotsGameActive =
-  | GameRollingForStart
-  | GamePlayingRolling
-  | GamePlayingMoving
+  | NodotsGameRollingForStart
+  | NodotsGamePlayingRolling
+  | NodotsGamePlayingMoving

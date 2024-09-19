@@ -8,8 +8,7 @@ import {
   dbGetPlayersSeekingGame,
   dbUpdatePlayerPreferences,
 } from './db'
-
-import { PlayerPreferences } from '../../backgammon-types/player'
+import { NodotsPlayerPreferences } from '../../backgammon-types'
 
 export const getPlayerById = async (playerId: string, db: NodePgDatabase) =>
   await dbGetPlayerById(playerId, db)
@@ -22,7 +21,7 @@ export const getPlayersSeekingGame = async (
   db: NodePgDatabase<Record<string, never>>
 ) => await dbGetPlayersSeekingGame(db)
 
-export type UpdatedPlayerPreferences = Partial<PlayerPreferences>
+export type UpdatedPlayerPreferences = Partial<NodotsPlayerPreferences>
 
 export const updatePlayerPreferences = async (
   id: string,

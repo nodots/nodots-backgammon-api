@@ -3,8 +3,7 @@ import { eq, and } from 'drizzle-orm'
 import { generateId } from '..'
 
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
-import { NodotsPlayersReady } from '../Player/helpers'
-import { PlayInitializing } from '.'
+import { PlayInitializing } from '../../backgammon-types'
 
 export const PlayTypeEnum = pgEnum('play-kind', [
   'play-initializing',

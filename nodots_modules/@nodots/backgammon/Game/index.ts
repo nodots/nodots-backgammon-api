@@ -7,12 +7,9 @@ import { dbCreateGame, dbGetGame, dbGetAll, dbGetGamesByPlayerId } from './db'
 import { GameStateError } from './errors'
 
 import {
-  GameInitializing,
-  NodotsMoveDirection,
-  PlayerReady,
+  NodotsGameInitializing,
+  NodotsPlayerReady,
 } from '../../backgammon-types'
-
-export type GamePlayerReady = PlayerReady & { direction: NodotsMoveDirection }
 
 // State transitions
 export const startGame = async (
@@ -20,15 +17,15 @@ export const startGame = async (
   player2Id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const player1 = (await getPlayerById(player1Id, db)) as unknown as PlayerReady // FIXME: This is a hack
-  const player2 = (await getPlayerById(player2Id, db)) as unknown as PlayerReady
+  const player1 = (await getPlayerById(player1Id, db)) as NodotsPlayerReady
+  const player2 = (await getPlayerById(player2Id, db)) as NodotsPlayerReady
 
-  const player1Playing: GamePlayerReady = {
+  const clockwisePlayer: NodotsPlayerReady = {
     ...player1,
     direction: 'clockwise',
   }
 
-  const player2Playing: GamePlayerReady = {
+  const counterclockwisePlayer: NodotsPlayerReady = {
     ...player2,
     direction: 'counterclockwise',
   }
@@ -41,12 +38,12 @@ export const startGame = async (
   const cube = buildCube()
   const dice = buildDice()
 
-  const gameInitializing: GameInitializing = {
-    kind: 'game-initializing',
-    players: [player1Playing, player2Playing],
+  const gameInitializing: NodotsGameInitializing = {
+    kind: 'initializing',
+    players: [clockwisePlayer, counterclockwisePlayer],
     board,
-    cube,
     dice,
+    cube,
   }
 
   return await dbCreateGame(gameInitializing, db)
