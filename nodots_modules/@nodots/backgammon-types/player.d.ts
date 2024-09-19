@@ -1,12 +1,16 @@
+import { NodotsLocale } from '.'
 import { NodotsColor, NodotsMoveDirection } from './game'
 
-export type NodotsLocale = 'en' | 'es' | 'fr' | 'ar' | 'tr'
-export interface NodotsPipCounts {
+/**
+ * It's a Type because black and white are idiosyncratic to this way of
+ * tracking move direction and representation of that direction
+ */
+export type NodotsPipCounts = {
   black: number
   white: number
 }
 
-export interface PlayerPreferences {
+export interface NodotsPlayerPreferences {
   username?: string
   givenName?: string
   familyName?: string
@@ -31,7 +35,7 @@ export type Player = {
   externalId?: string
   color?: NodotsColor
   direction?: NodotsMoveDirection
-  preferences?: PlayerPreferences
+  preferences?: NodotsPlayerPreferences
 }
 
 export interface PlayerInitializing extends Player {
@@ -46,7 +50,7 @@ export interface PlayerReady extends Player {
   externalId: string
   color: NodotsColor
   direction: NodotsMoveDirection
-  preferences?: PlayerPreferences
+  preferences?: NodotsPlayerPreferences
 }
 
 export interface PlayerPlaying extends Player {
@@ -58,7 +62,7 @@ export interface PlayerPlaying extends Player {
   externalId: string
   color: NodotsColor
   direction: NodotsMoveDirection
-  preferences?: PlayerPreferences
+  preferences?: NodotsPlayerPreferences
 }
 
 export type PlayerKind =

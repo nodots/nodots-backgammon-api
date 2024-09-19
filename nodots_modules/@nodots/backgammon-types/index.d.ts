@@ -1,3 +1,4 @@
+export type NodotsLocale = 'en' | 'es' | 'fr' | 'ar' | 'tr'
 export * from './board'
 export * from './checker'
 export * from './checkercontainer'
