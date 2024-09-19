@@ -18,8 +18,8 @@ const gameKind = [
   'initializing',
   'ready',
   'rolling-for-start',
-  'playing-rolling',
-  'playing-moving',
+  'rolling',
+  'moving',
 ] as const
 
 export const GameTypeEnum = pgEnum('game-kind', gameKind)
@@ -57,7 +57,7 @@ export const dbSetGameRolling = async (
   console.log('dbSetGameRolling', game)
   return {
     ...game,
-    kind: 'playing-rolling',
+    kind: 'rolling',
     activeColor,
   }
 }

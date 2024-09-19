@@ -1,5 +1,5 @@
 {
-  "id": "13a6966e-f5fd-4cb4-83a4-ab1b2237a58f",
+  "id": "dcf57af4-0cd4-45c4-906e-a041056d5f30",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -250,8 +250,8 @@
         "initializing",
         "ready",
         "rolling-for-start",
-        "playing-rolling",
-        "playing-moving"
+        "rolling",
+        "moving"
       ]
     },
     "public.offer-kind": {

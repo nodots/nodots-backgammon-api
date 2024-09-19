@@ -65,12 +65,7 @@ export type DestinationPosition = PointPosition | 'off'
 
 // GameInitializing should never hit the db. Check the db.ts file for the actual db schema
 type _Game = {
-  kind:
-    | 'initializing'
-    | 'ready'
-    | 'rolling-for-start'
-    | 'playing-rolling'
-    | 'playing-moving'
+  kind: 'initializing' | 'ready' | 'rolling-for-start' | 'rolling' | 'moving'
   players: NodotsPlayersPlaying
 }
 
@@ -115,7 +110,7 @@ export interface NodotsGameRollingForStart {
 
 export interface NodotsGamePlayingRolling {
   id: string
-  NodotsGameRollingForStart: 'playing-rolling'
+  NodotsGameRollingForStart: 'rolling'
   players: NodotsPlayersPlaying
   dice: NodotsGameDice
   board: NodotsBoard
@@ -126,7 +121,7 @@ export interface NodotsGamePlayingRolling {
 
 export interface NodotsGamePlayingMoving {
   id: string
-  kind: 'playing-moving'
+  kind: 'moving'
   players: NodotsPlayersPlaying
   dice: NodotsGameDice
   board: NodotsBoard
