@@ -83,7 +83,7 @@ export interface NodotsGameInitializing {
 export interface NodotsGameReady {
   id: string
   kind: 'ready'
-  NodotsGameInitializing: NodotsPlayersPlaying
+  players: NodotsPlayersPlaying
   directions: {
     white: NodotsMoveDirection
     black: NodotsMoveDirection
