@@ -10,13 +10,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core'
-import {
-  PlayerReady,
-  NodotsPlayer,
-  PlayerPlaying,
-  NodotsColor,
-  NodotsMoveDirection,
-} from '../../backgammon-types'
+import { PlayerReady, PlayerPlaying, Player } from '../../backgammon-types'
 import { UpdatedPlayerPreferences } from '.'
 
 export interface ExternalPlayerReference {
@@ -159,7 +153,7 @@ export const dbGetPlayersSeekingGame = async (
 export const dbGetPlayerByExternalSource = async (
   reference: ExternalPlayerReference,
   db: NodePgDatabase<Record<string, never>>
-): Promise<NodotsPlayer | null> => {
+): Promise<Player | null> => {
   const { source, externalId } = reference
   const players = await db
     .select()

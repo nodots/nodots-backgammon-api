@@ -1,4 +1,4 @@
-import { PlayerReady, PlayerPlaying, NodotsPlayer } from './player'
+import { PlayerReady, PlayerPlaying, Player } from './player'
 
 export interface NodotsPlayersReady {
   black: PlayerReady
@@ -9,4 +9,4 @@ export interface NodotsPlayersPlaying {
   white: PlayerPlaying
 }
 
-export type NodotsPlayers = [NodotsPlayer, NodotsPlayer]
+export type NodotsPlayers = [Player, Player]

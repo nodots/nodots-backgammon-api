@@ -7,6 +7,7 @@ import {
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { UserInfoResponse as Auth0User } from 'auth0'
+import { PlayerActive } from '../../nodots_modules/@nodots/backgammon-types'
 
 export interface IAuthRouter extends Router {}
 
@@ -27,7 +28,10 @@ export const AuthRouter = (db: NodePgDatabase): IAuthRouter => {
 
     const externalReference: ExternalPlayerReference = { source, externalId }
 
-    let player = await dbGetPlayerByExternalSource(externalReference, db)
+    let player = (await dbGetPlayerByExternalSource(
+      externalReference,
+      db
+    )) as PlayerActive
     if (player) {
       await dbLoginPlayer(player.id, db)
     }

@@ -6,7 +6,7 @@ export interface NodotsPipCounts {
   white: number
 }
 
-export interface IPlayerPreferences {
+export interface PlayerPreferences {
   username?: string
   givenName?: string
   familyName?: string
@@ -20,21 +20,25 @@ export interface IPlayerPreferences {
   }
 }
 
-/* Minimum player information -- this could come from a variety of sources, hence "I" for interface. */
-export type IPlayer = {
-  email: string
-  isLoggedIn: boolean
-  preferences?: IPlayerPreferences
+export type Player = {
+  kind: 'player-ready' | 'player-playing' | 'player-initializing'
+  id?: string
+  email?: string
+  activity?: PlayerActivity
+  source?: string
+  isSeekingGame?: boolean
+  isLoggedIn?: boolean
+  externalId?: string
+  color?: NodotsColor
+  direction?: NodotsMoveDirection
+  preferences?: PlayerPreferences
 }
 
-// PlayerInitializing should never hit the db. Check the db.ts file for the actual db schema
-export interface PlayerInitializing extends IPlayer {
+export interface PlayerInitializing extends Player {
   kind: 'player-initializing'
-  source: string
-  externalId: string
 }
 
-export interface PlayerReady extends IPlayer {
+export interface PlayerReady extends Player {
   id: string
   kind: 'player-ready'
   source: string
@@ -42,10 +46,10 @@ export interface PlayerReady extends IPlayer {
   externalId: string
   color: NodotsColor
   direction: NodotsMoveDirection
-  preferences?: IPlayerPreferences
+  preferences?: PlayerPreferences
 }
 
-export interface PlayerPlaying extends IPlayer {
+export interface PlayerPlaying extends Player {
   id: string
   kind: 'player-playing'
   activity: PlayerActivity
@@ -54,7 +58,7 @@ export interface PlayerPlaying extends IPlayer {
   externalId: string
   color: NodotsColor
   direction: NodotsMoveDirection
-  preferences?: IPlayerPreferences
+  preferences?: PlayerPreferences
 }
 
 export type PlayerKind =
@@ -64,4 +68,4 @@ export type PlayerKind =
 
 export type PlayerActivity = 'rolling' | 'moving' | 'waiting' | undefined
 
-export type NodotsPlayer = PlayerReady | PlayerPlaying
+export type PlayerActive = PlayerReady | PlayerPlaying
