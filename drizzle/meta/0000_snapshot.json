@@ -1,5 +1,5 @@
 {
-  "id": "dcf57af4-0cd4-45c4-906e-a041056d5f30",
+  "id": "bcde0b88-ce05-4547-bc69-fcf57dc8917f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -268,8 +268,7 @@
       "schema": "public",
       "values": [
         "ready",
-        "playing",
-        "initialilizing"
+        "playing"
       ]
     }
   },

@@ -14,13 +14,7 @@ export const DirectionEnum = pgEnum('direction', [
   'counterclockwise',
 ])
 
-const gameKind = [
-  'initializing',
-  'ready',
-  'rolling-for-start',
-  'rolling',
-  'moving',
-] as const
+const gameKind = ['rolling-for-start', 'rolling', 'moving'] as const
 
 export const GameTypeEnum = pgEnum('game-kind', gameKind)
 
@@ -41,7 +35,7 @@ export const dbCreateGame = async (
 ) => {
   const game: typeof GamesTable.$inferInsert = {
     ...gameInitializing,
-    kind: 'ready',
+    kind: 'rolling-for-start',
     player1: gameInitializing.players.black,
     player2: gameInitializing.players.white,
   }
@@ -80,11 +74,13 @@ export const dbGetGame = async (
   return game
 }
 
-export const dbGetReadyGameByPlayerId = async (
+export const dbGetNewGamesByPlayerId = async (
   playerId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const games = await (await dbGetAll(db)).filter((g) => g.kind === 'ready')
+  const games = await (
+    await dbGetAll(db)
+  ).filter((g) => g.kind === 'rolling-for-start')
   return games.length === 1 ? games[0] : null
 }
 

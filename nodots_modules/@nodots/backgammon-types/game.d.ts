@@ -92,7 +92,7 @@ export interface NodotsGameReady {
     black: NodotsDiceInitialized
   }
   board: NodotsBoard
-  cube: NodotsGameReady
+  cube: NodotsCube
 }
 
 export interface NodotsGameRollingForStart {
@@ -104,27 +104,27 @@ export interface NodotsGameRollingForStart {
     black: NodotsDice
   }
   board: NodotsBoard
-  cube: NodotsGameReady
+  cube: NodotsCube
 }
 
-export interface NodotsGamePlayingRolling {
+export interface NodotsGameRolling {
   id: string
   NodotsGameRollingForStart: 'rolling'
   players: NodotsPlayersPlaying
   dice: NodotsGameDice
   board: NodotsBoard
-  cube: NodotsGameReady
+  cube: NodotsCube
   activeColor: NodotsColor
   activePlay?: NodotsPlay
 }
 
-export interface NodotsGamePlayingMoving {
+export interface NodotsGameMoving {
   id: string
   kind: 'moving'
   players: NodotsPlayersPlaying
   dice: NodotsGameDice
   board: NodotsBoard
-  cube: NodotsGameReady
+  cube: NodotsCube
   activeColor: NodotsColor
   activeRoll: NodotsRoll
   activePlay?: NodotsPlay
@@ -133,10 +133,10 @@ export interface NodotsGamePlayingMoving {
 export type NodotsGame =
   | NodotsGameReady
   | NodotsGameRollingForStart
-  | NodotsGamePlayingRolling
-  | NodotsGamePlayingMoving
+  | NodotsGameRolling
+  | NodotsGameMoving
 
 export type NodotsGameActive =
   | NodotsGameRollingForStart
-  | NodotsGamePlayingRolling
-  | NodotsGamePlayingMoving
+  | NodotsGameRolling
+  | NodotsGameMoving

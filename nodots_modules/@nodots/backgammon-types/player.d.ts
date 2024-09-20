@@ -7,7 +7,7 @@ import { NodotsColor, NodotsMoveDirection } from './game'
  * They are explicitly NOT exported from the player module.
  */
 type _Player = {
-  kind: 'initializing' | 'ready' | 'playing'
+  kind: NodotsPlayerKind
   id?: string
   email?: string
   isSeekingGame?: boolean

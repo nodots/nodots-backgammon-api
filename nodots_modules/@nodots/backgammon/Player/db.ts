@@ -14,7 +14,7 @@ import { UpdatedPlayerPreferences } from '.'
 import {
   NodotsPlayerActive,
   NodotsPlayerInitializing,
-  NodotsPlayerKind,
+  NodotsPlayerReady,
 } from '../../backgammon-types'
 
 export interface ExternalPlayerReference {
@@ -22,7 +22,8 @@ export interface ExternalPlayerReference {
   externalId: string
 }
 
-const playerKinds = ['ready', 'playing', 'initialilizing'] as const
+// FIXME: We should be able to define this via the backgammon-types module
+const playerKinds = ['ready', 'playing'] as const
 export const PlayerTypeEnum = pgEnum('player-kind', playerKinds)
 
 export const PlayersTable = pgTable('players', {
@@ -40,33 +41,21 @@ export const PlayersTable = pgTable('players', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
-export const dbCreatePlayerFromAuth0User = async (
-  user: Auth0User,
-  isLoggedIn: boolean,
+export const dbCreatePlayer = async (
+  playerInititalizing: NodotsPlayerInitializing,
   db: NodePgDatabase<Record<string, never>>
-) => {
-  if (!user.sub) {
-    throw new Error('No sub in Auth0 user')
-  }
-  const [source, externalId] = user.sub?.split('|')
+): Promise<NodotsPlayerReady> => {
   const player: typeof PlayersTable.$inferInsert = {
+    ...playerInititalizing,
     kind: 'ready',
-    source,
-    externalId,
-    email: user.email,
-    isLoggedIn: isLoggedIn,
-    lastLogIn: isLoggedIn ? new Date() : null,
-    preferences: {
-      username: user.preferred_username
-        ? user.preferred_username
-        : user.nickname,
-      address: user.address,
-      avatar: user.picture,
-      locale: user.locale ? user.locale : 'en',
-    },
   }
-  const result = await db.insert(PlayersTable).values(player).returning()
-  return result[0] ? result[0] : null
+  console.log('[dbCreatePlayer] player:', player)
+  const result = (await db
+    .insert(PlayersTable)
+    .values(player)
+    .returning()) as unknown as NodotsPlayerReady
+  console.log('[dbCreatePlayer] result:', result)
+  return result
 }
 
 export const dbLoginPlayer = async (
