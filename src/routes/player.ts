@@ -115,7 +115,6 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
     '/seeking-game/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/',
     async (req, res) => {
       const playerId = req.params.playerId
-      const seekingGame = req.body.seekingGame
       console.log('[PlayerRouter] seeking-game req.body:', req.body)
       try {
         const player = await dbGetPlayerById(playerId, db)
@@ -125,10 +124,12 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
             .json({ message: `Player not found for id: ${playerId}` })
           return
         }
-        await dbSetPlayerSeekingGame(playerId, seekingGame, db)
-        res.status(200).json({
-          message: `Player seeking game set to: ${!player.isSeekingGame}`,
-        })
+        const updatedPlayer = await dbSetPlayerSeekingGame(
+          playerId,
+          !player.isSeekingGame,
+          db
+        )
+        res.status(200).json(updatedPlayer)
       } catch {
         res
           .status(404)
