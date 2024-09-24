@@ -24,14 +24,18 @@ export interface ExternalPlayerReference {
 
 // FIXME: We should be able to define this via the backgammon-types module
 const playerKinds = ['ready', 'playing'] as const
+const playerActivities = ['rolling', 'moving', 'waiting'] as const
+
 export const PlayerTypeEnum = pgEnum('player-kind', playerKinds)
+export const PlayerActivityEnum = pgEnum('player-activity', playerActivities)
 
 export const PlayersTable = pgTable('players', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
-  kind: PlayerTypeEnum('kind'),
+  kind: PlayerTypeEnum('kind').notNull(),
+  activity: PlayerActivityEnum('activity'),
   source: text('source'),
   externalId: text('external_id').unique(),
-  email: text('email').unique(),
+  email: text('email').unique().notNull(),
   isLoggedIn: boolean('is_logged_in').default(false).notNull(),
   isSeekingGame: boolean('is_seeking_game').default(false).notNull(),
   lastLogIn: timestamp('last_log_in'),
@@ -61,8 +65,9 @@ export const dbCreatePlayer = async (
 export const dbLoginPlayer = async (
   id: string,
   db: NodePgDatabase<Record<string, never>>
-) =>
-  await db
+) => {
+  console.log('[dbLoginPlayer] id:', id)
+  const result = await db
     .update(PlayersTable)
     .set({
       kind: 'ready',
@@ -70,6 +75,9 @@ export const dbLoginPlayer = async (
       lastLogIn: new Date(),
     })
     .where(eq(PlayersTable.id, id))
+    .returning()
+  return result.length === 1 ? result[0] : null
+}
 
 export const dbSetPlayerSeekingGame = async (
   id: string,

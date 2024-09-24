@@ -9,6 +9,7 @@ import { NodotsColor, NodotsMoveDirection } from './game'
 type _Player = {
   kind: NodotsPlayerKind
   id?: string
+  activity?: NodotsPlayerActivity
   email?: string
   isSeekingGame?: boolean
   isLoggedIn?: boolean
@@ -17,7 +18,6 @@ type _Player = {
   color?: NodotsColor
   direction?: NodotsMoveDirection
   preferences?: NodotsPlayerPreferences
-  activity?: NodotsPlayerActivity
 }
 export type NodotsPlayerKind = 'initializing' | 'ready' | 'playing'
 type NodotsPlayerActivity = 'rolling' | 'moving' | 'waiting' | undefined
@@ -42,12 +42,18 @@ export interface NodotsPlayerPreferences {
 
 export interface NodotsPlayerInitializing extends _Player {
   kind: 'initializing'
+  email: string
+  source: string
+  externalId: string
+  isLoggedIn: false
+  preferences: NodotsPlayerPreferences
 }
 
 export interface NodotsPlayerActive extends _Player {
   id: string
   kind: 'ready' | 'playing'
   email: string
+  activity: NodotsPlayerActivity
   isSeekingGame: boolean
   isLoggedIn: true
   source: string
@@ -61,9 +67,12 @@ export interface NodotsPlayerReady extends NodotsPlayerActive {
 export interface NodotsPlayerPlaying extends NodotsPlayerActive {
   kind: 'playing'
   isSeekingGame: false
-  activity: NodotsPlayerActivity // REVISIT this once we have a game going
-  // Do we still need these directly attached to player? Not the player object in the game?
-  // FIXME. This is almost certainly wrong.
+  activity: NodotsPlayerActivity
   color: NodotsColor
   direction: NodotsMoveDirection
 }
+
+export type NodotsPlayer =
+  | NodotsPlayerInitializing
+  | NodotsPlayerReady
+  | NodotsPlayerPlaying

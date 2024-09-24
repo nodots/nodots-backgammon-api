@@ -68,39 +68,10 @@ export const createPlayerFromPlayerInitializing = async (
   db: NodePgDatabase
 ) => {
   console.log(
-    '[Player API] createPlayerFromAuth0User playerInitializing:',
+    '[Player API] createPlayerFromPlayerInitializing playerInitializing:',
     playerInitializing
   )
   const result = await dbCreatePlayer(playerInitializing, db)
+  console.log('[Player API] createPlayerFromPlayerInitializing result:', result)
   return result
-}
-
-export const createPlayerFromAuth0User = async (
-  user: Auth0User,
-  db: NodePgDatabase<Record<string, never>>
-) => {
-  const { sub } = user
-  const [source, externalId] = sub.split('|')
-  console.log('[PlayerAPI] createPlayerFromAuth0User user:', user)
-  try {
-    const playerInitializing: NodotsPlayerInitializing = {
-      source,
-      externalId,
-      kind: 'initializing',
-      preferences: {
-        avatar: user.picture ? user.picture : '',
-        locale: user.locale ? (user.locale as NodotsLocale) : 'en',
-      },
-    }
-    console.log(
-      '[PlayerAPI] createPlayerFromAuth0User player:',
-      playerInitializing
-    )
-    const result = await dbCreatePlayer(playerInitializing, db)
-    console.log('[PlayerAPI] createPlayerFromAuth0User result:', result)
-    return result
-  } catch (error) {
-    console.error('Error creating player from Auth0 user:', error)
-    return null
-  }
 }

@@ -1,5 +1,5 @@
 {
-  "id": "bcde0b88-ce05-4547-bc69-fcf57dc8917f",
+  "id": "da31b02e-4917-46de-9d86-1154bfaa409c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -138,6 +138,13 @@
           "type": "player-kind",
           "typeSchema": "public",
           "primaryKey": false,
+          "notNull": true
+        },
+        "activity": {
+          "name": "activity",
+          "type": "player-activity",
+          "typeSchema": "public",
+          "primaryKey": false,
           "notNull": false
         },
         "source": {
@@ -156,7 +163,7 @@
           "name": "email",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "is_logged_in": {
           "name": "is_logged_in",
@@ -247,8 +254,6 @@
       "name": "game-kind",
       "schema": "public",
       "values": [
-        "initializing",
-        "ready",
         "rolling-for-start",
         "rolling",
         "moving"

@@ -1,24 +1,19 @@
+import { UserInfoResponse as Auth0User } from 'auth0'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { Router } from 'express'
-import { UserInfoResponse as Auth0User } from 'auth0'
+import { dbGetNewGamesByPlayerId } from '../../nodots_modules/@nodots/backgammon/Game/db'
+import { createPlayerFromPlayerInitializing } from '../../nodots_modules/@nodots/backgammon/Player'
 import {
-  dbCreatePlayer,
   dbGetPlayerByExternalSource,
   dbGetPlayerById,
   dbGetPlayers,
   dbGetPlayersSeekingGame,
+  dbLoginPlayer,
   dbLogoutPlayer,
   dbSetPlayerPlaying,
   dbSetPlayerSeekingGame,
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
-
-import { dbGetNewGamesByPlayerId } from '../../nodots_modules/@nodots/backgammon/Game/db'
-import {
-  NodotsLocale,
-  NodotsPlay,
-  NodotsPlayerInitializing,
-} from '../../nodots_modules/@nodots/backgammon-types'
-import { createPlayerFromAuth0User } from '../../nodots_modules/@nodots/backgammon/Player'
+import { NodotsPlayerInitializing } from '../../nodots_modules/@nodots/backgammon-types'
 export interface IPlayerRouter extends Router {}
 
 export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
@@ -30,9 +25,15 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   })
 
   router.post('/', async (req, res) => {
-    const user = req.body as Auth0User
-    console.log('[PlayerRouter] /player POST:', user)
-    createPlayerFromAuth0User(user, db)
+    const player = req.body as NodotsPlayerInitializing
+    console.log('[PlayerRouter] /player POST:', player)
+
+    const playerReady = createPlayerFromPlayerInitializing(player, db)
+    if (playerReady) {
+      res.status(201).json(playerReady)
+    } else {
+      res.status(500).json({ message: 'Error creating player' })
+    }
   })
 
   router.get(
@@ -161,6 +162,37 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
       try {
         await dbLogoutPlayer(playerId, db)
         res.status(200).json({ message: 'Player logged out' })
+      } catch {
+        res
+          .status(404)
+          .json({ message: `Player not found for id: ${playerId}` })
+      }
+    }
+  )
+
+  router.patch(
+    '/login/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+    async (req, res) => {
+      const playerId = req.params.playerId
+      try {
+        const result = await dbLoginPlayer(playerId, db)
+        console.log('[PlayerRouter] login player result:', result)
+        res.status(200).json(result)
+      } catch {
+        res
+          .status(404)
+          .json({ message: `Player not found for id: ${playerId}` })
+      }
+    }
+  )
+
+  router.patch(
+    '/logout/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+    async (req, res) => {
+      const playerId = req.params.playerId
+      try {
+        const loggedInPlayer = await dbLoginPlayer(playerId, db)
+        res.status(200).json(loggedInPlayer)
       } catch {
         res
           .status(404)
