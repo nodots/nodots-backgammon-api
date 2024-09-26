@@ -7,6 +7,7 @@ import {
 } from '../../nodots_modules/@nodots/backgammon/Game'
 
 export interface IGameRouter extends Router {}
+export type StartGamePayload = [string, string]
 
 export const GameRouter = (db: NodePgDatabase): IGameRouter => {
   const router = Router()
@@ -29,8 +30,6 @@ export const GameRouter = (db: NodePgDatabase): IGameRouter => {
     const result = await getGame(id, db)
     result.length === 1 ? res.status(200).json(result[0]) : res.status(404)
   })
-
-  type StartGamePayload = [string, string]
 
   router.post('/', async (req, res) => {
     const [player1Id, player2Id] = req.body as StartGamePayload

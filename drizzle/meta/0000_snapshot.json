@@ -1,5 +1,5 @@
 {
-  "id": "da31b02e-4917-46de-9d86-1154bfaa409c",
+  "id": "561a1331-7a20-4921-a188-df3622a29cea",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -139,13 +139,6 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
-        },
-        "activity": {
-          "name": "activity",
-          "type": "player-activity",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
         },
         "source": {
           "name": "source",

@@ -1,15 +1,18 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { buildBoard } from '../Board'
 import { buildCube } from '../Cube'
-import { buildDice, setActiveDice } from '../Dice'
+import { buildDice } from '../Dice'
 import { getPlayerById } from '../Player'
 import { dbCreateGame, dbGetGame, dbGetAll, dbGetGamesByPlayerId } from './db'
 import { GameStateError } from './errors'
 
 import {
-  NodotsGameInitializing,
+  NodotsColor,
+  NodotsGameInitialized,
+  NodotsMoveDirection,
   NodotsPlayerReady,
 } from '../../backgammon-types'
+import { dbSetPlayerPlaying } from '../Player/db'
 
 // State transitions
 export const startGame = async (
@@ -17,18 +20,9 @@ export const startGame = async (
   player2Id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
+  if (player1Id === player2Id) return console.error('player1Id === player2Id')
   const player1 = (await getPlayerById(player1Id, db)) as NodotsPlayerReady
   const player2 = (await getPlayerById(player2Id, db)) as NodotsPlayerReady
-
-  const clockwisePlayer: NodotsPlayerReady = {
-    ...player1,
-    direction: 'clockwise',
-  }
-
-  const counterclockwisePlayer: NodotsPlayerReady = {
-    ...player2,
-    direction: 'counterclockwise',
-  }
 
   if (!player1 || !player2) {
     throw GameStateError('Player not found')
@@ -37,25 +31,36 @@ export const startGame = async (
   const board = buildBoard()
   const cube = buildCube()
   const dice = buildDice()
-
-  const gameInitializing: NodotsGameInitializing = {
-    kind: 'initializing',
-    players: {
-      black:
-        clockwisePlayer.color === 'black'
-          ? clockwisePlayer
-          : counterclockwisePlayer,
-      white:
-        clockwisePlayer.color === 'white'
-          ? clockwisePlayer
-          : counterclockwisePlayer,
+  const players = {
+    black: {
+      player: player1,
+      attributes: {
+        color: 'black' as NodotsColor,
+        direction: 'clockwise' as NodotsMoveDirection,
+        pipCount: 167,
+      },
     },
-    board,
-    dice,
-    cube,
+    white: {
+      player: player2,
+      attributes: {
+        color: 'white' as NodotsColor,
+        direction: 'counterclockwise' as NodotsMoveDirection,
+        pipCount: 167,
+      },
+    },
   }
 
-  return await dbCreateGame(gameInitializing, db)
+  const gameInitialized: NodotsGameInitialized = {
+    kind: 'initialized',
+    players,
+    board,
+    cube,
+    dice,
+  }
+
+  const player1Playing = await dbSetPlayerPlaying(player1Id, db)
+  const playerPlaying2 = await dbSetPlayerPlaying(player2Id, db)
+  return await dbCreateGame(gameInitialized, db)
 }
 
 // Getters

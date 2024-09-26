@@ -5,39 +5,19 @@ like players "bringing their own dice" or roll analytics based on randomization
 algorithms?
 */
 import { NodotsColor } from '../../backgammon-types'
-import { initializingPlayerDice } from './helpers'
-import {
-  NodotsDiceInitialized,
-  NodotsDiceActive,
-  NodotsDiceInactive,
-  NodotsDicePlaying,
-  NodotsDiceBlackActive,
-  NodotsDiceWhiteActive,
-} from '../../backgammon-types/dice'
+import { NodotsDice } from '../../backgammon-types/dice'
 
-export const buildDice = (): {
-  black: NodotsDiceInitialized
-  white: NodotsDiceInitialized
-} => {
+export const buildDice = (): NodotsDice => {
   return {
-    black: initializingPlayerDice('black'),
-    white: initializingPlayerDice('white'),
+    white: {
+      kind: 'inactive',
+      color: 'white',
+      roll: [0, 0],
+    },
+    black: {
+      kind: 'inactive',
+      color: 'black',
+      roll: [0, 0],
+    },
   }
 }
-
-export const setActiveDice = (
-  dice: {
-    black: NodotsDiceInitialized | NodotsDiceInactive | NodotsDicePlaying
-    white: NodotsDiceInitialized | NodotsDiceInactive | NodotsDicePlaying
-  },
-  activeColor: NodotsColor
-): NodotsDiceWhiteActive | NodotsDiceBlackActive =>
-  activeColor === 'black'
-    ? {
-        black: dice.black as NodotsDiceActive,
-        white: dice.white as NodotsDiceInactive,
-      }
-    : {
-        black: dice.black as NodotsDiceInactive,
-        white: dice.white as NodotsDiceActive,
-      }

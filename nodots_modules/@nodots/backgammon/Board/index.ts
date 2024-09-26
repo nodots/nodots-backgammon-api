@@ -6,6 +6,7 @@ import {
   NodotsChecker,
   NodotsCheckercontainerImport,
   NodotsColor,
+  NodotsGame,
   NodotsPlayersPlaying,
   PointPosition,
   Points,
@@ -276,28 +277,24 @@ export const getCheckercontainer = (
   return container
 }
 
-export const getPipCounts = (
-  board: NodotsBoard,
-  players: NodotsPlayersPlaying
-) => {
+export const getPipCounts = (game: NodotsGame) => {
+  const { board, players } = game
   const pipCounts = {
     white: board.bar.white.checkers.length * 24,
     black: board.bar.black.checkers.length * 24,
   }
 
-  const clockwisePlayer = getClockwisePlayer(players)
+  // board.points.map((point) => {
+  //   if (point.checkers.length > 0) {
+  //     const color = point.checkers[0].color
 
-  board.points.map((point) => {
-    if (point.checkers.length > 0) {
-      const color = point.checkers[0].color
-
-      if (color === clockwisePlayer.color) {
-        pipCounts[color] += point.position.clockwise * point.checkers.length
-      } else {
-        pipCounts[color] +=
-          point.position.counterclockwise * point.checkers.length
-      }
-    }
-  })
+  //     if (color === clockwisePlayer.color) {
+  //       pipCounts[color] += point.position.clockwise * point.checkers.length
+  //     } else {
+  //       pipCounts[color] +=
+  //         point.position.counterclockwise * point.checkers.length
+  //     }
+  //   }
+  // })
   return pipCounts
 }

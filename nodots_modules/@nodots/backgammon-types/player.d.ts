@@ -9,22 +9,14 @@ import { NodotsColor, NodotsMoveDirection } from './game'
 type _Player = {
   kind: NodotsPlayerKind
   id?: string
-  activity?: NodotsPlayerActivity
   email?: string
   isSeekingGame?: boolean
   isLoggedIn?: boolean
   source?: string
   externalId?: string
-  color?: NodotsColor
-  direction?: NodotsMoveDirection
   preferences?: NodotsPlayerPreferences
 }
 export type NodotsPlayerKind = 'initializing' | 'ready' | 'playing'
-type NodotsPlayerActivity = 'rolling' | 'moving' | 'waiting' | undefined
-type _PipCounts = {
-  black: number
-  white: number
-}
 
 export interface NodotsPlayerPreferences {
   username?: string
@@ -49,27 +41,24 @@ export interface NodotsPlayerInitializing extends _Player {
   preferences: NodotsPlayerPreferences
 }
 
-export interface NodotsPlayerActive extends _Player {
+export interface NodotsPlayerReady extends _Player {
   id: string
-  kind: 'ready' | 'playing'
-  email: string
-  activity: NodotsPlayerActivity
-  isSeekingGame: boolean
-  isLoggedIn: true
+  kind: 'ready'
   source: string
   externalId: string
+  email: string
+  isSeekingGame: boolean
+  isLoggedIn: true
 }
 
-export interface NodotsPlayerReady extends NodotsPlayerActive {
-  kind: 'ready'
-}
-
-export interface NodotsPlayerPlaying extends NodotsPlayerActive {
+export interface NodotsPlayerPlaying extends _Player {
+  id: string
   kind: 'playing'
-  isSeekingGame: false
-  activity: NodotsPlayerActivity
-  color: NodotsColor
-  direction: NodotsMoveDirection
+  source: string
+  externalId: string
+  email: string
+  isSeekingGame: boolean
+  isLoggedIn: true
 }
 
 export type NodotsPlayer =

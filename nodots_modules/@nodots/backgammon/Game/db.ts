@@ -1,11 +1,10 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { eq, and } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
 import {
-  NodotsGameInitializing,
   NodotsGameReady,
   NodotsColor,
-  NodotsMoveDirection,
+  NodotsGameInitialized,
 } from '../../backgammon-types'
 
 export const ColorEnum = pgEnum('color', ['black', 'white'])
@@ -30,14 +29,28 @@ export const GamesTable = pgTable('games', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 export const dbCreateGame = async (
-  gameInitializing: NodotsGameInitializing,
+  gameInitialized: NodotsGameInitialized,
   db: NodePgDatabase<Record<string, never>>
 ) => {
   const game: typeof GamesTable.$inferInsert = {
-    ...gameInitializing,
+    ...gameInitialized,
     kind: 'rolling-for-start',
-    player1: gameInitializing.players.black,
-    player2: gameInitializing.players.white,
+    player1: {
+      player: gameInitialized.players.black.player,
+      attributes: {
+        color: 'black',
+        direction: gameInitialized.players.black.attributes.direction,
+        pipCount: 167,
+      },
+    },
+    player2: {
+      player: gameInitialized.players.white.player,
+      attributes: {
+        color: 'white',
+        direction: gameInitialized.players.white.attributes.direction,
+        pipCount: 167,
+      },
+    },
   }
   const result = await db.insert(GamesTable).values(game).returning()
   return result?.length === 1 ? result[0] : null

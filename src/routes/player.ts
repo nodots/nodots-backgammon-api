@@ -13,7 +13,10 @@ import {
   dbSetPlayerPlaying,
   dbSetPlayerSeekingGame,
 } from '../../nodots_modules/@nodots/backgammon/Player/db'
-import { NodotsPlayerInitializing } from '../../nodots_modules/@nodots/backgammon-types'
+import {
+  NodotsPlayerInitializing,
+  NodotsPlayerReady,
+} from '../../nodots_modules/@nodots/backgammon-types'
 export interface IPlayerRouter extends Router {}
 
 export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
@@ -81,36 +84,13 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
     }
   })
 
-  router.patch(
-    '/playing/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/',
-    async (req, res) => {
-      const playerId = req.params.playerId
-      console.log('[PlayerRouter] playing playerId:', playerId)
-      try {
-        const player = await dbGetPlayerById(playerId, db)
-        if (!player) {
-          res
-            .status(404)
-            .json({ message: `Player not found for id: ${playerId}` })
-          return
-        }
-        if (player.kind !== 'ready') {
-          res.status(400).json({
-            message: `Cannot transition playerId ${playerId} from ${player.kind} to 'playing'`,
-          })
-          return
-        }
-        await dbSetPlayerPlaying(playerId, db)
-        res.status(200).json({
-          message: `Player ${playerId} is now kind PlayerPlaying`,
-        })
-      } catch {
-        res
-          .status(404)
-          .json({ message: `Player not found for id: ${playerId}` })
-      }
-    }
-  )
+  router.get('/ready', async (req, res) => {
+    const players = await dbGetPlayers(db)
+    const readyPlayers = players.filter(
+      (player) => player.kind === 'ready'
+    ) as NodotsPlayerReady[]
+    res.status(200).json(readyPlayers)
+  })
 
   router.patch(
     '/seeking-game/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/',

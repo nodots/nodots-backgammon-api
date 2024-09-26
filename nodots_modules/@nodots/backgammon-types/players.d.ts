@@ -17,5 +17,3 @@ export interface NodotsPlayersPlaying {
   black: NodotsPlayerPlaying
   white: NodotsPlayerPlaying
 }
-
-export type NodotsPlayersActive = NodotsPlayersReady | NodotsPlayersPlaying

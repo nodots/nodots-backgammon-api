@@ -12,7 +12,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { UpdatedPlayerPreferences } from '.'
 import {
-  NodotsPlayerActive,
+  NodotsPlayer,
   NodotsPlayerInitializing,
   NodotsPlayerReady,
 } from '../../backgammon-types'
@@ -24,15 +24,11 @@ export interface ExternalPlayerReference {
 
 // FIXME: We should be able to define this via the backgammon-types module
 const playerKinds = ['ready', 'playing'] as const
-const playerActivities = ['rolling', 'moving', 'waiting'] as const
-
 export const PlayerTypeEnum = pgEnum('player-kind', playerKinds)
-export const PlayerActivityEnum = pgEnum('player-activity', playerActivities)
 
 export const PlayersTable = pgTable('players', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
   kind: PlayerTypeEnum('kind').notNull(),
-  activity: PlayerActivityEnum('activity'),
   source: text('source'),
   externalId: text('external_id').unique(),
   email: text('email').unique().notNull(),
@@ -150,9 +146,9 @@ export const dbGetPlayersSeekingGame = async (
 export const dbGetPlayerByExternalSource = async (
   reference: ExternalPlayerReference,
   db: NodePgDatabase<Record<string, never>>
-): Promise<NodotsPlayerActive | NodotsPlayerInitializing | null> => {
+): Promise<NodotsPlayer | null> => {
   const { source, externalId } = reference
-  const players = await db
+  const result = (await db
     .select()
     .from(PlayersTable)
     .where(
@@ -161,19 +157,9 @@ export const dbGetPlayerByExternalSource = async (
         eq(PlayersTable.externalId, externalId)
       )
     )
-    .limit(1)
+    .limit(1)) as NodotsPlayer[]
 
-  if (players.length === 1) {
-    const player = players[0]
-    switch (player.kind) {
-      case 'ready':
-      case 'playing':
-        return player as NodotsPlayerActive
-      default:
-        throw new Error('Unexpected player kind')
-    }
-  }
-  return null
+  return result.length === 1 ? result[0] : null
 }
 
 export const dbUpdatePlayerPreferences = async (
