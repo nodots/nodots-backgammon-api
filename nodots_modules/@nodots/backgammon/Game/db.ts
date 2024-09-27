@@ -102,14 +102,13 @@ export const dbGetActiveGameByPlayerId = async (
   playerId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  const where = sql`player1 @> '{"player":{"id": "\${playerId}"}}' OR player2 @> '{"player":{"id": "\${playerId}"}}'`
-  const activeGame = await db
-    .select()
-    .from(GamesTable)
-    .where(sql`${where}`)
-    .limit(1)
-  console.log(`[Game Db] dbGetActiveGameByPlayerId ${playerId}`, activeGame)
-  return activeGame
+  console.log('[Game Db] dbGetActiveGameByPlayerId', playerId)
+  // FIXME: Not loving using 'sql'
+  const result = await db.execute(
+    sql`SELECT * FROM games WHERE player1->'player'->>'id' = ${playerId} OR player2->'player'->>'id' = ${playerId}`
+  )
+  console.log(`[Game Db] dbGetActiveGameByPlayerId ${playerId}`, result)
+  return result
 }
 
 // SELECT * FROM table WHERE json_field->>'Name' = 'mike' AND json_field->>'Location' = 'Lagos'

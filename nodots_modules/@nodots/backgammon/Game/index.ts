@@ -81,5 +81,9 @@ export const getActiveGameByPlayerId = async (
   playerId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
+  console.log(
+    '[Backgammon Game API] getActiveGameByPlayerId playerId:',
+    playerId
+  )
   return await dbGetActiveGameByPlayerId(playerId, db)
 }
