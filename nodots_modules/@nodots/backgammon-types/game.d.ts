@@ -66,7 +66,24 @@ type _Game = {
 
 export interface NodotsGameInitializing {
   kind: 'initializing'
-  players: NodotsPlayersReady
+  players: {
+    white: {
+      player: NodotsPlayerReady
+      attributes: {
+        color: NodotsColor
+        direction: NodotsMoveDirection
+        pipCount: 167
+      }
+    }
+    black: {
+      player: NodotsPlayerReady
+      attributes: {
+        color: NodotsColor
+        direction: NodotsMoveDirection
+        pipCount: 167
+      }
+    }
+  }
 }
 
 export interface NodotsGameInitialized {

@@ -3,7 +3,12 @@ import { buildBoard } from '../Board'
 import { buildCube } from '../Cube'
 import { buildDice } from '../Dice'
 import { getPlayerById } from '../Player'
-import { dbCreateGame, dbGetGame, dbGetAll, dbGetGamesByPlayerId } from './db'
+import {
+  dbCreateGame,
+  dbGetGame,
+  dbGetAll,
+  dbGetActiveGameByPlayerId,
+} from './db'
 import { GameStateError } from './errors'
 
 import {
@@ -72,10 +77,9 @@ export const getGame = async (
   db: NodePgDatabase<Record<string, never>>
 ) => await dbGetGame(gameId, db)
 
-export const getGamesByPlayerId = async (
+export const getActiveGameByPlayerId = async (
   playerId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  console.log('getGamesByPlayerId', playerId)
-  return await dbGetGamesByPlayerId(playerId, db)
+  return await dbGetActiveGameByPlayerId(playerId, db)
 }

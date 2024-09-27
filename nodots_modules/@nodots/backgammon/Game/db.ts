@@ -1,5 +1,5 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
 import {
   NodotsGameReady,
@@ -97,15 +97,19 @@ export const dbGetNewGamesByPlayerId = async (
   return games.length === 1 ? games[0] : null
 }
 
-export const dbGetGamesByPlayerId = async (
+// ATM players can only have one active game. But this is not enforced in the db
+export const dbGetActiveGameByPlayerId = async (
   playerId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  console.log('dbGetGamesByPlayerId', playerId)
-  const games = await db.select().from(GamesTable)
-  // .where(
-  //   or(eq(GamesTable.player1Id, playerId), eq(GamesTable.player2Id, playerId))
-  // )
-  console.log('games', games)
-  return games
+  const where = sql`player1 @> '{"player":{"id": "\${playerId}"}}' OR player2 @> '{"player":{"id": "\${playerId}"}}'`
+  const activeGame = await db
+    .select()
+    .from(GamesTable)
+    .where(sql`${where}`)
+    .limit(1)
+  console.log(`[Game Db] dbGetActiveGameByPlayerId ${playerId}`, activeGame)
+  return activeGame
 }
+
+// SELECT * FROM table WHERE json_field->>'Name' = 'mike' AND json_field->>'Location' = 'Lagos'

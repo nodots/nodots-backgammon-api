@@ -4,6 +4,7 @@ import {
   startGame,
   getGame,
   getGames,
+  getActiveGameByPlayerId,
 } from '../../nodots_modules/@nodots/backgammon/Game'
 
 export interface IGameRouter extends Router {}
@@ -29,6 +30,13 @@ export const GameRouter = (db: NodePgDatabase): IGameRouter => {
     const { id } = req.params
     const result = await getGame(id, db)
     result.length === 1 ? res.status(200).json(result[0]) : res.status(404)
+  })
+
+  router.get('/player/:id', async (req, res) => {
+    const { id } = req.params
+    const game = await getActiveGameByPlayerId(id, db)
+    console.log('[Game Router] getActiveGameByPlayerId game:', game)
+    game ? res.status(200).json(game) : res.status(404)
   })
 
   router.post('/', async (req, res) => {
