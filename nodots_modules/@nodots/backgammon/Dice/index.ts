@@ -12,12 +12,12 @@ export const buildDice = (): NodotsDice => {
     white: {
       kind: 'inactive',
       color: 'white',
-      roll: [0, 0],
+      roll: [1, 1],
     },
     black: {
       kind: 'inactive',
       color: 'black',
-      roll: [0, 0],
+      roll: [1, 1],
     },
   }
 }

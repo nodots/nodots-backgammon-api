@@ -102,13 +102,11 @@ export const dbGetActiveGameByPlayerId = async (
   playerId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  console.log('[Game Db] dbGetActiveGameByPlayerId', playerId)
-  // FIXME: Not loving using 'sql'
+  // FIXME: Not loving using 'sql' but drizzle seems to still have problems w jsonb
   const result = await db.execute(
-    sql`SELECT * FROM games WHERE player1->'player'->>'id' = ${playerId} OR player2->'player'->>'id' = ${playerId}`
+    sql`SELECT * FROM games WHERE player1->'player'->>'id' = ${playerId} OR player2->'player'->>'id' = ${playerId} LIMIT 1`
   )
-  console.log(`[Game Db] dbGetActiveGameByPlayerId ${playerId}`, result)
-  return result
+  return result?.rows?.length === 1 ? result.rows[0] : null
 }
 
 // SELECT * FROM table WHERE json_field->>'Name' = 'mike' AND json_field->>'Location' = 'Lagos'

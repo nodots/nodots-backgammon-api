@@ -152,7 +152,7 @@ export interface NodotsGameRollingForStart {
 
 export interface NodotsGameRolling {
   id: string
-  NodotsGameRollingForStart: 'rolling'
+  kind: 'rolling'
   players: NodotsPlayersPlaying
   dice: NodotsDice
   board: NodotsBoard
