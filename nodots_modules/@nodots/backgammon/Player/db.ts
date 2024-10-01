@@ -1,4 +1,3 @@
-import { UserInfoResponse as Auth0User } from 'auth0'
 import { and, eq } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import {

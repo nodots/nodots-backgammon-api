@@ -1,5 +1,5 @@
 {
-  "id": "561a1331-7a20-4921-a188-df3622a29cea",
+  "id": "4ef232a3-6c03-45e4-b140-5773bb2967a7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -22,14 +22,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "player1": {
-          "name": "player1",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "player2": {
-          "name": "player2",
+        "players": {
+          "name": "players",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true

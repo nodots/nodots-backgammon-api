@@ -14,6 +14,7 @@ import { GameStateError } from './errors'
 import {
   NodotsColor,
   NodotsGameInitialized,
+  NodotsGamePlayers,
   NodotsMoveDirection,
   NodotsPlayerReady,
 } from '../../backgammon-types'
@@ -36,24 +37,20 @@ export const startGame = async (
   const board = buildBoard()
   const cube = buildCube()
   const dice = buildDice()
-  const players = {
-    black: {
-      player: player1,
-      attributes: {
-        color: 'black' as NodotsColor,
-        direction: 'clockwise' as NodotsMoveDirection,
-        pipCount: 167,
-      },
+  const players: NodotsGamePlayers = [
+    {
+      playerId: player1Id,
+      color: 'black',
+      direction: 'counterclockwise',
+      pipCount: 167,
     },
-    white: {
-      player: player2,
-      attributes: {
-        color: 'white' as NodotsColor,
-        direction: 'counterclockwise' as NodotsMoveDirection,
-        pipCount: 167,
-      },
+    {
+      playerId: player1Id,
+      color: 'white',
+      direction: 'clockwise',
+      pipCount: 0,
     },
-  }
+  ]
 
   const gameInitialized: NodotsGameInitialized = {
     kind: 'initialized',

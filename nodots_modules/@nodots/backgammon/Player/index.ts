@@ -1,15 +1,12 @@
-import { UserInfoResponse as Auth0User } from 'auth0'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import {
   dbGetPlayerById,
-  dbGetPlayerByExternalSource,
   dbGetPlayers,
   dbGetPlayersSeekingGame,
   dbUpdatePlayerPreferences,
   dbCreatePlayer,
 } from './db'
 import {
-  NodotsLocale,
   NodotsPlayerInitializing,
   NodotsPlayerPreferences,
 } from '../../backgammon-types'

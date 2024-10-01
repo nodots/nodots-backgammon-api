@@ -1,4 +1,4 @@
-import { NodotsLocale } from '.'
+import { NodotsLocale } from '../../src/i18n'
 import { NodotsColor, NodotsMoveDirection } from './game'
 
 /**

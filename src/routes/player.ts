@@ -1,7 +1,5 @@
-import { UserInfoResponse as Auth0User } from 'auth0'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { Router } from 'express'
-import { dbGetNewGamesByPlayerId } from '../../nodots_modules/@nodots/backgammon/Game/db'
 import { createPlayerFromPlayerInitializing } from '../../nodots_modules/@nodots/backgammon/Player'
 import {
   dbGetPlayerByExternalSource,
@@ -53,19 +51,6 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
       }
     }
   )
-
-  router.get('/active-game/:playerId', async (req, res) => {
-    const playerId = req.params.playerId
-    try {
-      const playerGames = await dbGetNewGamesByPlayerId(playerId, db)
-      console.log(playerGames)
-      res.status(200).json(playerGames)
-    } catch {
-      res
-        .status(404)
-        .json({ message: `Game not found for player id: ${playerId}` })
-    }
-  })
 
   router.get('/sub/:source/:externalId', async (req, res) => {
     const source = req.params.source

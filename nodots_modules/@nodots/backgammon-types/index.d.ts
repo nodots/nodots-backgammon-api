@@ -1,4 +1,5 @@
-export type NodotsLocale = 'en' | 'es' | 'fr' | 'ar' | 'tr'
+export type NodotsLocaleCode = 'en' | 'en-US' | 'es' | 'fr' | 'ar' | 'tr' | 'gr'
+
 export * from './board'
 export * from './checker'
 export * from './checkercontainer'

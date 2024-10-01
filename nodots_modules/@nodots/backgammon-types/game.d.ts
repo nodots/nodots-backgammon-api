@@ -3,7 +3,7 @@ import { NodotsChecker } from './checker'
 import { NodotsCube } from './cube'
 import { NodotsRoll, NodotsDice } from './dice'
 import { NodotsPlay } from './play'
-import { NodotsPlayerReady } from './player'
+import { NodotsPlayerPlaying, NodotsPlayerReady } from './player'
 import { NodotsPlayersPlaying, NodotsPlayersReady } from './players'
 
 export type NodotsColor = 'black' | 'white'
@@ -58,6 +58,15 @@ export type CheckercontainerPosition = PointPosition | 'bar' | 'off'
 export type OriginPosition = PointPosition | 'bar'
 export type DestinationPosition = PointPosition | 'off'
 
+export interface NodotsGamePlayer {
+  playerId: string
+  color: NodotsColor
+  direction: NodotsMoveDirection
+  pipCount: number
+}
+
+export type NodotsGamePlayers = [NodotsGamePlayer, NodotsGamePlayer]
+
 // GameInitializing should never hit the db. Check the db.ts file for the actual db schema
 type _Game = {
   kind: 'initializing' | 'ready' | 'rolling-for-start' | 'rolling' | 'moving'
@@ -66,46 +75,12 @@ type _Game = {
 
 export interface NodotsGameInitializing {
   kind: 'initializing'
-  players: {
-    white: {
-      player: NodotsPlayerReady
-      attributes: {
-        color: NodotsColor
-        direction: NodotsMoveDirection
-        pipCount: 167
-      }
-    }
-    black: {
-      player: NodotsPlayerReady
-      attributes: {
-        color: NodotsColor
-        direction: NodotsMoveDirection
-        pipCount: 167
-      }
-    }
-  }
+  players: NodotsGamePlayers
 }
 
 export interface NodotsGameInitialized {
   kind: 'initialized'
-  players: {
-    white: {
-      player: NodotsPlayerReady
-      attributes: {
-        color: NodotsColor
-        direction: NodotsMoveDirection
-        pipCount: number
-      }
-    }
-    black: {
-      player: NodotsPlayerReady
-      attributes: {
-        color: NodotsColor
-        direction: NodotsMoveDirection
-        pipCount: number
-      }
-    }
-  }
+  players: NodotsGamePlayers
   board: NodotsBoard
   dice: NodotsDice
   cube: NodotsCube
@@ -114,28 +89,7 @@ export interface NodotsGameInitialized {
 export interface NodotsGameReady {
   id: string
   kind: 'ready'
-  players: {
-    white: {
-      player: NodotsPlayerReady
-      attributes: {
-        color: NodotsColor
-        direction: NodotsMoveDirection
-        pipCount: 167
-      }
-    }
-    black: {
-      player: NodotsPlayerReady
-      attributes: {
-        color: NodotsColor
-        direction: NodotsMoveDirection
-        pipCount: 167
-      }
-    }
-  }
-  directions: {
-    white: NodotsMoveDirection
-    black: NodotsMoveDirection
-  }
+  players: NodotsGamePlayers
   board: NodotsBoard
   dice: NodotsDice
   cube: NodotsCube
@@ -144,7 +98,7 @@ export interface NodotsGameReady {
 export interface NodotsGameRollingForStart {
   id: string
   kind: 'rolling-for-start'
-  players: NodotsPlayersPlaying
+  players: NodotsGamePlayers
   board: NodotsBoard
   dice: NodotsDice
   cube: NodotsCube
@@ -153,7 +107,7 @@ export interface NodotsGameRollingForStart {
 export interface NodotsGameRolling {
   id: string
   kind: 'rolling'
-  players: NodotsPlayersPlaying
+  players: NodotsGamePlayers
   dice: NodotsDice
   board: NodotsBoard
   cube: NodotsCube
@@ -164,7 +118,7 @@ export interface NodotsGameRolling {
 export interface NodotsGameMoving {
   id: string
   kind: 'moving'
-  players: NodotsPlayersPlaying
+  players: NodotsGamePlayers
   dice: NodotsDice
   board: NodotsBoard
   cube: NodotsCube

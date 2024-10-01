@@ -20,8 +20,7 @@ export const GameTypeEnum = pgEnum('game-kind', gameKind)
 export const GamesTable = pgTable('games', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
   kind: GameTypeEnum('kind').notNull(),
-  player1: jsonb('player1').notNull(),
-  player2: jsonb('player2').notNull(),
+  players: jsonb('players').notNull(),
   board: jsonb('board').notNull(),
   cube: jsonb('cube').notNull(),
   dice: jsonb('dice').notNull(),
@@ -35,22 +34,20 @@ export const dbCreateGame = async (
   const game: typeof GamesTable.$inferInsert = {
     ...gameInitialized,
     kind: 'rolling-for-start',
-    player1: {
-      player: gameInitialized.players.black.player,
-      attributes: {
-        color: 'black',
-        direction: gameInitialized.players.black.attributes.direction,
-        pipCount: 167,
+    players: [
+      {
+        playerId: gameInitialized.players[0].playerId,
+        color: gameInitialized.players[0].color,
+        direction: gameInitialized.players[0].direction,
+        pipCount: gameInitialized.players[0].pipCount,
       },
-    },
-    player2: {
-      player: gameInitialized.players.white.player,
-      attributes: {
-        color: 'white',
-        direction: gameInitialized.players.white.attributes.direction,
-        pipCount: 167,
+      {
+        playerId: gameInitialized.players[1].playerId,
+        color: gameInitialized.players[1].color,
+        direction: gameInitialized.players[1].direction,
+        pipCount: gameInitialized.players[1].pipCount,
       },
-    },
+    ],
   }
   const result = await db.insert(GamesTable).values(game).returning()
   return result?.length === 1 ? result[0] : null
@@ -87,16 +84,7 @@ export const dbGetGame = async (
   return game
 }
 
-export const dbGetNewGamesByPlayerId = async (
-  playerId: string,
-  db: NodePgDatabase<Record<string, never>>
-) => {
-  const games = await (
-    await dbGetAll(db)
-  ).filter((g) => g.kind === 'rolling-for-start')
-  return games.length === 1 ? games[0] : null
-}
-
+// FIXME will not work with new db schema
 // ATM players can only have one active game. But this is not enforced in the db
 export const dbGetActiveGameByPlayerId = async (
   playerId: string,
