@@ -48,9 +48,9 @@ export const GameRouter = (db: NodePgDatabase): IGameRouter => {
       !isValidUuid(player2Id) ||
       player1Id === player2Id
     ) {
-      return {
-        error: `Invalid id for player1Id: ${player1Id} or player2Id: ${player2Id}`,
-      }
+      throw Error(
+        `Invalid id for player1Id: ${player1Id} or player2Id: ${player2Id}`
+      )
     }
 
     const game = await startGame(player1Id, player2Id, db)

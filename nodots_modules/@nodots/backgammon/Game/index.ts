@@ -43,7 +43,7 @@ export const startGame = async (
       pipCount: 167,
     },
     {
-      playerId: player1Id,
+      playerId: player2Id,
       color: 'white',
       direction: 'clockwise',
       pipCount: 167,
