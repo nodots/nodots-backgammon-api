@@ -12,11 +12,9 @@ import {
 import { GameStateError } from './errors'
 
 import {
-  NodotsColor,
   NodotsGameInitialized,
-  NodotsGamePlayers,
-  NodotsMoveDirection,
   NodotsPlayerReady,
+  NodotsPlayers,
 } from '../../backgammon-types'
 import { dbSetPlayerPlaying } from '../Player/db'
 
@@ -37,7 +35,7 @@ export const startGame = async (
   const board = buildBoard()
   const cube = buildCube()
   const dice = buildDice()
-  const players: NodotsGamePlayers = [
+  const players: NodotsPlayers = [
     {
       playerId: player1Id,
       color: 'black',
@@ -48,7 +46,7 @@ export const startGame = async (
       playerId: player1Id,
       color: 'white',
       direction: 'clockwise',
-      pipCount: 0,
+      pipCount: 167,
     },
   ]
 
@@ -60,9 +58,13 @@ export const startGame = async (
     dice,
   }
 
-  const player1Playing = await dbSetPlayerPlaying(player1Id, db)
-  const playerPlaying2 = await dbSetPlayerPlaying(player2Id, db)
-  return await dbCreateGame(gameInitialized, db)
+  try {
+    await dbSetPlayerPlaying(player1Id, db)
+    await dbSetPlayerPlaying(player2Id, db)
+    return await dbCreateGame(gameInitialized, db)
+  } catch (e: any) {
+    throw GameStateError(e.message)
+  }
 }
 
 // Getters
@@ -78,9 +80,11 @@ export const getActiveGameByPlayerId = async (
   playerId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  console.log(
-    '[Backgammon Game API] getActiveGameByPlayerId playerId:',
-    playerId
-  )
-  return await dbGetActiveGameByPlayerId(playerId, db)
+  // console.log(
+  //   '[Backgammon Game API] getActiveGameByPlayerId playerId:',
+  //   playerId
+  // )
+  const result = await dbGetActiveGameByPlayerId(playerId, db)
+  console.log('[Backgammon Game API] getActiveGameByPlayerId result:', result)
+  return result
 }

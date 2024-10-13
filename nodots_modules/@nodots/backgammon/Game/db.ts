@@ -1,11 +1,8 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, SQL, SQLWrapper } from 'drizzle-orm'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
-import {
-  NodotsGameReady,
-  NodotsColor,
-  NodotsGameInitialized,
-} from '../../backgammon-types'
+import { NodotsGameInitialized } from '../../backgammon-types'
+import { isValidUuid } from '../../backgammon-types/utils'
 
 export const ColorEnum = pgEnum('color', ['black', 'white'])
 export const DirectionEnum = pgEnum('direction', [
@@ -27,10 +24,25 @@ export const GamesTable = pgTable('games', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
+
 export const dbCreateGame = async (
   gameInitialized: NodotsGameInitialized,
   db: NodePgDatabase<Record<string, never>>
 ) => {
+  if (gameInitialized.players.length !== 2) {
+    return console.error(
+      '[Game API DB] dbCreateGame Invalid number of players:',
+      gameInitialized.players.length
+    )
+  }
+  if (
+    gameInitialized.players[0].playerId === gameInitialized.players[1].playerId
+  ) {
+    return console.error(
+      '[Game API DB] dbCreateGame player1Id === player2Id:',
+      gameInitialized.players[0].playerId
+    )
+  }
   const game: typeof GamesTable.$inferInsert = {
     ...gameInitialized,
     kind: 'rolling-for-start',
@@ -53,19 +65,6 @@ export const dbCreateGame = async (
   return result?.length === 1 ? result[0] : null
 }
 
-export const dbSetGameRolling = async (
-  game: NodotsGameReady,
-  activeColor: NodotsColor,
-  db: NodePgDatabase<Record<string, never>>
-) => {
-  console.log('dbSetGameRolling', game)
-  return {
-    ...game,
-    kind: 'rolling',
-    activeColor,
-  }
-}
-
 export const dbGetAll = async (db: NodePgDatabase<Record<string, never>>) =>
   await db.select().from(GamesTable)
 
@@ -73,6 +72,9 @@ export const dbGetGame = async (
   gameId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
+  if (!isValidUuid(gameId)) {
+    return console.error('[Game API DB] dbGetGame Invalid gameId:', gameId)
+  }
   const game = await db
     .select()
     .from(GamesTable)
@@ -84,17 +86,33 @@ export const dbGetGame = async (
   return game
 }
 
-// FIXME will not work with new db schema
+// '9b311cbb-e0d2-4d7b-ad91-b629aa2c7612'
 // ATM players can only have one active game. But this is not enforced in the db
 export const dbGetActiveGameByPlayerId = async (
   playerId: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
   // FIXME: Not loving using 'sql' but drizzle seems to still have problems w jsonb
+
   const result = await db.execute(
-    sql`SELECT * FROM games WHERE player1->'player'->>'id' = ${playerId} OR player2->'player'->>'id' = ${playerId} LIMIT 1`
+    sql`SELECT * FROM games WHERE players->0->>'playerId' = ${playerId} OR players->1->>'playerId' = ${playerId}`
   )
-  return result?.rows?.length === 1 ? result.rows[0] : null
+  console.log(
+    `[Game API Db] dbGetActiveGameByPlayerId ${playerId} result:`,
+    result.rows
+  )
+  return result.rows
 }
 
-// SELECT * FROM table WHERE json_field->>'Name' = 'mike' AND json_field->>'Location' = 'Lagos'
+/* 
+.where(sql`${databaseSchema.products.properties} ->> 'brand' = 'Audi'`);
+
+.where(sql`players->1->>'playerId' = '1c1e5bf5-77a0-4381-a35d-8aa00d94660b'
+OR
+players->0->>'playerId' = '1c1e5bf5-77a0-4381-a35d-8aa00d94660b'`);
+
+
+players->1->>'playerId' = '1c1e5bf5-77a0-4381-a35d-8aa00d94660b' 
+OR
+players->0->>'playerId' = '1c1e5bf5-77a0-4381-a35d-8aa00d94660b'
+*/

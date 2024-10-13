@@ -137,7 +137,6 @@ export const dbGetPlayerById = async (
   return result?.length === 1 ? result[0] : null
 }
 
-// Specialized read
 export const dbGetPlayersSeekingGame = async (
   db: NodePgDatabase<Record<string, never>>
 ) => await db.select().from(PlayersTable).where(eq(PlayersTable.kind, 'ready'))

@@ -3,8 +3,7 @@ import { NodotsChecker } from './checker'
 import { NodotsCube } from './cube'
 import { NodotsRoll, NodotsDice } from './dice'
 import { NodotsPlay } from './play'
-import { NodotsPlayerPlaying, NodotsPlayerReady } from './player'
-import { NodotsPlayersPlaying, NodotsPlayersReady } from './players'
+import { NodotsPlayersPlaying } from './players'
 
 export type NodotsColor = 'black' | 'white'
 export type NodotsMoveDirection = 'clockwise' | 'counterclockwise'
@@ -65,7 +64,7 @@ export interface NodotsGamePlayer {
   pipCount: number
 }
 
-export type NodotsGamePlayers = [NodotsGamePlayer, NodotsGamePlayer]
+export type NodotsPlayers = [NodotsGamePlayer, NodotsGamePlayer]
 
 // GameInitializing should never hit the db. Check the db.ts file for the actual db schema
 type _Game = {
@@ -75,12 +74,12 @@ type _Game = {
 
 export interface NodotsGameInitializing {
   kind: 'initializing'
-  players: NodotsGamePlayers
+  players: NodotsPlayers
 }
 
 export interface NodotsGameInitialized {
   kind: 'initialized'
-  players: NodotsGamePlayers
+  players: NodotsPlayers
   board: NodotsBoard
   dice: NodotsDice
   cube: NodotsCube
@@ -89,7 +88,7 @@ export interface NodotsGameInitialized {
 export interface NodotsGameReady {
   id: string
   kind: 'ready'
-  players: NodotsGamePlayers
+  players: NodotsPlayers
   board: NodotsBoard
   dice: NodotsDice
   cube: NodotsCube
@@ -98,7 +97,7 @@ export interface NodotsGameReady {
 export interface NodotsGameRollingForStart {
   id: string
   kind: 'rolling-for-start'
-  players: NodotsGamePlayers
+  players: NodotsPlayers
   board: NodotsBoard
   dice: NodotsDice
   cube: NodotsCube
@@ -107,7 +106,7 @@ export interface NodotsGameRollingForStart {
 export interface NodotsGameRolling {
   id: string
   kind: 'rolling'
-  players: NodotsGamePlayers
+  players: NodotsPlayers
   dice: NodotsDice
   board: NodotsBoard
   cube: NodotsCube
@@ -118,7 +117,7 @@ export interface NodotsGameRolling {
 export interface NodotsGameMoving {
   id: string
   kind: 'moving'
-  players: NodotsGamePlayers
+  players: NodotsPlayers
   dice: NodotsDice
   board: NodotsBoard
   cube: NodotsCube
