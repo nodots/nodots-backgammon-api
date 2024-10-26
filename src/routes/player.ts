@@ -27,7 +27,7 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
 
   router.post('/', async (req, res) => {
     const player = req.body as NodotsPlayerInitializing
-    console.log('[PlayerRouter] /player POST:', player)
+    console.log('bg-api> [PlayerRouter] /player POST:', player)
 
     const playerReady = createPlayerFromPlayerInitializing(player, db)
     if (playerReady) {
@@ -52,17 +52,36 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
     }
   )
 
+  router.get(
+    '/opponents/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+    async (req, res) => {
+      const playerId = req.params.playerId
+      try {
+        const opponents = (await (
+          await dbGetPlayers(db)
+        ).filter(
+          (o) => o.id !== playerId && o.kind === 'ready'
+        )) as NodotsPlayerReady[]
+        res.status(200).json(opponents)
+      } catch {
+        res
+          .status(404)
+          .json({ message: `Player not found for id: ${playerId}` })
+      }
+    }
+  )
+
   router.get('/sub/:source/:externalId', async (req, res) => {
     const source = req.params.source
     const externalId = req.params.externalId
-    console.log('[PlayerRouter] sub source:', source)
-    console.log('[PlayerRouter] sub externalId:', externalId)
+    console.log('bg-api> [PlayerRouter] sub source:', source)
+    console.log('bg-api> [PlayerRouter] sub externalId:', externalId)
     try {
       const result = await dbGetPlayerByExternalSource(
         { source, externalId },
         db
       )
-      console.log('[PlayerRouter] result:', result)
+      console.log('bg-api> [PlayerRouter] result:', result)
       result ? res.status(200).json(result) : res.status(404).json({})
     } catch {
       res.status(500).json({ message: 'Error retrieving player' })
@@ -81,7 +100,7 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
     '/seeking-game/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/',
     async (req, res) => {
       const playerId = req.params.playerId
-      console.log('[PlayerRouter] seeking-game req.body:', req.body)
+      console.log('bg-api> [PlayerRouter] seeking-game req.body:', req.body)
       try {
         const player = await dbGetPlayerById(playerId, db)
         if (!player) {
@@ -104,26 +123,11 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
     }
   )
 
-  // router.patch(
-  //   '/:id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
-  //   async (req, res) => {
-  //     const playerId = req.params.playerId
-  //     const updatedPlayerPreferences: UpdatedPlayerPreferences = req.body
-  //     try {
-  //       await dbUpdatePlayerPreferences(playerId, updatedPlayerPreferences, db)
-  //       res.status(200).json({ message: 'Player preferences updated' })
-  //     } catch {
-  //       res
-  //         .status(404)
-  //         .json({ message: `Player not found for id: ${playerId}` })
-  //     }
-  //   }
-  // )
-
   router.patch(
     '/logout/:playerId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
     async (req, res) => {
       const playerId = req.params.playerId
+      console.log('bg-api> [PlayerRouter] logout playerId:', playerId)
       try {
         await dbLogoutPlayer(playerId, db)
         res.status(200).json({ message: 'Player logged out' })
@@ -141,7 +145,7 @@ export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
       const playerId = req.params.playerId
       try {
         const result = await dbLoginPlayer(playerId, db)
-        console.log('[PlayerRouter] login player result:', result)
+        console.log('bg-api> [PlayerRouter] login player result:', result)
         res.status(200).json(result)
       } catch {
         res

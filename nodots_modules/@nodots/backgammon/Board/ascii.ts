@@ -18,9 +18,11 @@ const clockwiseRows = [
   '|..O...............X......|..X...................O..|',
 ]
 
-export const getClockwiseBoard = () =>
+const getClockwiseBoard = () =>
   colLabelsClockwiseTop +
   '\n' +
   clockwiseRows.join('\n') +
   '\n' +
   colLabelsClockwiseBottom
+
+export const AsciiBoard = getClockwiseBoard()

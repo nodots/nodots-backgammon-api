@@ -55,7 +55,8 @@ export const GameRouter = (db: NodePgDatabase): IGameRouter => {
 
     const game = await startGame(player1Id, player2Id, db)
 
-    res.status(200).json(game)
+    res.status(200).json(req.body)
   })
+
   return router
 }

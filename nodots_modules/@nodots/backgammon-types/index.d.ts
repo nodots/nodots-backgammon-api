@@ -1,4 +1,4 @@
-export type NodotsLocaleCode = 'en' | 'en-US' | 'es' | 'fr' | 'ar' | 'tr' | 'gr'
+export type NodotsLocaleCode = 'en' | 'es' | 'fr' | 'ar' | 'tr' | 'de' | 'gr'
 
 export * from './board'
 export * from './checker'
@@ -12,3 +12,4 @@ export * from './offer'
 export * from './play'
 export * from './player'
 export * from './players'
+export * from './utils'

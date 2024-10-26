@@ -1,5 +1,4 @@
 import express from 'express'
-import cors from 'cors'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Client } from 'pg'
 import { PlayerRouter } from './routes/player'
@@ -8,6 +7,9 @@ import { BoardRouter } from './routes/board'
 import { UserRouter } from './routes/user'
 import { OfferRouter } from './routes/offer'
 import { AuthRouter } from './routes/auth'
+import cors from 'cors'
+import { requestLogger } from './middleware/logger'
+
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -34,9 +36,13 @@ const main = async () => {
     })
   )
 
-  // Define a simple route
+  // Use the request logger middleware
+  app.use(requestLogger)
+
   app.get('/', (req, res) => {
-    res.send('Welcome to the Nodots Backgammon API!')
+    res.send(
+      'Welcome to the Nodots Backgammon API!\n\nhttps://github.com/nodots/nodots-backgammon-api'
+    )
   })
 
   app.post('/user', (req, res) => {
@@ -59,7 +65,7 @@ const main = async () => {
 
   // Start the server
   app.listen(port, () => {
-    console.log(`Server is running on port ${port}`)
+    console.log(`bgapi> Server is running on http://localhost:${port}`)
   })
 }
 

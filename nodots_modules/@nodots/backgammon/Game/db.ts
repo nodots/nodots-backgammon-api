@@ -1,8 +1,12 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { eq, sql, SQL, SQLWrapper } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
-import { NodotsGameInitialized } from '../../backgammon-types'
+import {
+  NodotsGameInitializing,
+  NodotsGameRollingForStart,
+} from '../../backgammon-types'
 import { isValidUuid } from '../../backgammon-types/utils'
+import { GameStateError } from './errors'
 
 export const ColorEnum = pgEnum('color', ['black', 'white'])
 export const DirectionEnum = pgEnum('direction', [
@@ -10,7 +14,7 @@ export const DirectionEnum = pgEnum('direction', [
   'counterclockwise',
 ])
 
-const gameKind = ['rolling-for-start', 'rolling', 'moving'] as const
+const gameKind = ['proposed', 'rolling-for-start', 'rolling', 'moving'] as const
 
 export const GameTypeEnum = pgEnum('game-kind', gameKind)
 
@@ -26,43 +30,45 @@ export const GamesTable = pgTable('games', {
 })
 
 export const dbCreateGame = async (
-  gameInitialized: NodotsGameInitialized,
+  gameInitializing: NodotsGameInitializing,
   db: NodePgDatabase<Record<string, never>>
-) => {
-  if (gameInitialized.players.length !== 2) {
-    return console.error(
-      '[Game API DB] dbCreateGame Invalid number of players:',
-      gameInitialized.players.length
+): Promise<NodotsGameRollingForStart> => {
+  if (gameInitializing.players.length !== 2) {
+    throw GameStateError(
+      `[Game API DB] dbCreateGame: Invalid number of players ${gameInitializing.players.length}`
     )
   }
   if (
-    gameInitialized.players[0].playerId === gameInitialized.players[1].playerId
+    gameInitializing.players[0].playerId ===
+    gameInitializing.players[1].playerId
   ) {
-    return console.error(
-      '[Game API DB] dbCreateGame player1Id === player2Id:',
-      gameInitialized.players[0].playerId
+    throw GameStateError(
+      `[Game API DB] dbCreateGame: Player1 === Player2 ${gameInitializing.players[0].playerId}`
     )
   }
   const game: typeof GamesTable.$inferInsert = {
-    ...gameInitialized,
-    kind: 'rolling-for-start',
+    ...gameInitializing,
+    kind: 'proposed',
     players: [
       {
-        playerId: gameInitialized.players[0].playerId,
-        color: gameInitialized.players[0].color,
-        direction: gameInitialized.players[0].direction,
-        pipCount: gameInitialized.players[0].pipCount,
+        playerId: gameInitializing.players[0].playerId,
+        color: gameInitializing.players[0].color,
+        direction: gameInitializing.players[0].direction,
+        pipCount: gameInitializing.players[0].pipCount,
       },
       {
-        playerId: gameInitialized.players[1].playerId,
-        color: gameInitialized.players[1].color,
-        direction: gameInitialized.players[1].direction,
-        pipCount: gameInitialized.players[1].pipCount,
+        playerId: gameInitializing.players[1].playerId,
+        color: gameInitializing.players[1].color,
+        direction: gameInitializing.players[1].direction,
+        pipCount: gameInitializing.players[1].pipCount,
       },
     ],
   }
   const result = await db.insert(GamesTable).values(game).returning()
-  return result?.length === 1 ? result[0] : null
+  if (result.length !== 1) {
+    throw GameStateError('[Game API DB] dbCreateGame: Game not created')
+  }
+  return result[0] as NodotsGameRollingForStart
 }
 
 export const dbGetAll = async (db: NodePgDatabase<Record<string, never>>) =>
@@ -103,16 +109,3 @@ export const dbGetActiveGameByPlayerId = async (
   )
   return result.rows
 }
-
-/* 
-.where(sql`${databaseSchema.products.properties} ->> 'brand' = 'Audi'`);
-
-.where(sql`players->1->>'playerId' = '1c1e5bf5-77a0-4381-a35d-8aa00d94660b'
-OR
-players->0->>'playerId' = '1c1e5bf5-77a0-4381-a35d-8aa00d94660b'`);
-
-
-players->1->>'playerId' = '1c1e5bf5-77a0-4381-a35d-8aa00d94660b' 
-OR
-players->0->>'playerId' = '1c1e5bf5-77a0-4381-a35d-8aa00d94660b'
-*/

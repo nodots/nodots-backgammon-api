@@ -68,26 +68,12 @@ export type NodotsPlayers = [NodotsGamePlayer, NodotsGamePlayer]
 
 // GameInitializing should never hit the db. Check the db.ts file for the actual db schema
 type _Game = {
-  kind: 'initializing' | 'ready' | 'rolling-for-start' | 'rolling' | 'moving'
+  kind: 'initializing' | 'proposed' | 'rolling-for-start' | 'rolling' | 'moving'
   players: NodotsPlayersPlaying
 }
 
 export interface NodotsGameInitializing {
   kind: 'initializing'
-  players: NodotsPlayers
-}
-
-export interface NodotsGameInitialized {
-  kind: 'initialized'
-  players: NodotsPlayers
-  board: NodotsBoard
-  dice: NodotsDice
-  cube: NodotsCube
-}
-
-export interface NodotsGameReady {
-  id: string
-  kind: 'ready'
   players: NodotsPlayers
   board: NodotsBoard
   dice: NodotsDice
@@ -114,6 +100,27 @@ export interface NodotsGameRolling {
   activePlay?: NodotsPlay
 }
 
+export interface NodotsGameDoubleProposed {
+  id: string
+  kind: 'double-proposed'
+  players: NodotsPlayers
+  dice: NodotsDice
+  board: NodotsBoard
+  cube: NodotsCube
+  activeColor: NodotsColor
+  activePlay?: NodotsPlay
+}
+
+export interface NodotsGameResignationProposed {
+  id: string
+  kind: 'rolling'
+  players: NodotsPlayers
+  dice: NodotsDice
+  board: NodotsBoard
+  cube: NodotsCube
+  activeColor: NodotsColor
+  activePlay?: NodotsPlay
+}
 export interface NodotsGameMoving {
   id: string
   kind: 'moving'
@@ -126,13 +133,27 @@ export interface NodotsGameMoving {
   activePlay?: NodotsPlay
 }
 
+export interface NodotsGameOver {
+  id: string
+  kind: 'over'
+  players: NodotsPlayers
+  board: NodotsBoard
+  cube: NodotsCube
+  winningPlayerId: string
+}
+
 export type NodotsGame =
-  | NodotsGameReady
+  | NodotsGameInitializing
   | NodotsGameRollingForStart
   | NodotsGameRolling
   | NodotsGameMoving
+  | NodotsGameDoubleProposed
+  | NodotsGameResignationProposed
+  | NodotsGameOver
 
 export type NodotsGameActive =
   | NodotsGameRollingForStart
   | NodotsGameRolling
   | NodotsGameMoving
+  | NodotsGameDoubleProposed
+  | NodotsGameResignationProposed

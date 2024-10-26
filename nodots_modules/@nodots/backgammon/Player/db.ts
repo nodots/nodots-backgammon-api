@@ -53,7 +53,7 @@ export const dbCreatePlayer = async (
     .insert(PlayersTable)
     .values(player)
     .returning()) as unknown as NodotsPlayerReady
-  console.log('[dbCreatePlayer] result:', result)
+  console.log('bgapi> [dbCreatePlayer] result:', result)
   return result
 }
 
@@ -61,7 +61,7 @@ export const dbLoginPlayer = async (
   id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  console.log('[dbLoginPlayer] id:', id)
+  console.log('bgapi> [dbLoginPlayer] id:', id)
   const result = await db
     .update(PlayersTable)
     .set({
@@ -79,16 +79,22 @@ export const dbSetPlayerSeekingGame = async (
   seekingGame: boolean,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  console.log('[dbSetPlayerSeekingGame] id:', id, 'seekingGame:', seekingGame)
+  console.log(
+    'bgapi> [dbSetPlayerSeekingGame] id:',
+    id,
+    'seekingGame:',
+    seekingGame
+  )
   const result = await db
     .update(PlayersTable)
     .set({
       kind: 'ready',
       isSeekingGame: seekingGame,
+      updatedAt: new Date(),
     })
     .where(eq(PlayersTable.id, id))
     .returning()
-  console.log('dbSetPlayerSeekingGame result:', result)
+  console.log('bgapi> [dbSetPlayerSeekingGame] result:', result)
   return result[0] ? result[0] : null
 }
 
@@ -96,15 +102,16 @@ export const dbSetPlayerPlaying = async (
   id: string,
   db: NodePgDatabase<Record<string, never>>
 ) => {
-  console.log('[dbSetPlayerPlaying] id:', id)
+  console.log('bgapi> [dbSetPlayerPlaying] id:', id)
   const result = await db
     .update(PlayersTable)
     .set({
       kind: 'playing',
+      updatedAt: new Date(),
     })
     .where(eq(PlayersTable.id, id))
     .returning()
-  console.log('dbSetPlayerPlaying result:', result)
+  console.log('bgapi> [dbSetPlayerPlaying] result:', result)
   return result[0] ? result[0] : null
 }
 
@@ -118,6 +125,7 @@ export const dbLogoutPlayer = async (
       kind: 'ready',
       isLoggedIn: false,
       lastLogOut: new Date(),
+      updatedAt: new Date(),
     })
     .where(eq(PlayersTable.id, id))
     .returning()
@@ -169,6 +177,7 @@ export const dbUpdatePlayerPreferences = async (
     .update(PlayersTable)
     .set({
       preferences,
+      updatedAt: new Date(),
     })
     .where(eq(PlayersTable.id, id))
     .returning()

@@ -12,19 +12,22 @@ import {
 import { GameStateError } from './errors'
 
 import {
-  NodotsGameInitialized,
+  NodotsGameInitializing,
+  NodotsGameRollingForStart,
   NodotsPlayerReady,
   NodotsPlayers,
 } from '../../backgammon-types'
 import { dbSetPlayerPlaying } from '../Player/db'
+import { generateId } from '..'
 
 // State transitions
 export const startGame = async (
   player1Id: string,
   player2Id: string,
   db: NodePgDatabase<Record<string, never>>
-) => {
-  if (player1Id === player2Id) return console.error('player1Id === player2Id')
+): Promise<NodotsGameRollingForStart> => {
+  if (player1Id === player2Id) throw GameStateError('Player1 === Player2')
+
   const player1 = (await getPlayerById(player1Id, db)) as NodotsPlayerReady
   const player2 = (await getPlayerById(player2Id, db)) as NodotsPlayerReady
 
@@ -50,8 +53,8 @@ export const startGame = async (
     },
   ]
 
-  const gameInitialized: NodotsGameInitialized = {
-    kind: 'initialized',
+  const gameInitializing: NodotsGameInitializing = {
+    kind: 'initializing',
     players,
     board,
     cube,
@@ -61,7 +64,7 @@ export const startGame = async (
   try {
     await dbSetPlayerPlaying(player1Id, db)
     await dbSetPlayerPlaying(player2Id, db)
-    return await dbCreateGame(gameInitialized, db)
+    return await dbCreateGame(gameInitializing, db)
   } catch (e: any) {
     throw GameStateError(e.message)
   }

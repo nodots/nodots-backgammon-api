@@ -4,6 +4,7 @@ import {
   uuid,
   timestamp,
   PgTimestamp,
+  boolean,
 } from 'drizzle-orm/pg-core'
 import { eq, and, or, ne } from 'drizzle-orm'
 import { NodotsOfferPlay } from '../../backgammon-types'
@@ -20,6 +21,7 @@ export interface OfferRecord {
   kind: OfferKind
   offeringPlayerId: string
   offeredPlayerId: string
+  accepted: boolean
 }
 
 export const OffersTable = pgTable('offers', {
@@ -27,6 +29,7 @@ export const OffersTable = pgTable('offers', {
   kind: OfferTypeEnum('kind').notNull(),
   offeringPlayerId: uuid('offering_player_id').notNull(),
   offeredPlayerId: uuid('offered_player_id').notNull(),
+  accepted: boolean('accepted').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -35,23 +38,47 @@ export const dbCreatePlayOffer = async (
   offeringPlayerId: string,
   offeredPlayerId: string,
   db: NodePgDatabase<Record<string, never>>
-) => {
-  const offer = {
-    kind: 'play' as OfferKind,
+): Promise<NodotsOfferPlay> => {
+  const offer: NodotsOfferPlay = {
+    kind: 'play',
     offeringPlayerId: offeringPlayerId,
     offeredPlayerId: offeredPlayerId,
+    accepted: false,
   }
-  return await db.insert(OffersTable).values(offer).returning()
+  const result = (await db
+    .insert(OffersTable)
+    .values(offer)
+    .returning()) as unknown as NodotsOfferPlay
+  return result
 }
 
-export const dbGetPlayOffers = async (
+export const dbGetPlayOffersForPlayerId = async (
   playerId: string,
   db: any
-): Promise<OfferRecord[]> => {
-  const offers = await db
+): Promise<NodotsOfferPlay[]> => {
+  const offers = (await db
     .select()
     .from(OffersTable)
-    .where(ne(OffersTable.offeredPlayerId, playerId))
+    .where(eq(OffersTable.kind, 'play'))
+    .where(
+      or(
+        eq(OffersTable.offeredPlayerId, playerId),
+        eq(OffersTable.offeringPlayerId, playerId)
+      )
+    )) as unknown as NodotsOfferPlay[]
   console.log(offers)
   return offers
 }
+
+export const dbRespondPlayOffer = async (
+  id: string,
+  accepted: boolean,
+  db: NodePgDatabase<Record<string, never>>
+) =>
+  await db
+    .update(OffersTable)
+    .set({
+      accepted,
+    })
+    .where(eq(OffersTable.id, id))
+    .returning()

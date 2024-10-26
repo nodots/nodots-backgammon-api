@@ -1,5 +1,5 @@
 {
-  "id": "4ef232a3-6c03-45e4-b140-5773bb2967a7",
+  "id": "72fc9175-635f-461d-baf2-1897f0a69fea",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -95,6 +95,13 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "accepted": {
+          "name": "accepted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "created_at": {
           "name": "created_at",
@@ -241,6 +248,7 @@
       "name": "game-kind",
       "schema": "public",
       "values": [
+        "proposed",
         "rolling-for-start",
         "rolling",
         "moving"

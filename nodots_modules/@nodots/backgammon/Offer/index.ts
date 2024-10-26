@@ -1,13 +1,25 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+
+import {
+  dbCreatePlayOffer,
+  dbGetPlayOffersForPlayerId,
+  dbRespondPlayOffer,
+} from './db'
 import { NodotsOfferPlay } from '../../backgammon-types'
-import { dbCreatePlayOffer } from './db'
-// State transitions
 
-export const offerPlay = async (
-  offer: NodotsOfferPlay,
+export const createPlayOffer = async (
+  playerId: string,
+  opponentId: string,
+  db: NodePgDatabase
+): Promise<NodotsOfferPlay> => await dbCreatePlayOffer(playerId, opponentId, db)
+
+export const getPlayOffersForPlayerId = async (
+  playerId: string,
   db: NodePgDatabase<Record<string, never>>
-) => await dbCreatePlayOffer(offer.offeringPlayerId, offer.offeredPlayerId, db)
+) => await dbGetPlayOffersForPlayerId(playerId, db)
 
-export const acceptOfferPlay = async () => {}
-
-export const rejectOfferPlay = async () => {}
+export const respondToPlayOffer = async (
+  offerId: string,
+  accepted: boolean,
+  db: NodePgDatabase<Record<string, never>>
+) => await dbRespondPlayOffer(offerId, accepted, db)

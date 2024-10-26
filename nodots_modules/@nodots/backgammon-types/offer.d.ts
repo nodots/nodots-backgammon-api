@@ -8,44 +8,20 @@ interface Offer {
 
 export interface NodotsOfferPlay extends Offer {
   kind: 'play'
-}
-
-export interface NodotsOfferPlayAccepted extends NodotsOfferPlay {
-  accepted: true
-}
-
-export interface NodotsOfferPlayRejected extends NodotsOfferPlay {
-  accepted: true
+  accepted: boolean
 }
 
 export interface NodotsOfferDouble extends Offer {
   kind: 'double'
-}
-
-export interface NodotsOfferDoubleAccepted extends NodotsOfferDouble {
-  accepted: true
-}
-
-export interface NodotsOfferDoubleRejected extends NodotsOfferDouble {
-  accepted: false
+  accepted: boolean
 }
 
 export interface NodotsOfferResign extends Offer {
   kind: 'resign'
-}
-
-export interface NodotsOfferResignAccepted extends NodotsOfferResign {
-  accepted: true
-}
-
-export interface NodotsOfferResignRejected extends NodotsOfferResign {
-  accepted: false
+  accepted: boolean
 }
 
 export type NodotsOffer =
   | NodotsOfferPlay
-  | NodotsOfferPlayAccepted
-  | NodotsOfferPlayRejected
+  | NodotsOfferDouble
   | NodotsOfferResign
-  | NodotsOfferResignAccepted
-  | NodotsOfferResignRejected
