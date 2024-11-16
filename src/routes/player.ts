@@ -1,27 +1,17 @@
+import { NodotsPlayerInitializing } from '@nodots/backgammon'
+import {
+  createPlayerFromPlayerInitializing,
+  getPlayers,
+} from '@nodots/backgammon/Player'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { Router } from 'express'
-import { createPlayerFromPlayerInitializing } from '../../nodots_modules/@nodots/backgammon/Player'
-import {
-  dbGetPlayerByExternalSource,
-  dbGetPlayerById,
-  dbGetPlayers,
-  dbGetPlayersSeekingGame,
-  dbLoginPlayer,
-  dbLogoutPlayer,
-  dbSetPlayerPlaying,
-  dbSetPlayerSeekingGame,
-} from '../../nodots_modules/@nodots/backgammon/Player/db'
-import {
-  NodotsPlayerInitializing,
-  NodotsPlayerReady,
-} from '../../nodots_modules/@nodots/backgammon-types'
 export interface IPlayerRouter extends Router {}
 
 export const PlayerRouter = (db: NodePgDatabase): IPlayerRouter => {
   const router = Router()
 
   router.get('/', async (req, res) => {
-    const players = await dbGetPlayers(db)
+    const players = await getPlayers(db)
     res.status(200).json(players)
   })
 

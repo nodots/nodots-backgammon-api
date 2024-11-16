@@ -14,9 +14,8 @@ import {
 export const getPlayerById = async (playerId: string, db: NodePgDatabase) =>
   await dbGetPlayerById(playerId, db)
 
-export const getAllPlayers = async (
-  db: NodePgDatabase<Record<string, never>>
-) => await dbGetPlayers(db)
+export const getPlayers = async (db: NodePgDatabase<Record<string, never>>) =>
+  await dbGetPlayers(db)
 
 export const getPlayersSeekingGame = async (
   db: NodePgDatabase<Record<string, never>>

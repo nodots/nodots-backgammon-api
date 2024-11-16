@@ -5,3 +5,8 @@ export const isValidUuid = (uuid: any): boolean => {
   if (!uuidRegex.test(uuid)) return false
   return true
 }
+
+import { v4 } from 'uuid'
+
+export const randomBoolean = () => (Math.random() > 0.5 ? true : false)
+export const generateId = () => v4()
