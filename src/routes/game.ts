@@ -1,8 +1,5 @@
 import { Router } from 'express'
-import { Game } from '../../nodots_modules/@nodots/nodots-backgammon-core/src'
-import { BackgammonPlayers } from '../../nodots_modules/@nodots/nodots-backgammon-core/src/types'
-// import { Game } from '../../nodots_modules/@nodots/nodots-backgammon-core/src'
-
+import { BackgammonPlayers } from 'nodots-backgammon-types'
 export interface IGameRouter extends Router {}
 
 export const GameRouter = (): IGameRouter => {
