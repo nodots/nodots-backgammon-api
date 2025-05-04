@@ -1,63 +1,69 @@
-import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { eq, sql } from 'drizzle-orm'
+import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { jsonb, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { isValidUuid } from '../../nodots_modules/@nodots/nodots-backgammon-core/src'
 import {
-  NodotsGameInitializing,
-  NodotsGameRollingForStart,
-} from '../../backgammon-types'
-import { isValidUuid } from '../../backgammon-types/utils'
-import { GameStateError } from './errors'
+  BackgammonColor,
+  BackgammonGame,
+  BackgammonGameRolledForStart,
+  BackgammonGameStateKind,
+  BackgammonMoveDirection,
+} from '../../nodots_modules/@nodots/nodots-backgammon-core/src/types'
+import { GameStateError } from '../types/error'
 
-export const ColorEnum = pgEnum('color', ['black', 'white'])
-export const DirectionEnum = pgEnum('direction', [
-  'clockwise',
-  'counterclockwise',
+const GAME_ROLLING_FOR_START = 'rolling-for-start' as BackgammonGameStateKind
+const GAME_ROLLED_FOR_START = 'rolled-for-start' as BackgammonGameStateKind
+const GAME_ROLLING = 'rolling' as BackgammonGameStateKind
+const GAME_MOVING = 'moving' as BackgammonGameStateKind
+const GAME_COMPLETED = 'completed' as BackgammonGameStateKind
+
+export const GameTypeEnum = pgEnum('game_type', [
+  GAME_ROLLING_FOR_START,
+  GAME_ROLLED_FOR_START,
+  GAME_ROLLING,
+  GAME_MOVING,
+  GAME_COMPLETED,
 ])
 
-const gameKind = ['proposed', 'rolling-for-start', 'rolling', 'moving'] as const
+const BLACK = 'black' as BackgammonColor
+const WHITE = 'white' as BackgammonColor
 
-export const GameTypeEnum = pgEnum('game-kind', gameKind)
+export const ColorEnum = pgEnum('color', [BLACK, WHITE])
+
+const CLOCKWISE = 'clockwise' as BackgammonMoveDirection
+const COUNTERCLOCKWISE = 'counterclockwise' as BackgammonMoveDirection
+
+export const DirectionEnum = pgEnum('direction', [CLOCKWISE, COUNTERCLOCKWISE])
 
 export const GamesTable = pgTable('games', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
-  kind: GameTypeEnum('kind').notNull(),
+  stateKind: GameTypeEnum('kind').notNull(),
   players: jsonb('players').notNull(),
   board: jsonb('board').notNull(),
   cube: jsonb('cube').notNull(),
-  dice: jsonb('dice').notNull(),
+  winner: jsonb('winner'),
+  activeColor: ColorEnum('active_color'),
+  activePlay: jsonb('active_play'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
 export const dbCreateGame = async (
-  gameInitializing: NodotsGameInitializing,
+  gameInitializing: BackgammonGame,
   db: NodePgDatabase<Record<string, never>>
-): Promise<NodotsGameRollingForStart> => {
-  if (gameInitializing.players.length !== 2) {
-    throw GameStateError(
-      `[Game API DB] dbCreateGame: Invalid number of players ${gameInitializing.players.length}`
-    )
-  }
-  if (
-    gameInitializing.players[0].playerId ===
-    gameInitializing.players[1].playerId
-  ) {
-    throw GameStateError(
-      `[Game API DB] dbCreateGame: Player1 === Player2 ${gameInitializing.players[0].playerId}`
-    )
-  }
+): Promise<BackgammonGameRolledForStart> => {
   const game: typeof GamesTable.$inferInsert = {
     ...gameInitializing,
-    kind: 'proposed',
+    stateKind: gameInitializing.stateKind,
     players: [
       {
-        playerId: gameInitializing.players[0].playerId,
+        playerId: gameInitializing.players[0].id,
         color: gameInitializing.players[0].color,
         direction: gameInitializing.players[0].direction,
         pipCount: gameInitializing.players[0].pipCount,
       },
       {
-        playerId: gameInitializing.players[1].playerId,
+        playerId: gameInitializing.players[1].id,
         color: gameInitializing.players[1].color,
         direction: gameInitializing.players[1].direction,
         pipCount: gameInitializing.players[1].pipCount,
@@ -68,7 +74,7 @@ export const dbCreateGame = async (
   if (result.length !== 1) {
     throw GameStateError('[Game API DB] dbCreateGame: Game not created')
   }
-  return result[0] as NodotsGameRollingForStart
+  return result[0] as unknown as BackgammonGameRolledForStart
 }
 
 export const dbGetAll = async (db: NodePgDatabase<Record<string, never>>) =>

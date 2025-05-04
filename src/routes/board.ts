@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { AsciiBoard } from '../../nodots_modules/@nodots/backgammon/Board/ascii'
+import { Board } from '../../nodots_modules/@nodots/nodots-backgammon-core/src'
 
 export interface IBoardRouter extends Router {}
 
@@ -7,7 +7,7 @@ export const BoardRouter = (): IBoardRouter => {
   const router = Router()
 
   router.get('/', async (req, res) => {
-    const board = AsciiBoard
+    const board = Board.getAsciiBoard(Board.initialize())
     return res.status(200).send(board)
   })
 

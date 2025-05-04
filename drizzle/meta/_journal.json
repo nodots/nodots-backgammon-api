@@ -8,6 +8,13 @@
       "when": 1729551168794,
       "tag": "0000_married_thor_girl",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1740878641030,
+      "tag": "0001_chief_impossible_man",
+      "breakpoints": true
     }
   ]
 }
