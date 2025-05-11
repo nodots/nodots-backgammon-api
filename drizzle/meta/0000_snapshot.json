@@ -1,5 +1,5 @@
 {
-  "id": "72fc9175-635f-461d-baf2-1897f0a69fea",
+  "id": "fef36742-7561-4061-90f9-298764a9117c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -17,7 +17,7 @@
         },
         "kind": {
           "name": "kind",
-          "type": "game-kind",
+          "type": "game_type",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
@@ -40,11 +40,36 @@
           "primaryKey": false,
           "notNull": true
         },
-        "dice": {
-          "name": "dice",
+        "winner": {
+          "name": "winner",
           "type": "jsonb",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "active_color": {
+          "name": "active_color",
+          "type": "color",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active_play": {
+          "name": "active_play",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active_player": {
+          "name": "active_player",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "inactive_player": {
+          "name": "inactive_player",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -64,10 +89,13 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "public.offers": {
-      "name": "offers",
+    "public.users": {
+      "name": "users",
       "schema": "",
       "columns": {
         "id": {
@@ -77,117 +105,33 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "kind": {
-          "name": "kind",
-          "type": "offer-kind",
-          "typeSchema": "public",
+        "auth0_id": {
+          "name": "auth0_id",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
-        },
-        "offering_player_id": {
-          "name": "offering_player_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "offered_player_id": {
-          "name": "offered_player_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "accepted": {
-          "name": "accepted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.players": {
-      "name": "players",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "kind": {
-          "name": "kind",
-          "type": "player-kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "source": {
-          "name": "source",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "external_id": {
-          "name": "external_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         },
         "email": {
           "name": "email",
-          "type": "text",
+          "type": "varchar(256)",
           "primaryKey": false,
           "notNull": true
         },
-        "is_logged_in": {
-          "name": "is_logged_in",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "is_seeking_game": {
-          "name": "is_seeking_game",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "last_log_in": {
-          "name": "last_log_in",
-          "type": "timestamp",
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false
         },
-        "last_log_out": {
-          "name": "last_log_out",
-          "type": "timestamp",
+        "first_name": {
+          "name": "first_name",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": false
         },
-        "preferences": {
-          "name": "preferences",
-          "type": "jsonb",
+        "last_name": {
+          "name": "last_name",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": false
         },
@@ -210,21 +154,24 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "players_external_id_unique": {
-          "name": "players_external_id_unique",
+        "users_auth0_id_unique": {
+          "name": "users_auth0_id_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "external_id"
+            "auth0_id"
           ]
         },
-        "players_email_unique": {
-          "name": "players_email_unique",
+        "users_email_unique": {
+          "name": "users_email_unique",
           "nullsNotDistinct": false,
           "columns": [
             "email"
           ]
         }
-      }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -244,36 +191,25 @@
         "counterclockwise"
       ]
     },
-    "public.game-kind": {
-      "name": "game-kind",
+    "public.game_type": {
+      "name": "game_type",
       "schema": "public",
       "values": [
-        "proposed",
         "rolling-for-start",
+        "rolled-for-start",
         "rolling",
-        "moving"
-      ]
-    },
-    "public.offer-kind": {
-      "name": "offer-kind",
-      "schema": "public",
-      "values": [
-        "play",
-        "double",
-        "resign"
-      ]
-    },
-    "public.player-kind": {
-      "name": "player-kind",
-      "schema": "public",
-      "values": [
-        "ready",
-        "playing"
+        "rolled",
+        "moving",
+        "moved",
+        "completed"
       ]
     }
   },
   "schemas": {},
   "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

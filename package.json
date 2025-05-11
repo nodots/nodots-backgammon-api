@@ -1,11 +1,12 @@
 {
   "dependencies": {
-    "nodots-backgammon-core": "git+https://github.com/nodots/nodots-backgammon-core.git",
     "auth0": "^4.8.0",
     "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "drizzle-kit": "^0.30.5",
     "drizzle-orm": "^0.40.0",
+    "nodots-backgammon-core": "github:nodots/nodots-backgammon-core",
+    "pg": "^8.11.5",
     "postgres": "^3.4.4",
     "uuid": "^8.3.2"
   },
@@ -28,12 +29,14 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "nodemon --exec ts-node src/index.ts",
-    "drizzle:generate": "drizzle-kit generate",
+    "drizzle:generate": "drizzle-kit generate && node make-enums-idempotent.js",
     "drizzle:migrate": "drizzle-kit migrate",
-    "drizzle:reset": "rm -rf drizzle && drizzle-kit generate && drizzle-kit migrate",
+    "drizzle:reset": "node drop-all-tables.js && drizzle-kit generate && node make-enums-idempotent.js && drizzle-kit migrate",
     "drizzle:push": "drizzle-kit push",
     "drizzle:studio": "drizzle-kit studio",
-    "test": "jest"
+    "test": "jest",
+    "generate-guid": "ts-node src/utils/generate-guid.ts",
+    "kill-port": "lsof -ti :3000 | xargs kill -9 || true"
   },
   "author": "Ken Riley <kenr@nodots.com>",
   "license": "MIT",

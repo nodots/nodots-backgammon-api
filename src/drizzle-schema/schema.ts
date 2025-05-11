@@ -1,1 +1,2 @@
-export { GamesTable } from '../db/game'
+export { GamesTable } from '../db/games'
+export { UsersTable } from '../db/users'

@@ -1,11 +1,11 @@
-import express from 'express'
-import { drizzle } from 'drizzle-orm/node-postgres'
-import { Client } from 'pg'
-import { BoardRouter } from './routes/board'
-import { AuthRouter } from './routes/auth'
 import cors from 'cors'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import express from 'express'
+import { Client } from 'pg'
 import { requestLogger } from './middleware/logger'
-import { GameRouter } from './routes/game'
+import { BoardRouter } from './routes/boards'
+import { GamesRouter } from './routes/games'
+import { UsersRouter } from './routes/users'
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -20,7 +20,7 @@ export const nodotsDbClient = new Client({
 
 const main = async () => {
   await nodotsDbClient.connect()
-  // const db = drizzle(nodotsDbClient)
+  const db = drizzle(nodotsDbClient)
 
   // Middleware to parse JSON
   app.use(express.json())
@@ -42,21 +42,14 @@ const main = async () => {
     )
   })
 
-  // app.post('/user', (req, res) => {
-  //   res.status(200).json(req.body)
-  // })
-
-  // const authRouter = AuthRouter(db)
-  // const userRouter = UserRouter(db)
-  // const playerRouter = PlayerRouter(db)
-  // const offerRouter = OfferRouter(db)
-  // const gameRouter = GameRouter(db)
+  const usersRouter = UsersRouter(db)
   const boardRouter = BoardRouter()
+  const gamesRouter = GamesRouter(db)
 
   // app.use('/auth', authRouter)
-  // app.use('/user', userRouter)
+  app.use('/users', usersRouter)
   // app.use('/player', playerRouter)
-  // app.use('/game', gameRouter)
+  app.use('/games', gamesRouter)
   app.use('/board', boardRouter)
   // app.use('/offer', offerRouter)
 
