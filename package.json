@@ -21,7 +21,7 @@
     "ts-node": "^10.9.2"
   },
   "name": "nodots-backgammon-api",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "API for Nodots Backgammon Client",
   "main": "src/index.ts",
   "scripts": {
