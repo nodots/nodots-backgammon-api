@@ -34,7 +34,8 @@
     "drizzle:reset": "rm -rf drizzle && drizzle-kit generate && drizzle-kit migrate",
     "drizzle:push": "drizzle-kit push",
     "drizzle:studio": "drizzle-kit studio",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "author": "Ken Riley <kenr@nodots.com>",
   "license": "MIT"
