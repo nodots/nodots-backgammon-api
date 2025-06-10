@@ -1,11 +1,42 @@
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect, jest } from '@jest/globals'
 import express from 'express'
 import supertest from 'supertest'
 import { UsersRouter } from '../users'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import { ExternalUser } from '../../db/Users/types'
+import { InferSelectModel } from 'drizzle-orm'
+import { UsersTable } from '../../db/Users/schema'
 
-// Mock the drizzle db object
-const mockDb = {} as NodePgDatabase
+const fakeUser: ExternalUser = {
+  token: 'auth0|123456789',
+  externalId: 'auth0|123456789',
+  email: 'testuser@example.com',
+  firstName: 'Test',
+  lastName: 'User',
+  imageUri: 'http://example.com/testuser.jpg',
+}
+
+type CreatedUser = InferSelectModel<typeof UsersTable>
+
+const createdUser: CreatedUser = {
+  id: 'some-random-uuid',
+  token: fakeUser.token,
+  email: fakeUser.email,
+  firstName: fakeUser.firstName,
+  lastName: fakeUser.lastName,
+  imageUri: fakeUser.imageUri,
+  preferences: null,
+}
+
+const mockReturning = jest
+  .fn<() => Promise<CreatedUser[]>>()
+  .mockResolvedValue([createdUser])
+const mockValues = jest.fn(() => ({ returning: mockReturning }))
+const mockInsert = jest.fn(() => ({ values: mockValues }))
+
+const mockDb = {
+  insert: mockInsert,
+} as any
 
 const app = express()
 app.use(express.json())
@@ -15,23 +46,13 @@ app.use('/users', userRouter)
 describe('User Routes', () => {
   describe('POST /users', () => {
     it('should return the user object that was posted', async () => {
-      const fakeUser = {
-        sub: 'auth0|123456789',
-        given_name: 'Test',
-        family_name: 'User',
-        nickname: 'testuser',
-        name: 'Test User',
-        picture: 'http://example.com/testuser.jpg',
-        locale: 'en-US',
-        updated_at: new Date().toISOString(),
-        email: 'testuser@example.com',
-        email_verified: true,
-      }
-
       const response = await supertest(app).post('/users').send(fakeUser)
 
-      expect(response.status).toBe(200)
-      expect(response.body.incomingUser).toEqual(fakeUser)
+      expect(response.status).toBe(201)
+      expect(response.body).toEqual(createdUser)
+      expect(mockInsert).toHaveBeenCalled()
+      expect(mockValues).toHaveBeenCalled()
+      expect(mockReturning).toHaveBeenCalled()
     })
   })
 
