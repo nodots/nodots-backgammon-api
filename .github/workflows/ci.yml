@@ -28,10 +28,9 @@ jobs:
       - name: List coverage files
         run: ls -R coverage
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.1.0
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           files: ./coverage/lcov.info
-          disable_search: true
           verbose: true
-          fail_ci_if_error: true
