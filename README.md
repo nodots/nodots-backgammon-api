@@ -32,8 +32,8 @@ This will also generate a coverage report in the `coverage/` directory.
 
 ## Coverage
 
-[![codecov](https://codecov.io/gh/nodots/nodots-backgammon-api/graph/badge.svg)](https://codecov.io/gh/nodots/nodots-backgammon-api)
+[![Coverage Status](https://coveralls.io/repos/github/nodots/nodots-backgammon-api/badge.svg?branch=main)](https://coveralls.io/github/nodots/nodots-backgammon-api?branch=main)
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See `
