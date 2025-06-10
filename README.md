@@ -32,7 +32,7 @@ This will also generate a coverage report in the `coverage/` directory.
 
 ## Coverage
 
-[![codecov](https://codecov.io/gh/nodots/nodots-backgammon-api/branch/main/graph/badge.svg)](https://codecov.io/gh/nodots/nodots-backgammon-api)
+[![codecov](https://codecov.io/gh/nodots/nodots-backgammon-api/graph/badge.svg)](https://codecov.io/gh/nodots/nodots-backgammon-api)
 
 ## License
 
