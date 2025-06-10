@@ -2,10 +2,9 @@ import express from 'express'
 import cors from 'cors'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Client } from 'pg'
-import { PlayerRouter } from './routes/player'
-import { GameRouter } from './routes/game'
-import { BoardRouter } from './routes/board'
-import { UserRouter } from './routes/user'
+import { GamesRouter } from './routes/games'
+import { BoardsRouter } from './routes/boards'
+import { UsersRouter } from './routes/users'
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -37,19 +36,20 @@ const main = async () => {
     res.send('Welcome to the Nodots Backgammon API!')
   })
 
-  app.post('/user', (req, res) => {
-    res.status(200).json(req.body)
+  const usersRouter = UsersRouter(db)
+  const gamesRouter = GamesRouter(db)
+  const boardsRouter = BoardsRouter()
+
+  const v1Router = express.Router()
+
+  v1Router.get('/', (req, res) => {
+    res.send('Nodots Backgammon API v1')
   })
+  v1Router.use('/users', usersRouter)
+  v1Router.use('/games', gamesRouter)
+  v1Router.use('/boards', boardsRouter)
 
-  const userRouter = UserRouter(db)
-  const playerRouter = PlayerRouter(db)
-  const gameRouter = GameRouter(db)
-  const boardRouter = BoardRouter()
-
-  app.use('/user', userRouter)
-  app.use('/player', playerRouter)
-  app.use('/game', gameRouter)
-  app.use('/board', boardRouter)
+  app.use('/api/v1', v1Router)
 
   // Start the server
   app.listen(port, () => {
