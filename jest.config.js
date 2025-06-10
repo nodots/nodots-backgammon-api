@@ -10,4 +10,5 @@ module.exports = {
     '!src/db/**',
     '!src/index.ts',
   ],
+  coverageReporters: ['text', 'lcov'],
 }
