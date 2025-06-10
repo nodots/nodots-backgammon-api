@@ -10,7 +10,7 @@ import {
   BackgammonPlayerInactive,
   BackgammonPlayerWinner,
   BackgammonDiceRolled,
-} from '../../../../nodots-backgammon-types/src/index'
+} from '@nodots-llc/backgammon-types'
 
 jest.mock('../../db/Games')
 
@@ -30,8 +30,7 @@ const mockDice: BackgammonDiceRolled = {
 }
 
 const winnerPlayer: BackgammonPlayerWinner = {
-  id: 'p1',
-  userId: 'user|1',
+  id: 'user|1',
   color: 'white',
   stateKind: 'winner',
   dice: mockDice,
@@ -41,8 +40,7 @@ const winnerPlayer: BackgammonPlayerWinner = {
 }
 
 const loserPlayer: BackgammonPlayerInactive = {
-  id: 'p2',
-  userId: 'user|2',
+  id: 'user|2',
   color: 'black',
   stateKind: 'inactive',
   dice: {
