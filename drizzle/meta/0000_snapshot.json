@@ -1,5 +1,5 @@
 {
-  "id": "6d6c0006-c7f2-4294-8792-98d9afd3c8a7",
+  "id": "b4276536-250a-4848-8672-e7a041c8d4fe",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -10,32 +10,25 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
-        "kind": {
-          "name": "kind",
-          "type": "game-kind",
+        "state": {
+          "name": "state",
+          "type": "game_state",
           "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "player1": {
-          "name": "player1",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "player2": {
-          "name": "player2",
-          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
         "board": {
           "name": "board",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "players": {
+          "name": "players",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true
@@ -46,25 +39,24 @@
           "primaryKey": false,
           "notNull": true
         },
-        "dice": {
-          "name": "dice",
+        "active_color": {
+          "name": "active_color",
+          "type": "color",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active_play": {
+          "name": "active_play",
           "type": "jsonb",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
+        "winner": {
+          "name": "winner",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": false
         }
       },
       "indexes": {},
@@ -72,38 +64,42 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.players": {
-      "name": "players",
+    "public.users": {
+      "name": "users",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
-        "kind": {
-          "name": "kind",
-          "type": "player-kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "source": {
-          "name": "source",
+        "token": {
+          "name": "token",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
-        },
-        "external_id": {
-          "name": "external_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "email": {
           "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "image_uri": {
+          "name": "image_uri",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -113,35 +109,14 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "players_external_id_unique": {
-          "name": "players_external_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "external_id"
-          ]
-        },
-        "players_email_unique": {
-          "name": "players_email_unique",
+        "users_email_unique": {
+          "name": "users_email_unique",
           "nullsNotDistinct": false,
           "columns": [
             "email"
@@ -167,26 +142,19 @@
         "counterclockwise"
       ]
     },
-    "public.game-kind": {
-      "name": "game-kind",
+    "public.game_state": {
+      "name": "game_state",
       "schema": "public",
       "values": [
-        "game-initializing",
-        "game-initialized",
-        "game-rolling-for-start",
-        "game-playing-rolling",
-        "game-playing-moving",
-        "game-completed"
-      ]
-    },
-    "public.player-kind": {
-      "name": "player-kind",
-      "schema": "public",
-      "values": [
-        "player-incoming",
-        "player-initialized",
-        "player-seeking-game",
-        "player-playing"
+        "rolling-for-start",
+        "rolled-for-start",
+        "rolling",
+        "rolled",
+        "doubling",
+        "doubled",
+        "moving",
+        "moved",
+        "completed"
       ]
     }
   },
