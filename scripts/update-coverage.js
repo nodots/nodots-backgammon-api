@@ -84,25 +84,15 @@ function updateReadme(coverageTable) {
   const endIndex = content.indexOf(endMarker)
 
   if (startIndex === -1 || endIndex === -1) {
-    // If markers don't exist, add them before the first heading after the badges
+    // If markers don't exist, add them after the API description
     const lines = content.split('\n')
     let insertIndex = -1
 
-    // Find the line after the badges and before the first content
+    // Find the line after "API for Nodots Backgammon Client"
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith('Core game logic implementation')) {
-        insertIndex = i
+      if (lines[i].includes('API for Nodots Backgammon Client')) {
+        insertIndex = i + 1
         break
-      }
-    }
-
-    if (insertIndex === -1) {
-      // Fallback: add after the last badge line
-      for (let i = 0; i < lines.length; i++) {
-        if (lines[i].includes('[![') && !lines[i + 1]?.includes('[![')) {
-          insertIndex = i + 2
-          break
-        }
       }
     }
 
