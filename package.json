@@ -35,7 +35,9 @@
     "drizzle:push": "drizzle-kit push",
     "drizzle:studio": "drizzle-kit studio",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "update-coverage": "node scripts/update-coverage.js"
   },
   "author": "Ken Riley <kenr@nodots.com>",
   "license": "MIT"
